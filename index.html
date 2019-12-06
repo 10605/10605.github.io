@@ -1,0 +1,426 @@
+<head>
+    <meta charset="utf-8">
+<title> CMU 10-405/10-605 </title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="style.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="container">
+	 <div class="panel-footer clearfix">
+        <div class="pull-left">
+        
+            <h1>10-405/10-605: Machine Learning with Large Datasets</h1>
+            <p class="lead">Instructor:</p><p><a href=https://www.cs.cmu.edu/~smithv/ target="_blank">Prof. Virginia Smith</a></p>
+            <p class="lead">Lecture:</p>
+            <p>Mon/Wed 9:00am-10:20am, POS 152 
+            <!--<br/>Instructor office hours are held right after lectures.-->
+            </p>
+            <p class="lead">Recitation:</p>
+            <p>Fri 9:00am-10:20am, POS 152
+            <!--<p class="lead"> TA Office Hours: </p>
+            <br/>Monday 9.30-10.30AM ET at Gates 3rd floor cafe (), Wednesday 5-6PM ET at REH 351 (), Friday 10-11AM ET at HH1209 ()</p>-->
+            </div>
+        </div>
+
+        <div class="main">
+        <br>
+        <h3>Course Overview</h3>
+        <p class="p1">Large datasets pose difficulties across the machine learning pipeline. They are difficult to visualize, and it can be hard to determine what sorts of errors and biases may be present in them. They are computationally expensive to process, and the cost of learning is often hard to predict---for instance, an algorithm that runs quickly on a dataset that fits in memory may be exorbitantly expensive when the dataset is too large for memory. Large datasets may also display qualitatively different behavior in terms of which learning methods produce the most accurate predictions.<br /><br />This course is intended to provide a student practical knowledge of, and experience with, the issues involving large datasets. Among the topics considered are: data cleaning, visualization and pre-processing at scale; principles of parallel and distributed computing for machine learning; techniques for scalable deep learning; analysis of programs in terms of memory, disk usage, and (for parallel methods) communication complexity; and methods for low-latency inference. Students will gain experience with common large-scale computing libraries and infrastructure, including Amazon AWS, Apache Spark, and TensorFlow.
+        </p>
+
+        <h3>Prerequisites</h3>
+        <p>Students are required to have taken a CMU introductory machine learning course (10-401, 10-601, 10-701, or 10-715). A strong background in programming will also be necessary; suggested prerequisites include 15-210, 15-214, or equivalent. Students are expected to be familiar with Python or learn it during the course.</p>
+    
+        <h3>Textbooks</h3>
+        There will be no required textbooks, though we may suggest additional reading in the schedule below.
+
+        <!--<h3>Piazza</h3>
+        <p> We will use Piazza for class discussions. Please go to <a href=http://piazza.com/cmu/spring2020/1040510605 target="_blank" >this Piazza website</a> to join the course forum (note: you must use a cmu.edu email account to join the forum). We strongly encourage students to post on this forum rather than emailing the course staff directly (this will be more efficient for both students and staff). Students should use Piazza to: 
+        <ul>
+          <li>Ask clarifying questions about the course material.</li>
+          <li>Share useful resources with classmates (so long as they do not
+          contain homework solutions).</li>
+          <li>Look for students to form study groups.</li>
+          <li>Answer questions posted by other students to solidify your own
+          understanding of the material.</li>
+        </ul>
+        The course Academic Integrity Policy must be followed on the message boards at all times. <b>Do not post or request homework solutions!</b> Also, please be polite.-->
+
+        <h3>Staff Contact Info</h3>
+        TBA
+        <!--<p class="lead">TAs:</p><p>
+            <table cellspacing="10">
+                <tr>
+                    <td><img src="images/.JPG" width="125px"></img>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>@andrew.cmu.edu</td>
+                </tr>
+                <tr>
+                    <td><img src="images/.png" width="125px"></img>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>@andrew.cmu.edu</td>
+                </tr>
+                <tr>
+                    <td><img src="images/.png" width="90px"></img>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>@cmu.edu</td>
+                </tr>
+                <tr>
+                    <td><img src="images/.jpg" width="100px"></td>
+                    <td>&nbsp;</td>
+                    <td>@andrew.cmu.edu</td>
+                </tr>
+                <tr>
+                    <td><img src="images/.jpg" width="100px"></img>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>@andrew.cmu.edu</td>
+                </tr>
+                <tr>
+                    <td><img src="images/.png" width="75px"></img>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>@andrew.cmu.edu</td>
+                </tr>
+            </table>
+        </p>-->
+
+        <h3>Grading Policy</h3>
+        <p> Grades will be based on the following components: 
+        <ul>
+          <li> <b>Problem Sets (XX%)</b>: There will be XX problem sets. Each
+          each problem set will have equal weight.
+          <ul>
+            <li><b>***Late submissions will not be accepted.***</b> 
+            <li> Students can drop their lowest grade (i.e., only the top XX
+            grades will count).              
+            <li> Solutions will be graded on both correctness and clarity. If
+            you cannot solve a problem completely, you will get more partial
+            credit by identifying the gaps in your argument than by 
+            attempting to cover them up.
+            <li>There is one TA responsible for each assignment, as indicated in the schedule below. ***Direct all communication regarding the assignment to this TA.***</li>
+          </ul>
+          <li> <b>Midterm (XX%), Final (XX%)</b>: These in-person exams will cover material
+          from the lectures and the problem sets.
+          <li> <b>Bonus</b>: On Piazza, the top student “endorsed answer” answerers can earn bonus points.</li>
+        </ul>
+
+        <p><b>Gradescope:</b> We will use Gradescope to collect PDF submissions of each problem set. Upon uploading your PDF, Gradescope will ask you to identify which page(s) contains your solution for each problem – this is a great way to double check that you haven’t left anything out.<p/>
+
+        <b>Regrade Requests:</b> If you believe an error was made during grading, you’ll be able to submit a regrade request on Gradescope. <i>***For each homework, regrade requests will be open for only 1 week after the grades have been published.***</i> This is to encourage you to check the feedback you’ve received early!
+
+        <h3>Academic Integrity Policy</h3>
+        Group studying and collaborating on problem sets are encouraged, as
+        working together is a great way to understand new material.  Students
+        are free to discuss the homework problems with anyone under the
+        following conditions:
+        <ul>
+          <li>Students must write their own solutions and understand the
+          solutions that they wrote down.</li>
+          <li>Students must list the names of their collaborators (i.e., anyone
+          with whom the assignment was discussed).</li>
+          <li>Students may not use old solution sets from other classes under any circumstances, unless the instructor grants
+          special permission.</li>
+        </ul>
+        
+        Students are encouraged to read CMU's <a
+          href=https://www.cmu.edu/policies/
+          target="_blank"> Policy on Cheating and Plagiarism</a>.
+
+        <h3>Using LaTeX</h3>
+        <p> Students are strongly encouraged to use LaTeX for problem sets.  LaTeX makes it
+        simple to typeset mathematical equations, and is extremely useful for students to know. Most of the academic papers you read were
+        written with LaTeX, and probably most of the textbooks too. <a
+          href=http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf
+          target="_blank">Here</a> is an excellent LaTeX tutorial and <a
+          href=http://latex-project.org/ftp.html target="_blank">here</a> are
+        instructions for installing LaTeX on your machine.
+        </p>
+
+        <h3>Acknowledgments</h3>
+        <p> This course is based in part on material developed by <a href="http://www.cs.cmu.edu/~wcohen/" target="_blank">William Cohen</a>, <a href="http://www.cs.cmu.edu/~bapoczos/" target="_blank">Barnabas Poczos</a>, <a href="https://www.cs.cmu.edu/~atalwalk/" target="_blank">Ameet Talwalkar</a>,  and <a href="http://www.cs.berkeley.edu/~adj/" target="_blank">Anthony Joseph</a>.
+        <hr>
+
+
+        <h3>Schedule (Subject to Change)</h3>
+        <div class="bs-example">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Topics</th>
+                        <th>Reading</th>
+                        <th>HW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="active">
+                        <td>1/13</td>
+                        <td>Introduction
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>1/15</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>1/20</td>
+                        <td><b>No class (MLK Day)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>1/22</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>1/27
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>1/29</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>2/3</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>2/10</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    <tr class="active">
+                        <td>2/12</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>2/17</td>
+                        <td>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>2/19</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>2/24</td>
+			            <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>2/26</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>3/2</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>3/4</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>3/9</td>
+                        <td><b>No class (Spring Break)</b>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                     <tr class="active">
+                        <td>3/11</td>
+                        <td><b>No class (Spring Break)</b>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>3/16</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>3/18</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>3/23</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>3/25</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>3/30</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>4/1</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>4/6</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>4/8</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>4/13</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>4/15</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>4/20</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>4/22</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="success">
+                        <td>4/27</td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="active">
+                        <td>4/29</td>
+                        <td><b></b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+        <hr>
+    </div>
+    <!-- /container -->
+ 
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+
+</body>
