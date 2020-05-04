@@ -635,6 +635,30 @@
       <!-- end group -->
 
 
+      <!-- start group -->
+      <h3 class="anchored">Year and Decade Prediction on Million Song with Spark</h3>
+      <p>
+        <b>Xinnan Du, Shengrui Lyu, Xuewei Wang, Xiao Zeng, Zihang Zhang, Junpei Zhou</b>
+      </p>
+      <p>
+        We try to predict the year and decade of a song based on its timbre feature on the Million Song dataset. We explore different dimension reduction techniques (PCA and t-SNE) and different distributed ML models including Logistic Regression, Naive Bayes, and Random Forest. We use Spark with MLlib to build our pipeline and run the distributed model on AWS EMR. We find that the decade pattern is more clear than the year pattern from the visualization result, which is consistent with the experimental result that predicting the decade is much easier. Another interesting observation is that for the difficult setting (predicting the year) the Random Forest performs much better than other methods (also cost much more to train), but for the easy setting (predicting the decade) the gap between models is smaller, where the light-weight model is preferred.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1isGNi4uNuMaTQydbdYNYWJ2qMDfjtkly/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+      <!-- start group -->
+      <h3 class="anchored">Comparison of dimension reduction algorithms on Million Song Dataset</h3>
+      <p>
+        <b>Leyi Cai, Zhonglin Cao, Xin Shen, Yijie Zhang, Ping Zhong</b>
+      </p>
+      <p>
+        This project made a comparison of dimension reduction methods using the Million Song dataset. The algorithms compared include PCA, AutoEncoder and LargeVis.The metrics we used include basic ones like running time, memory usage, and model linearity. A regression model was run with dimension reduced data to predict song hotness, the RMSE and Pearson R value of the regression is also used as metrics for algorithms comparison. We discovered that PCA was the most efficient model for this case because it was much faster, took less memory and preserves more information. As a built-in algorithm in pyspark library, PCA is also much easier to use.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1CRXo83vbnJrpqr9tgsIjV4OIaEvEAge_/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
 
     </div>
     <!-- /container -->
