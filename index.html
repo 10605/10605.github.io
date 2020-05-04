@@ -674,6 +674,19 @@
       <!-- end group -->
 
 
+      <!-- start group -->
+      <h3 class="anchored">Genre Classification on Million Song Dataset</h3>
+      <p>
+        <b>Max Bai, Xintong Shi, Yiyi Zou, Beiming Zhang</b>
+      </p>
+      <p>
+        We used machine learning techniques to predict genre label based on songs’ metadata and audio features. We compared the performance of Logistic Regression, Random Forest and Neural Networks on genre classification. Early stage data pre-processing was run on EC2, while later model training and testing was done in pySpark with MLlib running on AWS EMR. As a result, Logistic Regression performed best with cross validation accuracy of 0.9351, while Random Forest produced cross validation accuracy of 0.6018 and Neural Network 0.6934. We have strong reasons to believe that the data might be linearly separable in high dimensions(e.g. separable by high dimensional planes). In such situations, models with linear classification boundaries, such as logistic regression, tend to perform better than those with non-linear classification boundaries(Random Forest, Neural Networks).
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1Fj5XdNa943AxwD14hILhQ0FLtGOHsIRH/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
 
     </div>
     <!-- /container -->
