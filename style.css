@@ -34,3 +34,12 @@ p.lead {
 .main{
   padding: 12px;
 }
+
+.anchorjs-link {
+  color: #aaa;
+  border: 0;
+}
+.anchorjs-link:hover {
+  color: #ff5231;
+  border: 0;
+}

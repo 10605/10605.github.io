@@ -555,6 +555,87 @@
         </div>
 
         <hr>
+
+
+      <h2>Completed Projects from Spring 2020</h2>
+      <p>&nbsp;</p><p>&nbsp;</p>
+
+
+      <!-- start group -->
+      <h3 class="anchored">DeepGenre: Deep Neural Networks for Genre Classification in Literary Works</h3>
+      <p>
+        <b>Zihan Huang, Yikang Li, Scott Liu, Zhanlin Sun, Jiahao Wu, Hongyi Zhang</b>
+      </p>
+      <p>
+        In this project, we attempt to address a multi-label text classification problem that predominately features very long text-based inputs. In particular, we focus on using the Gutenberg Project dataset and use the main text of an e-book to infer its genre. This is motivated partly because many e-books, especially new ones, may have few or no labeled genres; an automated approach would help curators and librarians assign correct genres for better cataloguing of library resources. We propose to use feature engineering combined with a distributed approach using deep neural networks to tackle long textual inputs. We evaluate and benchmark various models according to our custom metrics in order to determine their effectiveness.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1dskHpWp1-qycwr6SiAhLlswHnpne9zCE/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+      <!-- start group -->
+      <h3 class="anchored">Predicting Hotness from Million Song Dataset</h3>
+      <p>
+        <b>Andrew Alini, Christopher	Benson, Harsh Jain, Sabyasachi	Mohanty, Varun Natu</b>
+      </p>
+      <p>
+        The pace of music production is ever increasing, so it can be hard for those in the music industry to consume and rate new music as it is released. To address this, we created a system that rates the “hotness” of a new unseen song using the MCFF audio features of a song. We trained on the Million Song Dataset, and took advantage of distributed ML frameworks such as SparkML, Tensorflow, and Horovod.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1BsRhNhAdwKrqucgEM1ivgD8ZKE6VKhwE/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+      <!-- start group -->
+      <h3 class="anchored">Automated Road Network Extraction and Route Travel Time Estimation from Satellite Imagery</h3>
+      <p>
+        <b>Phalguna	Dasaratha Mankar, Karan Vasant Hebbar, Sameed Qureshi, Vedant Sanil, Zeeshan Ashraf Shaikh, Sharath Srikanth Chellappa</b>
+      </p>
+      <p>
+        We focused on data from the SpaceNet Challenge. The aim of this challenge is to build models at scale that are able to use satellite imagery to not only detect the network of roads but also provide an estimate of the travel time along the different routes. With this data, we aimed to answer the following questions: (1) Is it possible to use satellite images to accurately identify roads? (2) Is it possible to build a network (graph structure) from the identified roads? (3) Is it possible to estimate travel times using the graph network (on the detected edges)?
+      </p>
+      <p>
+        The data that we had was first divided into the image data and the metadata. The image data consisted of approximately 2500 annotated images in total for training, and approximately 930 test images. The images were present in TIF format. The metadata consisted of GeoJSON data, linestring data (road graphs), and TIF geodata images. For the GeoTiff processing we used the GDAL and CV2 package.
+      </p>
+      <p>
+        With this processed data, the end goal of our model was to be able to segment out roads from the satellite images and predict travel times for the roads. The processed 8-bit image was first fed into 4 separately trained UNet-inspired models in parallel. The models have a ResNet34 encoder and a U-Net decoder. These models output the segmentation masks of the roads. For robustness, the output from the four models was superimposed to create a final segmentation output. The segmented image was then smoothed out, small gaps were closed out, spurious connections were removed. An attempt was also made to clean hanging edges and connect terminal vertices near non-connected nodes. From the final cleaned segmented image, we extracted the skeleton using skimage. From the skeleton the graph was extracted using sknw - a python library to convert a skeleton to a graph.
+      </p>
+      <p>
+        We stored the data on AWS s3 bucket and accessed this in the ec2 instance created. We used AWS g4xdn.large ec2 instance and GCP VM instances to train the model for 50 epochs which took around 3-4 hours to train. With this, we were able to accurately identify the roads from the satellite images and build a road network from the identified roads.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1z0HHJEuwKT0zPdMG-kr_7jaZMyWFrRco/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+      <!-- start group -->
+      <h3 class="anchored">Exploring Relationships Between Subreddits</h3>
+      <p>
+        <b>Linhong Li, Simin Li, Xinwen Liu, Junyan Pu</b>
+      </p>
+      <p>
+        Reddit is a forum where people can comment on many different topics organized by subreddits. The question we set out to answer is: What is the relationships between different subreddits across time and how do we interpret them? For this project, our methods included TF-IDF for tokenization, LDA topic modeling and PCA for dimensionality reduction, and t-SNE and K-means clustering for evaluation.  We used Dataproc on Google Cloud Platform (GCP) as our cluster service provider and a 403 GB public Reddit dataset available via GCP’s BigQuery platform. We found that 1. The size of clusters and membership of subreddits change over time and 2. LDA outperforms PCA in terms of interpretability but underperforms in terms of silhouette score.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1Qk_MRTr_WJHqZdOpVMDg0R2JrUtDScOn/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+      <!-- start group -->
+      <h3 class="anchored">Predicting the Stock Market with Reddit Comments</h3>
+      <p>
+        <b>Linhong Li, Simin Li, Xinwen Liu, Junyan Pu</b>
+      </p>
+      <p>
+        The question we wanted to answer was whether we could predict the stock market trends using Reddit comments. We used sentiment analysis and PCA to preprocess the data and used logistic regression and hyperparameter searching to acquire the best performing model. We used PySpark to train our models on AWS EMR machines and AWS S3 bucket to store datasets. Eventually, our best performing model achieved around 65% accuracy on the testing dataset. One important lesson we have learned is that large scale machine learning tasks can be time-consuming in terms of both implementation and training. So it is the best to design and plan carefully ahead of time.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1WflM8lesxF8tf8P6EnpqHIhbpI-yaPLi/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+
     </div>
     <!-- /container -->
 
@@ -564,6 +645,11 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
+    <script>
+      anchors.options.visible = 'always';
+      anchors.add('.anchored');
+    </script>
 
 
 </body>
