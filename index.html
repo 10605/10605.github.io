@@ -729,7 +729,7 @@
       <!-- start group -->
       <h3 class="anchored">Forecasting Web Page View using Bidirectional LSTM with Auxiliary Features</h3>
       <p>
-        <b>Yuzhong Hua, Yuexin Li, Zhongyan Lu, Xinyi Zhang</b>
+        <b>Yuqing Deng, Yuzhong Hua, Yuexin Li, Zhongyan Lu, Xinyi Zhang</b>
       </p>
       <p>
         In this project, we explored the possibility for forecasting click trends of webpages using past page view series (~365 GB) from Wikistats PageView Dataset. Aiming to leverage both local contextual information and global periodic patterns, we constructed a machine learning model consisting of three parts- a bidirectional LSTM model, a Dense Layer fed by extracted auxiliary features (such as mean, std, and location of spikes), and an output layer. All raw data is stored on Amazon S3 bucket; data cleaning and processing work are completed on Amazon Elastic Map Reduce (Amazon EMR), using Spark and Python3 for parallel processing; model building, training and validating are completed on EC2, using TensorFlow 2.1.0 and Keras APIs. As a result, our model successfully learned the general curvature of page view of webpages and reduced the average Mean Absolute Error to 10.
