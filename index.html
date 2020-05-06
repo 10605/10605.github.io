@@ -834,6 +834,36 @@
 
 
 
+      <!-- start group -->
+      <h3 class="anchored">Temporal Topic models for Reddit Score Prediction</h3>
+      <p>
+        <b>Paola Buitrago, Alec Jasen, Eric Li, Karun Thankachan, Santiago Roa</b>
+      </p>
+      <p>
+        We set out to see if, given the observable features at the time of the creation of a Reddit post, it be possible to predict the score it would eventually attain and to figure out the infrastructure and pipeline design required to support such a production-level large-scale ML system.
+      </p>
+
+      <p>
+        To predict the score of Reddit we used the Reddit Post Dataset (300 GB), from which we extracted metadata information (time, subreddit) and content(title and post text) to create features (topics model at a month level, word2Vec embedding, sentiment) to train regression models - Linear Regression, Random Forests, and Gradient Boosted Trees. Their performance was compared using RMSE and R2 as metrics.
+      </p>
+
+      <p>
+        The raw data was pulled in from Google BigQuery to the five node (n1-standard-4, 15GB Ram, 4vCPU) Dataproc cluster that we used to complete data processing (2 days and 6 hours for 200GB) and machine learning (~100s for linear regression, ~90s for the random forest, ~550s for GBTree)
+      </p>
+
+      <p>
+        The results varied from subreddit to subreddit, ranging from RMSE of 0.09 (OneAmericaNews subreddit) to 8287 (gifs subreddit) and R2-values on appropriate subreddits of 0.16 to -0.12. (ethtrader to Futurology)
+      </p>
+
+      <p>
+        We found that the heavily skewed scores (most scores are zero) and the temporal relevancy of Reddit posts require a more nuanced feature engineering approach. Also, we learned the phases of a production ML pipeline (from Data Ingestion to Model Scoring) and got a handle on estimating the infrastructure required to support it.
+      </p>
+      <center><iframe iframe frameborder="0" scrolling="no" src="https://drive.google.com/file/d/1rrUcziU2NXrDBqyAoR7YhhYkjC-YqCAn/preview" width="640" height="380"></iframe></center>
+      <p>&nbsp;</p>
+      <!-- end group -->
+
+
+
     </div>
     <!-- /container -->
 
