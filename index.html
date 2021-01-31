@@ -34,22 +34,25 @@
             </p>
             <p class="lead">Recitation:</p>
             <p>Fri 8:20am-9:40am</p>
+            <p class="lead">Quick Links:</p>
+            <p>[<a href="#overview">Overview</a>] [<a href="#components">Course Components</a>] [<a href="#technologies">Technologies</a>] [<a href="#schedule">Course Schedule</a>] [<a href="#policies">Policies</a>]</p>
             </div>
         </div>
 
         <div class="main">
         <br>
-        <h3>Course Overview</h3>
+        <h3 id="overview">Course Overview</h3>
         <p class="p1">Large datasets pose difficulties across the machine learning pipeline. They are difficult to visualize, and it can be hard to determine what sorts of errors and biases may be present in them. They are computationally expensive to process, and the cost of learning is often hard to predict---for instance, an algorithm that runs quickly on a dataset that fits in memory may be exorbitantly expensive when the dataset is too large for memory. Large datasets may also display qualitatively different behavior in terms of which learning methods produce the most accurate predictions.<br /><br />This course is intended to provide a student practical knowledge of, and experience with, the issues involving large datasets. Among the topics considered are: data cleaning, visualization, and pre-processing at scale; principles of parallel and distributed computing for machine learning; techniques for scalable deep learning; analysis of programs in terms of memory, disk usage, and (for parallel methods) communication complexity; and methods for low-latency inference. Students will gain experience with common large-scale computing libraries and infrastructure, including Apache Spark and TensorFlow.
         </p>
 
-        <h3>Prerequisites</h3>
+        <h4>Prerequisites</h4>
         <p>Students are required to have taken a CMU introductory machine learning course (10-301, 10-315, 10-601, 10-701, or 10-715). A strong background in programming will also be necessary; suggested prerequisites include 15-210, 15-214, or equivalent. Students are expected to be familiar with Python or learn it during the course.</p>
 
-        <h3>Textbooks</h3>
+        <h4>Textbooks</h4>
         There will be no required textbooks, though we may suggest additional reading in the schedule below.
 		
-		<h3>Course Components</h3>
+        <br /><br />
+		<h3 id="components">Course Components</h3>
 		The requirements of this course consist of participating in lectures, homework assignments, and two exams. The grading breakdown is the following:
 		<ul> 
 		<li>25% Exam 1 </li>
@@ -64,8 +67,8 @@
 		<h4>Homework</h4>
 		The homeworks will be divided into two components: programming and written. The programming assignments will ask you to implement ML algorithms from scratch; they emphasize understanding of real-world applications of ML, building end-to-end systems, and experimental design. The written assignments will focus on core concepts, “on-paper” implementations of classic learning algorithms, derivations, and understanding of theory.
         
-		
-        <h3>Technologies</h3>
+		<br /><br />
+        <h3 id="technologies">Technologies</h3>
 		
 		<h4>Piazza</h4>
         <p> We will use Piazza for class discussions. 
@@ -87,8 +90,8 @@
 		<h4>Regrade Requests</h4>
 		If you believe an error was made during manual grading, you’ll be able to submit a regrade request on Gradescope. For each homework, regrade requests will be open for only 1 week after the grades have been published. This is to encourage you to check the feedback you’ve received early!
 		
-        
-        <h3>Schedule (Subject to Change)</h3>
+         <br /><br /><br />
+        <h3 id="schedule">Schedule (Subject to Change)</h3>
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
                   <tbody>
@@ -334,7 +337,8 @@
             </table>
         </div>
 		
-		<h3>General Policies</h3>
+        <br /><br />
+		<h3 id="policies">General Policies</h3>
 		<h4>Late Homework Policy</h4>
 		You receive 4 total grace days for use on any homework assignment. We will automatically keep a tally of these grace days for you; they will be applied greedily. No assignment will be accepted more than 1 days after the deadline without written permission from Daniel, Ameet, or Virginia. You may not use more than 1 grace day on any single assignment.<br /> <br />All homework submissions are electronic (see Technologies section below). As such, lateness will be determined by the latest timestamp of any part of your submission. For example, suppose the homework requires submissions to both Gradescope Written and Programming– if you submit your Written on time but your Programming 1 minute late, your entire homework will be penalized for the full 24-hour period.
 		
@@ -383,7 +387,7 @@ For any of the above situations, you may request an extension by emailing Daniel
 		</ol>
 
 		
-		
+		<br /><br />
 		<h3>Acknowledgments</h3>
         <p> This course is based in part on material developed by <a href="https://heather.miller.am/" target="_blank">Heather Miller</a>, <a href="http://www.cs.cmu.edu/~wcohen/" target="_blank">William Cohen</a>, <a href="http://www.cs.berkeley.edu/~adj/" target="_blank">Anthony Joseph</a>, and <a href="http://www.cs.cmu.edu/~bapoczos/" target="_blank">Barnabas Poczos</a>.</p>
         <p>Previous courses: <a href="https://10605.github.io/fall2020/index.html" target="_blank">10-605/10-805, Fall 2020</a>; <a href="https://10605.github.io/spring2020/index.html" target="_blank">10-405/10-605, Spring 2020</a>.</p>
