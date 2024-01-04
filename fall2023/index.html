@@ -1,0 +1,678 @@
+<head>
+    <meta charset="utf-8">
+<title> CMU 10-605/10-805 </title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="style.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="container">
+	 <div class="panel-footer clearfix">
+        <div class="pull-left">
+
+            <h1>10-605/10-805: ML with Large Datasets, Fall 2023</h1>
+            <p class="lead">Instructors:</p><p><a href=https://www.cs.cmu.edu/~atalwalk/ target="_blank">Prof. Ameet Talwalkar</a> and <a href=https://www.cs.cmu.edu/~ggordon/ target="_blank">Prof. Geoff Gordon</a></p>
+			<p class="lead">Education Associates:</p> <p>Daniel Bird (dpbird [at] andrew [dot] cmu [dot] edu)</p>
+            <p class="lead">Lecture:</p>
+            <p>Mon/Wed 11:00am - 12:20pm in GHC 4401 (Rashid Auditorium)
+            </p>
+            <p class="lead">Recitation:</p>
+            <p>Fri 11:00am - 12:20pm in GHC 4401 (Rashid Auditorium)</p>
+            <p class="lead">Quick Links:</p>
+            <p>[<a href="#overview">Overview</a>] [<a href="#schedule">Course Schedule</a>] [<a href="#policies">Policies</a>]</p>
+            </div>
+        </div>
+
+        <div class="main">
+        <br>
+        <h3 id="overview">Course Overview</h3>
+        <p class="p1">Large datasets pose difficulties across the machine learning pipeline. They are difficult to visualize and introduce computational, storage, and communication bottlenecks during data preprocessing and model training. Moreover, high capacity models often used in conjunction with large datasets introduce additional computational and storage hurdles during model training and inference. This course is intended to provide a student with the mathematical, algorithmic, and practical knowledge of issues involving learning with large datasets. Among the topics considered are: data cleaning, visualization, and pre-processing at scale; principles of parallel and distributed computing for machine learning; techniques for scalable deep learning; analysis of programs in terms of memory, computation, and (for parallel methods) communication complexity; and methods for low-latency inference.
+        </p>
+
+        <h4>Prerequisites</h4>
+        <p>Students are required to have taken a CMU introductory machine learning course (10-301, 10-315, 10-601, 10-701, or 10-715). A strong background in programming will also be necessary; suggested prerequisites include 15-210, 15-214, or equivalent. Students are expected to be familiar with Python or learn it during the course.</p>
+
+        <h4>Textbooks</h4>
+        There will be no required textbooks, though we may suggest additional reading in the schedule below.
+		
+        <br /><br />
+		<h3 id="components">Course Components</h3>
+		The requirements of this course consist of participating in lectures, homework assignments, a mini-project and two exams. The grading breakdown is the following:
+		<ul> 
+		<li>20% Exam 1 </li>
+		<li>20% Exam 2 </li>
+		<li>40% Homework (5 Assignments, 8% Each) </li>
+		<li>15% Mini-Project </li>
+		<li>5% Participation </li>
+		</ul>
+
+                <h4>10-605, 10-805 Differences</h4>
+		Students who are enrolled in 10-805 may have additional homework questions to complete and they will need to do additional project work compared to 10-605 students. More details will be announced throughout the semester.
+		
+		<h4>Exams</h4>
+		You are required to attend all in person exams. The exams will be given during class. Please plan your travel accordingly as we will not be able accommodate individual travel needs (e.g. by offering the exam early).<br /> <br />If you have an unavoidable conflict with an exam (e.g. an exam in another course), notify us by filling out the exam conflict form which will be released on Piazza a few weeks before the exam.
+		
+		<h4>Homework</h4>
+		The homeworks will be divided into two components: programming and written. The programming assignments will ask you to implement ML algorithms from scratch; they emphasize understanding of real-world applications of ML, building end-to-end systems, and experimental design. The written assignments will focus on core concepts, “on-paper” implementations of classic learning algorithms, derivations, and understanding of theory.
+		
+		<h4>Mini Project</h4>
+		Students will make create groups and participate in a Mini-project. Mini-Project details will be released later in the semester. 
+
+		<h4>Participation</h4>
+		Participation will be measured with in class polls. In order to get full credit in this aspect, you need to have successfully participated in at least 80% of the class polls. 
+		
+		<h4>Piazza</h4>
+        <p> We will use Piazza for class discussions. 
+        Please go to <a href="https://piazza.com/cmu/fall2023/10605805/home" target="_blank" >this Piazza website</a> to join the course forum (note: you must use a cmu.edu email account to join). 
+        We strongly encourage students to post on this forum rather than emailing the course staff directly (this will be more efficient for both students and staff). Students should use Piazza to:
+        <ul>
+          <li>Ask clarifying questions about the course material.</li>
+          <li>Share useful resources with classmates (so long as they do not
+          contain homework solutions).</li>
+          <li>Look for students to form study groups.</li>
+          <li>Answer questions posted by other students to solidify your own
+          understanding of the material.</li>
+        </ul>
+        The course Academic Integrity Policy must be followed on the message boards at all times. <b>Do not post or request homework solutions!</b> Also, please be polite.
+		
+	<h4>Gradescope</h4>
+	We use Gradescope to collect PDF submissions of open-ended questions on the homework (e.g. mathematical derivations, plots, short answers). The course staff will manually grade your submission, and you’ll receive personalized feedback explaining your final marks.<br /> <br />You will also submit your code for programming questions on the homework to Gradescope. After uploading your code, our grading scripts will autograde your assignment by running your program on a VM. This provides you with immediate feedback on the performance of your submission.
+		
+	<h4>Regrade Requests</h4>
+	If you believe an error was made during manual grading, you’ll be able to submit a regrade request on Gradescope. For each homework, regrade requests will be open for only **1 week** after the grades have been published. This is to encourage you to check the feedback you’ve received early!
+	
+  <h4>Course Staff</h4>
+
+	<p><b>Instructional Staff</b></p>
+	<div class="row">
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F22Images/ameet.jpg" width="150" height="150">
+              <p>
+                <b>Ameet Talwalkar</b>
+                <br/>
+              </p>
+            </center>
+          </div>
+	  <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/GeoffGordon.jpeg" width="150" height="150">
+              <p>
+                <b>Geoff Gordon</b>
+                <br/>
+              </p>
+            </center>
+          </div>
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F22Images/DanielBird.jpeg" width="150" height="150">
+              <p>
+                <b>Daniel Bird</b>
+                <br/>
+              </p>
+            </center>
+	  </div>
+          </div>
+	
+        <p><b>Teaching Assistants</b></p>
+
+        <div class="row">
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/Lucio-ProfilePhoto.png" width="150" height="150">
+              <p>
+                <b>Lucio Dery</b>
+                <br/>OH: Monday's 5:00pm - 6:00pm
+              </p>
+            </center>
+          </div>
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/Abishek Sridhar.png" width="150" height="150">
+              <p>
+                <b>Abishek Sridhar</b>
+                <br/>OH: Tuesday's 5:00pm - 6:00pm
+              </p>
+            </center>
+          </div>
+          <div class="col-md-5ths col-xs-6">
+            <center>
+             <img src="F23Images/Liyan Chang.jpg" width="150" height="150">
+             <p>
+               <b>Liyan Chang</b>
+               <br/>OH: Wednesday 12:30pm - 1:30pm
+             </p>
+           </center> 
+         </div>
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/DeepPatel.jpg" width="150" height="150">
+              <p>
+                <b>Deep	Patel</b>
+                <br/>OH: Monday's 2:30pm - 3:30pm
+              </p>
+            </center>
+          </div>
+          <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/EricHuang.jpg" width="150" height="150">
+              <p>
+                <b>Eric	Huang</b>
+                <br/>OH: Wednesday's 1:30pm - 2:30pm
+              </p>
+            </center>
+          </div>
+          </div>
+          <div class="row">
+            <div class="col-md-5ths col-xs-6">
+            <center>
+              <img src="F23Images/AaronChen.png" width="150" height="150">
+              <p>
+                <b>Aaron Chen</b>
+                <br/>OH: Thursday's 4:00pm - 5:00pm
+              </p>
+            </center>
+            </div>
+                  <div class="col-md-5ths col-xs-6">
+             <center>
+              <img src="F23Images/Jacob Rast.png" width="150" height="150">
+              <p>
+                <b>Jacob Rast</b>
+                <br/>OH: Friday's 3:00pm - 4:00pm
+              </p>
+            </center> 
+          </div>
+          <div class="col-md-5ths col-xs-6">
+<!--             <center>
+              <img src="F22Images/PrekshaPatel.JPG" width="150" height="150">
+              <p>
+                <b>Preksha Patel</b>
+                <br/>OH: Thursdays 4:00pm - 5:00pm
+              </p>
+            </center> -->
+          </div>
+          <div class="col-md-5ths col-xs-6">
+<!--             <center>
+              <img src="F22Images/challu-cristian.jpeg" width="150" height="150">
+              <p>
+                <b>Cristian Challu</b>
+                <br/>OH: Tuesdays 10:00am - 11:00am
+              </p>
+            </center> -->
+          </div>
+        </div> 
+	 
+		
+	
+         <br /><br /><br />
+        <h3 id="schedule">Schedule (Subject to Change)</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                  <tbody>
+                    <tr class="leading">
+                        <th>Date</th>
+                        <th>Lecture</th>
+                        <th>Resources</th>
+                        <th>Announcements</th>
+                    </tr>
+                    <tr>
+                        <td colspan=4, style="text-align: center; background-color: #e6f5ff">Data Pre-Processing and Visualization, Distributed Computing</td>
+                    </tr>
+                    <tr>
+                        <td>Aug 28</td>
+                        <td>
+                        Introduction  (<a href="https://drive.google.com/file/d/1Zk-hjwoBWIMPb_GQQt5WMxQArzdtt2hG/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2ccf4a39-fddf-4d7f-b727-b06c010b5cdd" target="_blank">video</a>) 
+                        </td>
+                        <td></td>
+                        <td><a href="https://github.com/10605/F23_hw1/releases/tag/F23hw1" target="_blank">HW1 Released</a></td>
+                    </tr>
+                    <tr>
+                        <td>Aug 30</td>
+                        <td>
+                        Distributed Systems, Map-Reduce (<a href="https://drive.google.com/file/d/1ZGVH1_zzbwufiFrVK_eGSy1iGOVEOes_/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=be1b8dcd-6854-4221-9641-b06e011211e1" target="_blank">video</a>)
+                        </td>
+                        </td>
+                        <td><a href="https://arxiv.org/pdf/1404.1100.pdf" target="_blank">Tutorial on PCA</a></td>
+                        <td></td>
+                    </tr>
+		    <tr>
+                        <td>Sep 1</td>
+                        <td>
+                        <i>Recitation 1: Introduction to Pyspark and Databricks (<a href="https://docs.google.com/presentation/d/1Dk2V9dQsjuQ74QBCVBr-Qbx5UZWUjOEfM-wooi1loSU/edit?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=af8df04d-0b5b-4702-a24c-b0700110e21c" target="_blank">video</a>) </i>
+                        </td>
+                        <td>  <a href="https://drive.google.com/file/d/1tr6lI89f62-hA83VnLyyzJ8vrpRzelsG/view?usp=sharing" target="_blank">Lab Notebook</a> </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Sep 4</td>
+                        <td>
+                        No Class - Labor Day <!-- (<a href="https://drive.google.com/file/d/1AtnS0-rhXJ5X6HOs9ygIeIblUqqBypK2/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/1Kmz49kBR00HXH5fsnY7C4I8EaB-g0u82/view?usp=sharing" target="_blank">annotated</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2abffa8a-c52e-40ef-a290-af08013f1516" target="_blank">video</a>) -->
+                        </td> 
+                        <td></td>
+                        <td></td>
+                    </tr>
+		    <tr>
+                        <td>Sep 6</td>
+                        <td>
+                        Visualization: PCA (<a href="https://drive.google.com/file/d/1Ne45PjUtLCALii5UC7sJHfP3qWq8ogK5/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=61b1a755-578a-4d7c-b569-b0750111d009" target="_blank">video</a>) 
+                        </td>
+                        <td><a href="https://cseweb.ucsd.edu/~dasgupta/papers/jl.pdf" target="_blank">JL Theorem</a></td>
+                        <td></td>
+                    </tr>
+                    </tr>
+		    <tr>
+                        <td>Sep 8</td>
+                        <td>
+                        <i>Recitation 2: Linear Algebra Review (<a href="https://drive.google.com/file/d/19NnW7PBpw1vFQ5QoZGgbi-VQnC_hSvsi/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=87b92da1-a35a-40e1-8915-b077011067fc" target="_blank">video</a>) </i>
+                        </td>
+                        <td> <a href="https://drive.google.com/file/d/1XgrWY8mB3ghBWt4lZ8RmksC2G_Pby3QN/view?usp=sharing" target="_blank">Lab Notebook</a> </td>
+                        <td><a href="https://github.com/10605/F23_hw2/releases/tag/F23hw2" target="_blank">HW2 Released</a></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan=4, style="text-align: center; background-color: #e6f5ff">Basics of Large-Scale / Distributed Machine Learning</td>
+                    </tr>
+                    <tr>
+                        <td>Sep 11</td>
+                        <td>
+                        Visualization: JL + t-SNE (<a href="https://drive.google.com/file/d/1qJvcSM5AyFD7Z7OaqzX0uTUCM2EIuhQx/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=72a57fbb-5eb4-4cf4-bb48-b07a0114df02" target="_blank">video</a>)
+                        </td> 
+                        <td></td>
+                        <td>HW1 Due</td>
+                    </tr>
+                    <tr>
+                        <td>Sep 13</td>
+                        <td>
+                        Distributed Linear Regression (<a href="https://drive.google.com/file/d/1CwMr2ELROfyVlfxvZAevkZWzMKziTRMW/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=f16b2575-9f1e-459e-a87c-b07c011588f6" target="_blank">video</a>)
+                        </td>
+                        <td> </td>
+                        <td></td>
+                    </tr>
+		    <tr>
+                        <td>Sep 15</td>
+                        <td>
+                        <i>Recitation 3: HW1 Written Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f1534be-4e08-46df-86b2-b07e0103ad6d" target="_blank">video</a>) </i>
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                        <td>Sep 18</td>
+                        <td>
+                        Distributed PCA & Logistic Regression (<a href="https://drive.google.com/file/d/1_JLtgldGhZ-e3ntRfDZTsncJE2XYnBpI/view?usp=sharing" target="_blank">slides (Ameet)</a>, <a href="https://drive.google.com/file/d/1tdCYNMtgBtVlpkMeYO8vXeY24ctV667i/view?usp=sharing" target="_blank">slides (Geoff)</a>, <a href="https://drive.google.com/file/d/10XFBxExsVrC8zpXyU0YbrAQGoqCrZNcs/view?usp=sharing" target="_blank">annotated (Geoff)</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=58170a8a-88d8-4165-99a0-b081011afa60" target="_blank">video</a>) 
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Sep 20</td>
+                        <td> 
+			                  Scaling up Kernel Machines 1: Kernel Review & Nystrom  (<a href="https://drive.google.com/file/d/1tdCYNMtgBtVlpkMeYO8vXeY24ctV667i/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/1qeeMno_qOuCHyUo1s_vSiHCfl7ht-acU/view?usp=sharing" target="_blank">annotated</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4db729e4-62ee-4ae1-9952-b08301112590" target="_blank">video</a>)
+                        </td>
+                        <td> <a href="https://jmlr.csail.mit.edu/papers/volume10/shi09a/shi09a.pdf" target="_blank">Hash kernels, I</a><br /><a href="https://arxiv.org/pdf/0902.2206.pdf" target="_blank">Hash kernels, II</a>, <a href="http://dimacs.rutgers.edu/~graham/pubs/papers/cm-full.pdf" target="_blank">Count-min sketch</a>, <a href="calculus-review.html" target="_blank">Calculus Review</a></td>
+			                  <td></td>
+                    </tr>
+		    <tr>
+                        <td>Sep 22</td>
+                        <td>
+                        <i>Recitation 4: AWS Setup (<a href="https://docs.google.com/presentation/d/1FGcZKTV2m_CcC6fCS52N_CRP_3jnE40TzR4ZJvlucgg/edit?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=14a84a74-d8d1-446b-a519-b08501134b26" target="_blank">video</a>) </i>
+			                  </td>
+                        <td></td>
+                        <td><a href="https://github.com/10605/F23_hw3/releases/tag/hw3" target="_blank">HW3 Released</a></td>
+                    </tr>
+	    	    <tr>
+                        <td>Sep 25</td>
+                        <td>
+                        Hashing Theory, CMS (<a href="https://drive.google.com/file/d/1C-cE_a6RsKFXYqYdiw5epmRExAzD3a4k/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=078d60d9-a2e5-46d5-a20f-b088011af120" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                  <tr>
+                      <td>Sep 27</td>
+                      <td>
+                      LSH (<a href="https://drive.google.com/file/d/1Us8koOuD8csGVsa1RvOZoCcfqlYXCyqM/view?usp=sharing" target="_blank">slides</a>,  <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=527dfb26-162d-4767-a1f3-b08a01157f8d" target="_blank">video</a>)
+                      </td>
+                      <td></td>
+                      <td>HW2 Due</td>
+                  </tr>
+	    	    <tr>
+                        <td>Sep 29</td>
+                        <td>
+                        <i>No Planned Recitation  </i>
+			</td>
+                        <td>Homework 2 Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dfc65170-4ec3-4ed9-b500-b08e00fb9d1d" target="_blank">video</a>)</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 2</td>
+                        <td>Scaling up Kernel Machines 2: Random Fourier Features (<a href="https://drive.google.com/file/d/1RsPlQ-Ly5qV4PC2LN7bpQ626p1QDuTi7/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/1w8XxDcqhZ_k7zBoZCUWuru7qRZkrlONH/view?usp=sharing" target="_blank">Annotated</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b7e2556e-d69f-4d8f-85bd-b08f0114e99a" target="_blank">video</a>) 
+			</td>
+                        <td><a href="http://people.csail.mit.edu/indyk/p117-andoni.pdf" target="_blank">LSH</a></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 4</td>
+                        <td>
+                        Randomized Linear Algebra (<a href="https://drive.google.com/file/d/1045AsVYlT454M0-Z6VHAdFXwEExnq1h3/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=75b74f8d-2667-496f-a218-b09101009019" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td>HW3 Due</td>
+                    </tr>
+	            <tr>
+                        <td>Oct 6</td>
+                        <td>
+                        <i>Recitation 5: Practice Exam 1 Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=bc5eaada-f7e0-4e3a-932d-b09301161507" target="_blank">video</a>)</i>
+			                  </td>
+                        <td>Homework 3 Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9586bd99-b2e2-4b9a-b571-b094010a8ca2" target="_blank">video</a>)</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>Oct 9</td>
+                        <td><b>Exam 1</b></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 11</td>
+                        <td>
+                        No Class
+                        </td>
+                        <td></td>
+                        <td><a href="https://github.com/10605/F23_hw4/releases/tag/F23_hw4" target="_blank">HW4 Parts A + B Released</a></td>
+                    </tr>
+	    	    <tr>
+                        <td>Oct 13</td>
+                        <td>
+                        <i>Recitation 6: HW4 Part A Tutorial (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a8468342-e294-489b-82a6-b09a010e3eda" target="_blank">video</a>) </i>
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+	            <tr>
+                        <td>Oct 16</td>
+                        <td><b>Fall Break (No Classes)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 18</td>
+                        <td><b>Fall Break (No Classes)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 20</td>
+                        <td><b>Fall Break (No Classes)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+	            <tr>
+                        <td colspan=4, style="text-align: center; background-color: #e6f5ff">Scalable Deep Learning: Training, Tuning, and Inference</td>
+                    </tr>
+                    <tr>
+                        <td>Oct 23</td>
+			<td>Deep learning, DL frameworks, and Hardware (<a href="https://drive.google.com/file/d/1kykxBFQcREaGVoOuKumOLd8DKw_IOkod/view?usp=share_link" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b445ed54-f19e-4250-879e-b0a401142ce9" target="_blank">video</a>)                        
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 25</td>
+                        <td>
+                        Guest Lecture - Alex Cabrera, CMU (Model Evaluation / Zeno Project) (<a href="https://drive.google.com/file/d/15DFyp8Ey4jZomXSM7O4AIHrRRHC0Athc/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=1b687a63-02eb-4c81-b4fb-b0a60116988f" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td>HW 4 Part A Due</td>
+                    </tr>
+	    	    <tr>
+                        <td>Oct 27</td>
+                        <td>
+                        <i>Recitation 7: Tensorflow Tutorial (<a href="https://drive.google.com/file/d/1GfsCl1A_ngE61eMW-XbMLTXykyp1blDf/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/13F3IHrnD90397EQ0EF8p9iOmgokNYW_I/view?usp=sharing" target="_blank">Notebook</a>,<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fd20863e-95fe-4907-a21f-b0a801009ea7" target="_blank">video</a>) </i>
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 30</td>
+                        <td>
+                        Optimization for DL (GD, SGD, Cocoa/Duality) (<a href="https://drive.google.com/file/d/1yKHOI4snbIoqVLe3LHvydpcE-osgDM0X/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/1gSIIAwF19VcoIqaLxzVqG5HfdettaXFD/view?usp=sharing" target="_blank">Annotated</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=399465e2-a884-4273-97e5-b0ab0115bf0d" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Nov 1</td>
+                        <td>
+                        Optimization for DL (Momentum, Adagrad, Adadelta, Adam) (<a href="https://drive.google.com/file/d/1WCKqrDoWx2946O2wvKxx9KwEfp8FuzR1/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=36b07803-29b9-4e9c-9cb5-b0ad01128085" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td>HW4 Part B Due, <a href="" target="_blank">HW5 Released</a></td>
+                    </tr>
+	            <tr>
+                        <td>Nov 3</td>
+                        <td>
+                        <i>Recitation 8: Optimization & Learning Rates (<a href="https://drive.google.com/file/d/130WN_5-fFILqYLrjlVhjkIABsqNfzvSk/view?usp=sharing" target="_blank">slides</a>, <a href="https://drive.google.com/file/d/15oEpCK9hGn-JGUU6W5qadszOfaoNa3c-/view?usp=sharing" target="_blank">notebook</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7135bb26-112d-4476-bcfc-b0af010a18d4" target="_blank">video</a>) </i>
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Nov 6</td>
+                        <td>
+                        Parallel / Distributed DL (<a href="https://drive.google.com/file/d/1u7yJ6_wcHG61Dkwv9_nFNeUU3B7guGtM/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=60c543e0-2d93-4993-bf49-b0b20126bc9f" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Nov 8</td>
+                        <td>
+                        Hyperparameter Tuning (<a href="https://drive.google.com/file/d/1p8tcIZRB682d4cnRPvHqHrT_uQ95SIaB/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=730a0fc3-7401-40fc-947c-b0b40123c8cc" target="_blank">video</a>) 
+                        </td>
+		        <td></td>
+                        <td></td>
+                    </tr>
+	     	    <tr>
+                        <td>Nov 10</td>
+                        <td>
+			<i>Recitation 9: Homework 4 Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=351a6c41-9c66-459b-ad51-b0b6011a51c6" target="_blank">video</a>) </i>
+                        </td>
+		        <td></td>
+                        <td>Mini Project Proposal Due</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 13</td>
+                        <td>
+                        Inference + Model Compression (<a href="https://drive.google.com/file/d/1PsKS5tphk1AHh9pudu_5G6krco0wNwzt/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d1b5e22f-bb7c-4249-9be6-b0b900ea61f5" target="_blank">video</a>) -->
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+		    <tr>
+                	<td colspan=4, style="text-align: center; background-color: #e6f5ff">Advanced Topics</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 15</td>
+                        <td>
+                        AutoML for Diverse Tasks Hosted by Junhong Shen (<a href="https://drive.google.com/file/d/13squekBGML-SuOszBb2S6LOVPq0HQBTX/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4ff8d959-190b-46e3-8a55-b0bb0122e6e1" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td>HW5 Due</td>
+		    </tr>
+	            <tr>
+                        <td>Nov 17</td>
+                        <td>
+			<i>Recitation 10: Homework 5 Solutions (<a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a43e5fd7-9069-4151-a190-b0be015ace34" target="_blank">slides</a>, <a href="" target="_blank">video</a>) </i>
+                        </td>
+		        <td></td>
+                        <td></td>
+                    </tr>
+	            <tr>
+                        <td>Nov 20</td>
+                        <td>
+			Scaling Laws for Foundation Models Hosted by Lucio Dery (<a href="https://drive.google.com/file/d/1LkFWPi6Jv7MOT84o3cu4aWUIY890n6Yr/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=bfcddd27-ca68-417f-8ba5-b0c00124009b" target="_blank">video</a>)
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+	            <tr>
+                        <td>Nov 22</td>
+                        <td><b>Thanksgiving (No Classes)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+	            <tr>
+                        <td>Nov 24</td>
+                        <td><b>Thanksgiving (No Classes)</b>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Nov 27</td>
+                        <td>RL with large Data (<a href="https://drive.google.com/file/d/1Snu_rkrLjoVGCtX23wJoh99M3nHLiVZR/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=300f463c-82c7-4c36-ba65-b0c701264dad" target="_blank">video</a>) 
+                        </td>
+			<td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Nov 29</td>
+                        <td>RL with large Data continued (<a href="https://drive.google.com/file/d/1CGvzsJKX525bUs7euv0INNQKO4jnyziZ/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6d5a1c4e-3389-415b-999e-b0c90122fd3f" target="_blank">video</a>) 
+                        </td> 
+                        <td></td>
+                        <td>Mini-Projects Due</td>
+		    </tr>
+	            <tr>
+                        <td>Dec 1</td>
+                        <td>
+			                  <i>Recitation 11: Exam 2 Office Hours <!-- (<a href="" target="_blank">slides</a>, <a href="" target="_blank">video</a>) --> </i>
+                        </td>
+		        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Dec 4</td>
+                        <td> Course Summary (<a href="https://drive.google.com/file/d/1kx9nHU26qhbl9Eu2Xauu6zFY1qcBPBnO/view?usp=sharing" target="_blank">slides</a>, <a href="https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=511cb831-92f4-412d-aeef-b0ce011184df" target="_blank">video</a>)                         
+			</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Dec 6</td>
+                        <td><b>Exam 2</b></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+		
+        <br /><br />
+
+
+		<h3 id="policies">General Policies</h3>
+		<h4>Late Homework Policy</h4>
+		You receive 4 total grace days for use on any homework assignment. We will automatically keep a tally of these grace days for you; they will be applied greedily. No assignment will be accepted more than 2 days after the deadline without written permission from Daniel, or the Professors. You may not use more than 2 grace days on any single assignment.<br /> <br />All homework submissions are electronic. As such, lateness will be determined by the latest timestamp of any part of your submission. For example, suppose the homework requires submissions to both Gradescope Written and Programming– if you submit your Written on time but your Programming 1 minute late, your entire homework will be penalized for the full 24-hour period.
+		
+		<h4>Extensions</h4>
+		In general, we do not grant extensions on assignments. There are several exceptions:
+		<ul>
+		<li>Medical Emergencies: If you are sick and unable to complete an assignment or attend class, please go to University Health Services. For minor illnesses, we expect grace days to provide sufficient accommodation. For medical emergencies (e.g. prolonged hospitalization), students may request an extension afterwards by contacting their Student Liaison or Academic Advisor and having them reach out to the education associate Daniel Bird on their behalf.</li>
+		<li>Family/Personal Emergencies: If you have a family emergency (e.g. death in the family) or a personal emergency (e.g. mental health crisis), please contact your academic adviser or Counseling and Psychological Services (CaPS). In addition to offering support, they will reach out to the instructors for all your courses on your behalf to request an extension.</li>
+		<li>University-Approved Absences: If you are attending an out-of-town university approved event (e.g. multi-day athletic/academic trip organized by the university), you may request an extension for the duration of the trip. You must provide confirmation of your attendance, usually from a faculty or staff organizer of the event.</li>
+		</ul>
+    For any of the above situations, you may request an extension by emailing Daniel Bird (dpbird@andrew.cmu.edu). The email should be sent as soon as you are aware of the conflict and at least 5 days prior to the deadline. In the case of an emergency, no notice is needed.
+		
+		<h4>Audit Policy</h4>
+		Official auditing of the course (i.e. taking the course for an “Audit” grade) is not permitted this semester.<br /> <br />Unofficial auditing of the course (i.e. attending the lectures in person when their is space available) is welcome and permitted without prior approval. Unofficial auditors will not be given access to course materials such as homework assignments and exams.
+
+		<h4>Pass/Fail Policy</h4>
+		Pass/Fail is allowed in this class, no permission is required from the course staff. The grade for the Pass cutoff will depend on your program. Be sure to check with your program / department as to whether you can count a Pass/Fail course towards your degree requirements.
+		
+
+		<!-- <h4>Accommodating Remote Learning Students</h4>
+		Lectures in this class will be livestreamed and recorded for students who are required to this course remotely, the livestreams and recordings can be found on our course Canvas and linked on our website, students must be officially enrolled to view these. We strongly encourage you to watch the class live if you are able so that you can participate by asking questions in the chat, which will be asked to the instructor via a member of course staff, while also ensuring that you keep up with the weekly Canvas quizzes. We plan to host some office hours online so that students who are remote can still benefit from these, more details will be posted to Piazza shortly after the semester starts. We also encourage you to post your questions on Piazza which is frequently monitored by the course staff. Homework submissions, Canvas quizzes and Exams can all be completed online. -->
+
+		<h4>Accommodations for Students with Disabilities </h4>
+		If you have a disability and have an accommodations letter from the Disability Resources office, I encourage you to discuss your accommodations and needs with Daniel Bird as early in the semester as possible. I will work with you to ensure that accommodations are provided as appropriate. If you suspect that you may have a disability and would benefit from accommodations but are not yet registered with the Office of Disability Resources, I encourage you to contact them at <a href= "mailto:access@andrew.cmu.edu">access@andrew.cmu.edu</a>.
+		
+		<h3>Academic Integrity Policies</h3>
+		<b>Read this Carefully</b>
+		<h4>Collaboration among Students</h4>
+		<ul>
+		<li>The purpose of student collaboration is to facilitate learning, not to circumvent it. Studying the material in groups is strongly encouraged. It is also allowed to seek help from other students in understanding the material needed to solve a particular homework problem, provided no written notes (including code) are shared, or are taken at that time, and provided learning is facilitated, not circumvented. The actual solution must be done by each student alone.</li>
+		<li>The presence or absence of any form of help or collaboration, whether given or received, must be explicitly stated and disclosed in full by all involved. Specifically, each assignment solution must include the corresponding collaboration section.</li>
+		<li>If you gave help after turning in your own assignment and/or after answering the collaboration section, you must update your answers before the assignment’s deadline, if necessary by emailing the course staff or a Piazza post.</li>
+		<li>Collaboration without full disclosure will be handled severely, in compliance with CMU’s Policy on <a href= "https://www.cmu.edu/policies/student-and-student-life/academic-integrity.html" target = "_blank">Academic Integrity.</a></li>
+		</ul>
+		
+		<h4>Previously Used Assignments</h4>
+		Some of the homework assignments used in this class may have been used in prior versions of this class, or in classes at other institutions, or elsewhere. Solutions to them may be, or may have been, available online, or from other people or sources. It is explicitly forbidden to use any such sources, or to consult people who have solved these problems before. It is explicitly forbidden to search for these problems or their solutions on the internet. You must solve the homework assignments completely on your own. We will be actively monitoring your compliance. Collaboration with other students who are currently taking the class is allowed, but only under the conditions stated above.
+		
+		<h4>Policy Regarding “Found Code”</h4>
+		You are encouraged to read books and other instructional materials, both online and offline, to help you understand the concepts and algorithms taught in class. These materials may contain example code or pseudo code, which may help you better understand an algorithm or an implementation detail. However, when you implement your own solution to an assignment, you must put all materials aside, and write your code completely on your own, starting “from scratch”. Specifically, you may not use any code you found or came across. If you find or come across code that implements any part of your assignment, you must disclose this fact in your collaboration statement.
+		
+		<h4>Duty to Protect One’s Work</h4>
+		Students are responsible for proactively protecting their work from copying and misuse by other students. If a student’s work is copied by another student, the original author is also considered to be at fault and in gross violation of the course policies. It does not matter whether the author allowed the work to be copied or was merely negligent in preventing it from being copied. When overlapping work is submitted by different students, both students will be punished.<br /> <br />To protect future students, do not post your solutions publicly, neither during the course nor afterwards.
+
+		<h4>Penalties for Violations of Course Policies</h4>
+		All violations (even first one) of course policies will always be reported to the university authorities (your Department Head, Associate Dean, Dean of Student Affairs, etc.) as an official Academic Integrity Violation and will carry severe penalties.
+		<ol>
+		<li>The penalty for the first violation is a one-and-a-half letter grade reduction. For example, if your final letter grade for the course was to be an A-, it would become a C+.</li>
+		<li>The penalty for the second violation is failure in the course, and can even lead to dismissal from the university.</li>
+		</ol> 
+
+		
+		<br /><br />
+		<h3>Acknowledgments</h3>
+        <p> This course is based in part on material developed by <a href="https://www.cs.cmu.edu/~smithv/" target="_blank">Virginia Smith</a>, <a href="https://heather.miller.am/" target="_blank">Heather Miller</a>, <a href="http://www.cs.cmu.edu/~wcohen/" target="_blank">William Cohen</a>, <a href="http://www.cs.berkeley.edu/~adj/" target="_blank">Anthony Joseph</a>, and <a href="http://www.cs.cmu.edu/~bapoczos/" target="_blank">Barnabas Poczos</a>.</p>
+        <p>Previous courses: <a href="https://10605.github.io/fall2022/index.html" target="_blank">10-605/10-805, Fall 2022</a>, <a href="https://10605.github.io/spring2022/index.html" target="_blank">10-405/10-605, Spring 2022</a>, <a href="https://10605.github.io/fall2021/index.html" target="_blank">10-605/10-805, Fall 2021</a>; <a href="https://10605.github.io/spring2021/index.html" target="_blank">10-405/10-605, Spring 2021</a>; <a href="https://10605.github.io/fall2020/index.html" target="_blank">10-605/10-805, Fall 2020</a>; <a href="https://10605.github.io/spring2020/index.html" target="_blank">10-405/10-605, Spring 2020</a>.</p>
+        <hr>
+		
+		
+		
+		
+		
+		
+        </div>
+		
+		
+
+    </div>
+    <!-- /container 
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
+    <script>
+      anchors.options.visible = 'always';
+      anchors.add('.anchored');
+    </script>
+
+
+</body>
