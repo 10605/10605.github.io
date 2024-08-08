@@ -1,12 +1,8 @@
-.container {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
 h4 {
   margin-top: 25px;
 }
 .row {
+  margin: auto;
   margin-bottom: 20px;
 }
 .row .row {
@@ -23,8 +19,8 @@ h4 {
 }
 
 hr {
-  margin-top: 40px;
-  margin-bottom: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 p.lead {
   margin-bottom: 5px;
@@ -78,4 +74,71 @@ p.lead {
         width: 20%;
         float: left;
     }
+}
+
+hr.fancy{
+  border-top: 4px solid #eee;
+  border-bottom: none;
+  width: 100%;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  margin-top:10px;
+}
+
+.label{
+    border-radius: 4px;
+    margin-left: 0;
+    user-select: none;
+    display: inline-block;
+    margin-top:0.26em;
+    padding-top: 0.16em;
+    padding-right: 0.56em;
+    padding-bottom: 0.16em;
+    padding-left: 0.56em;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    color: #fff;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.label-blue{
+  background-color: #37beae;
+}
+
+.label-green{
+  background-color: #2374ab;
+}
+
+.label-red{
+  background-color: #d24689;
+}
+
+.label-purple{
+  background-color: #231651;
+}
+
+.label-pink{
+  background-color: #ff8484;
+}
+
+.collapsible {
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  background-color: transparent;
+}
+
+.active, .collapsible:hover {
+  background-color: transparent;
+}
+
+.content {
+  padding: 0 10px;
+  padding-top: 5px;
+  display: none;
+  overflow: hidden;
 }
