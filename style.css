@@ -142,3 +142,40 @@ hr.fancy{
   display: none;
   overflow: hidden;
 }
+
+.label{
+    border-radius: 4px;
+    margin-left: 0;
+    user-select: none;
+    display: inline-block;
+    margin-top:0.26em;
+    padding-top: 0.16em;
+    padding-right: 0.56em;
+    padding-bottom: 0.16em;
+    padding-left: 0.56em;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    color: #fff;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.label-blue{
+  background-color: #ff8484;
+}
+
+.label-green{
+  background-color: #37beae;
+}
+
+.label-red{
+  background-color: #d24689;
+}
+
+.label-purple{
+  background-color: #231651;
+}
+
+.label-pink{
+  background-color: #2374ab;
+}
