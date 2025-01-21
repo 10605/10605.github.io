@@ -1,0 +1,610 @@
+matmul-in-spark.pptx:
+  num_slides: 4
+  summary: matmul in spark
+k-means-in-spark-example.pptx:
+  num_slides: 12
+  summary: quick summary of k-means in spark 
+iterative-pagerank-in-spark.pptx:
+  num_slides: 7
+  summary: slow and fast implementations
+comparing-corpora.pptx:
+  num_slides: 11
+  summary: phraseness pipeline
+  links:
+  - https://aclanthology.org/W03-1805.pdf:
+      A Language Model Approach to Keyphrase Extraction
+601-bayes.pptx:
+  num_slides: 23
+  summary: bayes rule, smoothing as MAP
+601-prob-intro.pptx:
+  num_slides: 52
+  summary: motivation, axioms, independence, conditional prob, smoothing
+605-administrivia.pptx:
+  num_slides: 12
+  summary: 'overview of 10-605: grading policies, projects, 605 vs 805 | Grading policies
+    and etc'
+605-overview+prob-review-recap.pptx:
+  num_slides: 2
+  summary: ''
+605-overview-recap.pptx:
+  num_slides: 6
+  summary: ''
+adagrad.pptx:
+  num_slides: 7
+  summary: ''
+alias-fenwick-tree-sampling-lda.pptx:
+  num_slides: 10
+  summary: '!lda mimno''s sparse LDA'
+allreduce.pptx:
+  num_slides: 14
+  summary: All-reduce
+autodiff-details.pptx:
+  num_slides: 4
+  summary: '!deep !autodiff | Inputs, parameters, updates'
+autodiff-systems.pptx:
+  num_slides: 5
+  summary: Theano and some other examples !autodiff | Some systems using autodiff
+autodiff.pptx:
+  num_slides: 14
+  summary: ' +autodiff | Reverse-mode differentiation (autodiff)'
+autodiff.txt:
+  num_slides: 0
+  summary: writeup of autodiff assignment | Symbolic reverse-mode differentiation
+averaged-perceptron.pptx:
+  num_slides: 4
+  summary: ' | Averaged perceptrons'
+bigdata-history.pptx:
+  num_slides: 16
+  summary: +rep, ripper, banko & brill, affect/effect demo, deep learning requires
+    big data | History of Big Data
+  links:
+  - https://wwcohen.github.io/postscript/ijcai-93.ps:
+      William W. Cohen (1993). Efficient pruning methods for separate-and-conquer rule learning systems
+  - https://aclanthology.org/P01-1005.pdf:
+      Banko, Michele, and Eric Brill (2001). Scaling to very very large corpora for natural language disambiguation
+  - https://books.google.com/ngrams/:
+      Google NGrams Viewer
+  - https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=4804817&casa_token=ILyj04MU_08AAAAA:QZtVl6LIhMMKqXSd8moyUfbM2hv4F2Zje-FbQMMvm1vnW0pQz0MK5A4BkQpbXdSr2x8jsULS&tag=1:
+      Norvig, Pereira, Halevy (2009). The Unreasonable Effectiveness of Data
+  - https://www.nowpublishers.com/article/Details/MAL-006:
+      Yoshua Bengio (2009). Learning Deep Architectures for AI
+bloom-filter-countmin-review.pptx:
+  num_slides: 14
+  summary: +bloom | Review of Bloom filters
+bloom-filter-recap.pptx:
+  num_slides: 6
+  summary: '!bloom !countmin recap of bloom-filter.pptx | Review of Bloom filters'
+bloom-filter.pptx:
+  num_slides: 10
+  summary: +bloom | Bloom filters
+chinchilla-scaling.pptx:
+  num_slides: 7
+  summary: Data and Compute Scaling for LLMs
+  links:
+  - https://arxiv.org/abs/2203.15556:
+      Hoffman et al (2022). Training Compute-Optimal LLMs
+cnn.pptx:
+  num_slides: 20
+  summary: '!deep | Convolutional ANNs'
+common-hadoop-extensions-detailed.pptx:
+  num_slides: 30
+  summary: hadoop streaming, mrjob, cascading, hive, pig, iteration in pig, spark,
+    flink +pig +spark | Systems built on top of Hadoop
+common-hadoop-extensions-short.pptx:
+  num_slides: 12
+  summary: cascading, hive vs pig, flink !pig | Systems built on top of Hadoop
+comparing-parallel-nb-and-perceptrons.pptx:
+  num_slides: 6
+  summary: also discusses structured perceptrons, rocchio
+complexity.pptx:
+  num_slides: 9
+  summary: Complexity theory review
+cost-of-operations.pptx:
+  num_slides: 7
+  summary: Cost of Disk/Memory Access
+  links:
+  - https://samwho.dev/numbers/:
+      Visualizing the cost of operations
+  - https://ourworldindata.org/grapher/historical-cost-of-computer-memory-and-storage?time=1990..latest:
+      Historical cost of storage
+  - https://github.com/erikfrey/bashreduce:
+      Bash Reduce - minimal implementation of Map-Reduce
+      
+construct-wengert-list.pptx:
+  num_slides: 6
+  summary: constructing a wengert list
+convnets.pptx:
+  num_slides: 23
+  summary: ' | Convolutional ANNs'
+count-min-recap.pptx:
+  num_slides: 4
+  summary: recap of count-min | Review of count min
+count-min-sketch.pptx:
+  num_slides: 8
+  summary: +countmin | The countmin sketch
+deep-learners-have-unstable-gradients.pptx:
+  num_slides: 10
+  summary: '!deep | Exploding and vanishing gradients'
+deep-learning-intro-and-history.pptx:
+  num_slides: 10
+  summary: +deep | Deep learning intro
+deep-networks-and-sgd.pptx:
+  num_slides: 2
+  summary: '!deep | trainability with SGD'
+deep-networks-are-expressive.pptx:
+  num_slides: 4
+  summary: '!deep | Expressiveness of MLPs'
+deep-recap.pptx:
+  num_slides: 4
+  summary: recap of backprop algorithm, mostly
+deep-sketches.pptx:
+  num_slides: 11
+  summary: ' | CM Sketches in Deep Learning'
+deephash:
+  num_slides: 17
+  summary: '!lsh | DeepHash'
+delta-trick-for-vp.pptx:
+  num_slides: 3
+  summary: ' | The "delta trick"'
+density-vs-naive-bayes.pptx:
+  num_slides: 12
+  summary: Brute force for ngrams data, multinomial NB
+density-estimation-by-counting.pptx:
+  num_slides: 15
+  summary: '  joint, affect/effect demo, counting experiment, density estimation vs
+    classifier | Counting for big data and density estimation'
+dgm-review.pptx:
+  num_slides: 6
+  summary: +dgm
+eval-and-diff-wengert-list.pptx:
+  num_slides: 11
+  summary: '   !autodiff | Details on Wengert lists'
+expander.pptx:
+  num_slides: 4
+  summary: ' | Google''s Expander SSL System'
+generative-models-for-text.pptx:
+  num_slides: 20
+  summary: '!nbayes define DGMs, model for naive bayes and LDA | DGMs for naive Bayes
+    and LDA'
+gibbs-for-lda.ppt:
+  num_slides: 15
+  summary: '!lda +gibbs-lda +gibbs | Gibbs sampling for LDA'
+gpu-intro.pptx:
+  num_slides: 8
+  summary: gpu +gpu | Introduction to GPUs
+gpu-programming-intro.pptx:
+  num_slides: 38
+  summary: cuda !gpu | CUDA
+gpus-vs-hadoop.pptx:
+  num_slides: 5
+  summary: gpus | GPUs vs Hadoop
+graph-ml-outtro.pptx:
+  num_slides: 3
+  summary: '!graph-arch'
+graph-ml-overview-gibbs.pptx:
+  num_slides: 6
+  summary: '!gibbs +graph-arch | Graph-based ML architectures'
+graph-ml-overview-nogibbs.pptx:
+  num_slides: 5
+  summary: +graph-arch | Graph-based ML architectures
+graph-sampling-paper.pptx:
+  num_slides: 6
+  summary: jure/christos's empirical study of graph sampling methods | Sampling a
+    graph
+graphchi.pptx:
+  num_slides: 12
+  summary: '!graph-arch !graphlab | GraphChi'
+graphlab.pptx:
+  num_slides: 6
+  summary: '!graph-arch +graphlab | GraphLab'
+graphx.pptx:
+  num_slides: 9
+  summary: '!graph-arch !graphlab !spark | GraphX'
+guinea-pig.pptx:
+  num_slides: 10
+  summary: wc example, join, group +gpig | Guinea Pig intro
+hadoop-as-parallel-stream-and-sort.pptx:
+  num_slides: 7
+  summary: '  like imaginary-hadoop-assignment'
+hadoop-combiners.pptx:
+  num_slides: 6
+  summary: +combiners | Combiners
+hadoop-debugging.pptx:
+  num_slides: 8
+  summary: ' | Debugging Hadoop'
+hadoop-intro.ppt:
+  num_slides: 52
+  summary: 'note: long section - basically alona''s hadoop intro: MR visualization,
+    robustness; HDFS; hadoop streaming; wordcount example; combiners todo: update
+    screen shots?'
+hadoop-short-intro.pptx:
+  num_slides: 20
+  summary: basics and hdfs, lots of screen shots | Intro to Hadoop
+hadoop-streaming-api.pptx:
+  num_slides: 17
+  summary: also quick overview of non-streaming | Hadoop Streaming
+harmonic-fields.pptx:
+  num_slides: 11
+  summary: harmonic fields !ssl | HF and NELL as an example
+hash-kernels.pptx:
+  num_slides: 7
+  summary: ' | Hash kernels'
+hash-trick-review.pptx:
+  num_slides: 6
+  summary: ''
+hash-trick-to-bloom-filter.pptx:
+  num_slides: 5
+  summary: ''
+hashed-logreg.pptx:
+  num_slides: 14
+  summary: motivation, main idea, implementation suggestions | Hash kernels for logistic
+    regression
+hf-discussion.pptx:
+  num_slides: 10
+  summary: all the different derivations of it including co-training..... | Harmonic
+    fields
+imaginary-hadoop-assignment.pptx:
+  num_slides: 17
+  summary: '| How would you parallelize stream and sort?'
+intro-to-graphs.pptx:
+  num_slides: 10
+  summary: follows underlying theme "how do you sample"?
+iterative-pagerank-in-pig-and-gpig.pptx:
+  num_slides: 8
+  summary: '!pig !gpig | PageRank in Pig and Guinea Pig'
+iterative-pagerank-in-pig.pptx:
+  num_slides: 3
+  summary: '!pig | PageRank in Pig'
+k-means-in-pig-example.pptx:
+  num_slides: 17
+  summary: ends with discussion of i/o costs <spark-overview.pptx !pig | K-means in
+    Pig
+kernel-perceptron.pptx:
+  num_slides: 7
+  summary: ''
+lda-in-python-recap.pptx:
+  num_slides: 5
+  summary: '!lda review of implementation of LDA'
+lda-in-python.ppt:
+  num_slides: 11
+  summary: '!gibbs-lda !lda'
+lda-like-graph-models.pptx:
+  num_slides: 9
+  summary: '!lda | DGMs for graphs'
+lda-param-server.pptx:
+  num_slides: 11
+  summary: '!ps !lda | LDA Sampler with PS'
+lda-review.pptx:
+  num_slides: 4
+  summary: '!lda review of LDA'
+lda.ppt:
+  num_slides: 10
+  summary: '!nb-dgm +lda'
+learning-as-optimization-short.pptx:
+  num_slides: 4
+  summary: differentiate to find max for binomial | Learning as optimization
+local-partitioning-paper+assignment.pptx:
+  num_slides: 33
+  summary: pagerank-nibble paper + breakdown of the assignment; follows graph-sampling
+    paper | Local partitioning
+lsh.pptx:
+  num_slides: 13
+  summary: includes one slide of "applications" which are sort of vague really | Locality
+    sensitive hashing
+mad-discussion.pptx:
+  num_slides: 16
+  summary: MAD and SSL as optimization +mad | Modified Adsorption SSL method
+mad-with-countmin-sketch.pptx:
+  num_slides: 7
+  summary: '!mad !countmin | MAD with countmin sketches'
+managed-comm-in-param-server.pptx:
+  num_slides: 29
+  summary: -ps +lasso +coord-descent | Managed Communication in PS
+manifold-trick-for-pic.pptx:
+  num_slides: 15
+  summary: '!spectral~average !pic !spectral~average | Label propagation for clustering
+    non-graph data'
+manifold-trick-for-ssl.pptx:
+  num_slides: 10
+  summary: '!spectral~average !ssl | Label propagation for SSL on non-graph data'
+map-reduce-abstractions.pptx:
+  num_slides: 9
+  summary: examples from naive bayes testing | Abstractions for map-reduce 
+map-reduce-frameworks.pptx:
+  num_slides: 10
+  summary: Flume and others, ptr to BashReduce
+map-vs-reduce-side-joins.pptx:
+  num_slides: 7
+  summary: +mapside-join | Joins in Hadoop
+matrix-backprop.pptx:
+  num_slides: 14
+  summary: ' bprop with square loss and logistic units | BackProp following Nielson'
+matrix-factorization-defined.pptx:
+  num_slides: 20
+  summary: abstract definition, collab filtering, image modeling, modeling text |
+    Matrix factorization
+matrix-factorization-via-distributed-sgd-short.pptx:
+  num_slides: 11
+  summary: from gemulla's slide deck, follows matrix-factorization-via-sgd.pptx |
+    distributed matrix factorization with SGD
+matrix-factorization-via-distributed-sgd.pptx:
+  num_slides: 30
+  summary: from gemulla's slide deck, follows matrix-factorization-via-sgd.pptx |
+    distributed matrix factorization with SGD
+matrix-factorization-via-sgd.pptx:
+  num_slides: 15
+  summary: from gemulla's slide deck | Matrix factorization with SGD
+matrix-factorization-vs-clustering.pptx:
+  num_slides: 2
+  summary: ''
+mcdonald-structured-parallel-perceptron-paper.pptx:
+  num_slides: 20
+  summary: including analysis +ipm | Iterative parameter mixing paper
+midterm-review.pptx:
+  num_slides: 14
+  summary: ' | Midterm review'
+mitchell-backprop.pptx:
+  num_slides: 14
+  summary: bprop with square loss and logistic units +mitchell-bprop | BackProp following
+    Mitchell
+modern-deep-network-tricks.pptx:
+  num_slides: 18
+  summary: reLU, cross entropy loss (no derivation), initialization | Modern deep
+    learning models
+motivating-streaming.pptx:
+  num_slides: 7
+  summary: '| Why streaming is important'
+mrw-paper.pptx:
+  num_slides: 13
+  summary: frank's results | Multirank-walk SSL method
+naive-bayes-as-dgm.pptx:
+  num_slides: 12
+  summary: '!dgm !nbayes +nb-dgm also presents unsupervised naive bayes | DGMs for
+    naive Bayes'
+naive-bayes.pptx:
+  num_slides: 26
+  summary: stupid version w/ all attributes independent, streaming naive bayes algorithm
+    +nbayes | streaming Naive Bayes
+online-lsh.pptx:
+  num_slides: 14
+  summary: ' | Online LSH'
+other-work-with-phrases.pptx:
+  num_slides: 10
+  summary: turney semantic orientation, downey long NE finding !phrases | Other work
+    with phrases
+pagerank-intro.pptx:
+  num_slides: 4
+  summary: +pagerank | PageRank
+pagerank-via-stream-and-sort.pptx:
+  num_slides: 9
+  summary: follows pagerank-intro
+pagerank-with-prs-on-disk.pptx:
+  num_slides: 5
+  summary: '!pagerank'
+parallel-ann-with-GPU.pptx:
+  num_slides: 11
+  summary: '!ipm should include a bit more info on GPUs | Deep learning and GPUs'
+parallel-lda.pptx:
+  num_slides: 9
+  summary: '!gibbs-lda !ipm | Parallelizing LDA'
+parallel-sgd.pptx:
+  num_slides: 3
+  summary: parallel sgd analysis and experiments | Parallel SGD via Param Mixing
+parallel-simjoins-wthout-pig.pptx:
+  num_slides: 13
+  summary: examples in guinea pig !gpig !simjoins | Parallel simjoins
+parallel-simjoins.pptx:
+  num_slides: 16
+  summary: examples in guinea pig and pig !pig !simjoins | Parallel simjoins
+parallel-stream-and-sort-aside.pptx:
+  num_slides: 5
+  summary: 'parallel stream and sort'
+parallel-stream-and-sort.pptx:
+  num_slides: 10
+  summary: Parallelize stream and sort
+param-server-intro.pptx:
+  num_slides: 13
+  summary: +ps | Parameter servers
+param-server-ssp.pptx:
+  num_slides: 25
+  summary: '!ps | State Synchronous Parallel (SSP) model'
+param-server-vs-hadoop.pptx:
+  num_slides: 3
+  summary: '!ps !ipm | PS vs Hadoop'
+perceptron+rank+struct-recap.pptx:
+  num_slides: 11
+  summary: review of perceptrons with ranking and structured perceptron
+perceptron-recap.pptx:
+  num_slides: 6
+  summary: review of perceptrons
+phrase-finding-in-hadoop-using-question-response.pptx:
+  num_slides: null
+  summary: ''
+phrase-finding-in-pig-example.pptx:
+  num_slides: 27
+  summary: 'features: shell-like commands, load, foreach, group, describe, illustrate,
+    join, store, cross, udf, !phrases | Phrase-finding in Pig'
+phrase-finding-paper.pptx:
+  num_slides: 19
+  summary: +phrases | Phrase finding
+pic-paper.pptx:
+  num_slides: 22
+  summary: lots of results - todo, add some stuff on later math/analysis !spectral~average
+    +pic | Power iteration clustering
+pig-overview.pptx:
+  num_slides: 6
+  summary: '+pig '
+pig-short-overview.pptx:
+  num_slides: 4
+  summary: bare essentials of pig +pig
+powergraph.pptx:
+  num_slides: 14
+  summary: '!graph-arch !graphlab | PowerGraph'
+prediction-game.pptx:
+  num_slides: 4
+  summary: ''
+pregel.pptx:
+  num_slides: 6
+  summary: '!graph-arch +pregel | Pregel'
+ranking-perceptron.pptx:
+  num_slides: 11
+  summary: ' | Ranking perceptrons'
+ranking-to-structured-perceptron.pptx:
+  num_slides: 13
+  summary: algorithm for NER and collin's experiments | Structured perceptrons
+request-and-answer-for-testing-large-classifiers.pptx:
+  num_slides: 22
+  summary: '!nbayes +nbayes-test | Scalable classification'
+request-and-answer-recap.pptx:
+  num_slides: 8
+  summary: recap of NB request-and-answer, discussion of use for phrases !phrases
+rnn-apps.pptx:
+  num_slides: 14
+  summary: '!deep | Achitectures using RNNs'
+rnn.pptx:
+  num_slides: 20
+  summary: '!deep | Recursive ANNs'
+rocchio.pptx:
+  num_slides: 14
+  summary: rocchio vs naive bayes, results, tfidf naive bayes +rocchio !nbayes | Rocchio
+    and TFIDF
+scalable-nb-notes.pdf:
+  num_slides: 0
+  summary: streaming naive bayes; stream-and-sort naive bayes; caching stream-and-sort
+    naive bayes; large model testing kludge; look-ahead to hadoop | Notes on scalable
+    naive bayes
+scalable-rocchio.pptx:
+  num_slides: 12
+  summary: '!nbayes-test !rocchio !nbayes | Scalable Rocchio and TFIDF'
+sgd-debugging-tips.pptx:
+  num_slides: 10
+  summary: actually fairly general comments about debugging ML algorithms | Debugging
+    ML algorithms
+sgd-for-logistic-regression.pptx:
+  num_slides: 7
+  summary: derivation of update +lr-sgd | Logistic regression with SGD
+sgd-regularization-and-sparsity.pptx:
+  num_slides: 11
+  summary: naive algorithm for un-regularized, regularized logreg | Regularized SGD
+sgd-vs-streaming.pptx:
+  num_slides: 4
+  summary: also compare to rocchio and naive bayes !rocchio !nbayes
+sgd-vw-experiments.pptx:
+  num_slides: 7
+  summary: ''
+short-managed-comm-in-param-server.pptx:
+  num_slides: 28
+  summary: -ps +lasso +coord-descent | Managed Communication in PS
+short-perceptron-analysis.pptx:
+  num_slides: 8
+  summary: ''
+short-stream-and-sort.pptx:
+  num_slides: 16
+  summary: stream wc example in Python | Stream and Sort as Ops
+short-stream-sort-to-mr.pptx:
+  num_slides: 10
+  summary: Compressed Sketch of Stream-Sort WC Example and Shuffle-Sort
+recap-longer-stream-sort-mr.pptx :
+  num_slides: 12
+  summary: Python Streaming WC
+signal-collect.pptx:
+  num_slides: 17
+  summary: '!graph-arch !pregel | Signal-collect'
+simjoins-complete:
+  num_slides: 24
+  summary: ' !gpig !tfidf | Similarity Joins'
+simjoins-intro.pptx:
+  num_slides: 13
+  summary: true names quote, motivation, some results using tfidf as a similarity
+    metric +simjoins | Similarity joins
+simjoins-with-tfidf-basic.pptx:
+  num_slides: 4
+  summary: definition and some simple optimizations using inverted indices !rocchio
+    +simjoins-basic | Similarity joins with TFIDF
+simjoins-with-tfidf-optimizations.ptx:
+  num_slides: 5
+  summary: some simple optimizations using inverted indices !simjoins-basic
+slow-learners-are-fast-recap.pptx:
+  num_slides: 7
+  summary: Langford result on time delayed SGD
+slow-learners-are-fast.pptx:
+  num_slides: 9
+  summary: Langford result on time delayed SGD
+sorting-and-pipes.pptx:
+  num_slides: 12
+  summary: ''
+spark-overview.pptx:
+  num_slides: 15
+  summary: +spark | Spark
+spark-details.pptx:
+  num_slides: 11
+  summary: More about working with Spark
+sparse-averaged-perceptron.pptx:
+  num_slides: 8
+  summary: ''
+sparse-regularized-sgd.pptx:
+  num_slides: 9
+  summary: ' | Efficient regularized SGD'
+sparse-sampling-lda.pptx:
+  num_slides: 25
+  summary: '!gibbs-lda | Fast sampling for LDA'
+spectral-clustering-as-averaging.pptx:
+  num_slides: 13
+  summary: include shi results and example +spectral~average | Spectral clustering
+spectral-clustering-as-optimization.pptx:
+  num_slides: 6
+  summary: eigenvector stuff and leadin to PIC !spectral~average
+spectral-clustering-intro-and-examples.pptx:
+  num_slides: 2
+  summary: spectral clustering examples
+ssl-intro.pptx:
+  num_slides: 14
+  summary: motivation and general idea with NELL as example +ssl | Semi-supervised
+    learning intro
+stream-and-sort+combining.pptx:
+  num_slides: 7
+  summary: using buffers as a 'combiner' for stream-and-sort | Local counting in stream
+    and sort
+stream-and-sort-alternatives.pptx:
+  num_slides: 14
+  summary: ' | Alternatives to stream and sort'
+stream-and-sort-examples.pptx:
+  num_slides: 13
+  summary: ' | Stream and sort examples'
+stream-and-sort-naive-bayes.pptx:
+  num_slides: 5
+  summary: '| Naive Bayes using stream-and-sort'
+testing-kludge-for-streaming-nb.pptx:
+  num_slides: 6
+  summary: a kludge for testing a model that doesn't fit in memory on a small test
+    set
+tfidf-in-abstract-workflow.pptx:
+  num_slides: 3
+  summary: ''
+tfidf-in-guineapig.pptx:
+  num_slides: 13
+  summary: '!gpig -mapside-join -combiners| TFIDF in Guinea Pig'
+tfidf-in-pig.pptx:
+  num_slides: 2
+  summary: '!pig | TFIDF in Pig'
+uses-of-bloom-filters.pptx:
+  num_slides: 4
+  summary: '!bloom'
+uses-of-count-min-sketch.pptx:
+  num_slides: 4
+  summary: '!countmin'
+vectorize-logreg.pptx:
+  num_slides: 29
+  summary: ' | Vectorization'
+word2vec+glove.pptx:
+  num_slides: 6
+  summary: '!deep | Word2vec and GloVE'
+word2vec.pptx:
+  num_slides: 8
+  summary: '!deep | Word2vec'
+xman.pptx:
+  num_slides: 12
+  summary: '!autodiff screen shots of xman.py | Breakdown of xman.py'
+zookeeper.pptx:
+  num_slides: 2
+  summary: distributed coordination services
