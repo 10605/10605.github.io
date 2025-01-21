@@ -1,3 +1,6 @@
+# utilities for planning lectures
+#
+
 import argparse
 import calendar
 import datetime
@@ -240,23 +243,32 @@ if __name__ == '__main__':
     parser.add_argument(
         'action',
         choices=['html', 'syllabus', 'check', 'calendar', 'next'],
+        help="\n".join([
+            'html: generate schedule.html;',
+            'syllabus: summary of planned lectures;',
+            'calendar: shorter summary of planned lectures;',
+            'next: syllabus output for next --n lectures'])
     )
     parser.add_argument(
         '--config',
-        default='config.yaml')
+        default='config.yaml',
+        help='basic info on dates for the course + html generation')
     parser.add_argument(
         '--lectures',
         default='lectures.yaml',
-        help='print info on lectures')
+        help='database of info on each lecture')
     parser.add_argument(
         '--slides',
-        default='slides.yaml')
+        default='slides.yaml',
+        help='database of info on decks for individual "modules"')
     parser.add_argument(
         '--show_cancelled',
-        action='store_true')
+        action='store_true',
+        help='show dates of cancelled clsses')
     parser.add_argument(
         '--show_weeks',
-        action='store_true')
+        action='store_true',
+        help='show dividing lines between weeks')
     parser.add_argument(
         '--n',
         type=int,

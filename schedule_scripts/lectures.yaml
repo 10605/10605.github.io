@@ -1,19 +1,3 @@
-# weeks 1-2: spark, then why (3 lectures; 2 recitations; entity-resolution HW)
-#  cost of ops, streaming, hadoop
-#  hadoop/spark model of computation (w/o caching)
-#  spark key ideas
-#    abstractions on top of map-reduce
-#    - RDDs
-#    - computation graph via lazy transformations and eager 'actions'
-#    caching 
-#  workflows for joins and etc
-#    shorter-stream-and-sort, parallel-stream-and-sort are better paced
-#    possible: phrase-finding-* simjoins-complete.pptx simjoins-intro naive-bayes
-#    note also simjoins-2 - has A* search
-#  fast inner product search / hybrid search
-#  haitian - practical aspects of training LLMs at scale - maybe a 40min talk in mid-March
-#  recitations: pyspark, linear algebra
-
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
   slide_link: https://drive.google.com/file/d/1bOg-_CoG7hWjoZ0vlRQx_4dUaJUOB-OJ/view?usp=sharing
