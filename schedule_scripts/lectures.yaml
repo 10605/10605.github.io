@@ -38,6 +38,8 @@
   - spark-overview.pptx
   - '* HW - Entity Resolution and Naive Bayes in Spark'
 - title: 'Recitation: PySpark'
+  slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
+  notebook_link: https://drive.google.com/file/d/1CvXouTClAVLROO0z0B4mGG0CvkmZ3-7Q/view?usp=sharing
   summary: ''
   type: recitation
 - title: 'Workflows for Map-Reduce Systems'

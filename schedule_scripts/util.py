@@ -96,12 +96,13 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
             return ''
     slide_href = make_href(kw.get('slide_link'), '/ Slides')
     movie_href = make_href(kw.get('movie_link'), '/ Recording')
+    notebook_href = make_href(kw.get('notebook_link'), '/ Notebook')
     hw_href = make_href(kw.get('hw_link'), assignment, text_is_required=True)
     lines = []
     lines.append(f'{" "*20}<tr>')
     lines.append(f'{tab}<td>{printable_date}</td>')
     lines.append(f'{tab}<td>{meeting_type[kw.get("type", "lecture")]}</td>')
-    lines.append(f'{tab}<td>{title} {slide_href} {movie_href}</td>')
+    lines.append(f'{tab}<td>{title} {slide_href} {notebook_href} {movie_href}</td>')
     lines.append(f'{tab}<td>')
     lines.append(f'{tab}  <ul>')
     for url, text in rsrc_links:
