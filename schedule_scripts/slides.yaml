@@ -508,7 +508,10 @@ short-stream-sort-to-mr.pptx:
   num_slides: 10
   summary: Compressed Sketch of Stream-Sort WC Example and Shuffle-Sort
 recap-longer-stream-sort-mr.pptx :
-  num_slides: 12
+  num_slides: 14
+  links:
+  - https://xavi.ivars.me/arxius/manuals/bash/unix-for-poets.pdf:
+      Ken Church (1994). Unix for Poets
   summary: Python Streaming WC
 signal-collect.pptx:
   num_slides: 17

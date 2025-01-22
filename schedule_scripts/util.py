@@ -57,19 +57,20 @@ def show_content(tab, kind, **kw):
                     print(f"{tabbing} - {key:10s}:{kw[key]}")
 
 
-def get_assignment(content, **kw):
+def get_assignments(content, **kw):
+    # get a list of assignment lines (which start with '* ' in lectures file)
     hw_contents = [c for c in content if c.get('kind', '') == 'assignment']
     if not hw_contents:
         return None
     else:
-        val = hw_contents[0]['value']
-        if val.startswith('* '): val = val[len('* '):]
-        return val
+        def unstar(val):
+            return val[len('* '):] if val.startswith('* ') else val 
+        return [unstar(c['value']) for c in hw_contents]
 
 def lecture_with_hw_as_str(**lec_d):
     line1 = lecture_as_str(**lec_d)
-    assignment = get_assignment(**lec_d)
-    return line1 if assignment is None else f'{line1}\n{" "*18}{assignment}'
+    assignments = get_assignments(**lec_d)
+    return line1 if assignments is None else f'{line1}\n{" "*18}{", ".join(assignments)}'
 
 def lecture_as_str(title, summary, printable_date, content, **kw):
     num_slides = sum([d.get('num_slides', 0) for d in content])
@@ -88,24 +89,29 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
     meeting_type = dict(
         recitation='<strong class="label label-red">Recitation</strong>',
         lecture='<strong class="label label-pink">Lecture</strong>')
-    assignment = get_assignment(content=content) or ''
+    assignments = get_assignments(content=content) or ['']
     rsrc_links = [it for c in lec_d['content'] for link in c.get('links',[]) for it in link.items()]
-    def make_href(link, text, text_is_required=False):
+    def make_href(link, text):
         if link:
             return f'<a href="{link}">{text}</a>'
-        elif text_is_required:
-            return text
         else:
             return ''
-    slide_href = make_href(kw.get('slide_link'), '/ Slides')
+    def make_href_for_list_of_texts(link, texts):
+        if not texts:
+            return ''
+        if link:
+            texts = [f'<a href="{link}">{texts[0]}</a>'] + texts[1:]
+        return '<br/> '.join(texts)
+    slide_href = make_href(kw.get('slide_link'), '/ Slides (pdf)')
+    pptx_href = make_href(kw.get('pptx_link'), '/ Slides (pptx)')
     movie_href = make_href(kw.get('movie_link'), '/ Recording')
     notebook_href = make_href(kw.get('notebook_link'), '/ Notebook')
-    hw_href = make_href(kw.get('hw_link'), assignment, text_is_required=True)
+    hw_href = make_href_for_list_of_texts(kw.get('hw_link'), assignments)
     lines = []
     lines.append(f'{" "*20}<tr>')
     lines.append(f'{tab}<td>{printable_date}</td>')
     lines.append(f'{tab}<td>{meeting_type[kw.get("type", "lecture")]}</td>')
-    lines.append(f'{tab}<td>{title} {slide_href} {notebook_href} {movie_href}</td>')
+    lines.append(f'{tab}<td>{title} {slide_href} {pptx_href} {notebook_href} {movie_href}</td>')
     lines.append(f'{tab}<td>')
     lines.append(f'{tab}  <ul>')
     for url, text in rsrc_links:
