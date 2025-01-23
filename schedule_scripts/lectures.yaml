@@ -13,7 +13,7 @@
   summary: 'Stream and sort paradigm, map-reduce'
   slide_link: https://drive.google.com/file/d/1qgMx4UeB13HSoRBEsuDfItJ1PjU2lozz/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1szuxvUdiRBrB3j2WvVW2FEqQohnENbOg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  hw_link: https://github.com/10605/S25_HW1/archive/refs/tags/hw1.tar.gz
+  hw_link: https://github.com/10605/S25_HW1/archive/refs/tags/hw1-v2.zip
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b41db72c-4aa9-4f61-bf0a-b266013d2bc9
   content: #ER and HW1 task
   - cost-of-operations.pptx
@@ -53,6 +53,10 @@
 #  recitations: AWS, probabilities
 - title: Learning as Optimization
   summary: Linear Regression, Logistic Regression
+  content:
+  - learning-as-optimization-short.pptx 
+  - linear-regression.pptx - to fix!
+  - sgd-for-logistic-regression.pptx 
 - title: Parallel Optimization 1
   summary: Parameter Mixing, All-Reduce
   content: 

@@ -614,3 +614,6 @@ xman.pptx:
 zookeeper.pptx:
   num_slides: 2
   summary: distributed coordination services
+linear-regression.pptx:
+  num_slides: 46
+  summary: messy version of ginger's slides
