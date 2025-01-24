@@ -26,7 +26,7 @@
 - title: 'Recitation: PySpark'
   slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
   notebook_link: https://drive.google.com/file/d/1CvXouTClAVLROO0z0B4mGG0CvkmZ3-7Q/view?usp=sharing
-  summary: ''
+  summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
@@ -42,7 +42,9 @@
   - k-means-in-spark-example.pptx
   - matmul-in-spark.pptx
 - title: 'Recitation: Linear Algebra Review'
-  summary: ''
+  summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
+  slide_link: https://drive.google.com/file/d/1U5CfdI1-J1Dh4T9Cu7N2YrZgMQYFAIGY/view?usp=drive_link
+  notebook_link: https://drive.google.com/file/d/1nddT8bfOsq6Ykigs3nGHgd6_86Dul29U/view?usp=sharing
   type: recitation
 
 # weeks 3-4: optimization (4 lectures; 2 recitations; distrib linreg HW)
