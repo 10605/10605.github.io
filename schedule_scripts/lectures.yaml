@@ -26,12 +26,14 @@
 - title: 'Recitation: PySpark'
   slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
   notebook_link: https://drive.google.com/file/d/1CvXouTClAVLROO0z0B4mGG0CvkmZ3-7Q/view?usp=sharing
-  summary: ''
+  summary: 'An introduction to using Databricks and PySpark, with coding demo.'
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d331b160-54e6-45ae-aae0-b2680133fb5b
   type: recitation
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
   slide_link: https://drive.google.com/file/d/1AsxiIdiYa8U11G7nr5_jctoRjddVsc8a/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1LAgfi1ZRRvu2E7e6-FUzuq_zWvMFG48z/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=56e166b2-69d8-4c73-b8d5-b26d013e2b73&start=0.404204
   content: #add motivation for entity resolution
   - recap-longer-stream-sort-mr.pptx
   - parallel-stream-and-sort.pptx
@@ -42,7 +44,10 @@
   - k-means-in-spark-example.pptx
   - matmul-in-spark.pptx
 - title: 'Recitation: Linear Algebra Review'
-  summary: ''
+  summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
+  slide_link: https://drive.google.com/file/d/1U5CfdI1-J1Dh4T9Cu7N2YrZgMQYFAIGY/view?usp=drive_link
+  notebook_link: https://drive.google.com/file/d/1nddT8bfOsq6Ykigs3nGHgd6_86Dul29U/view?usp=sharing
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0d446099-478b-4ae8-b1f2-b26f012ef7a5&start=0.872264
   type: recitation
 
 # weeks 3-4: optimization (4 lectures; 2 recitations; distrib linreg HW)
