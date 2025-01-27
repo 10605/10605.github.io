@@ -1,6 +1,29 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+linreg-kernels.pptx:
+  num_slides: 16
+  summary: kernels linreg, poly and gaussian kernels, exact kernel ridge regression
+ridge-reg-and-basis-vecs.pptx:
+  num_slides: 13
+  summary: ridge regression, basis vectors, background needed for HW2 S25 601
+linreg-to-logreg-sgd.pptx:
+  num_slides: 7
+  summary: derive sgd update for logreg, point out similarity to linreg
+sgd-and-parallel-linear-regression.pptx:
+  num_slides: 11
+  summary: sgd background, derivation for linear regression
+batch-gradient-linear-regression.pptx:
+  num_slides: 14
+  summary: linreg with batch, plus parallel gradient descent
+  links:
+    - https://drive.google.com/file/d/16mnJaGcfhiEXLEcvWywo01Ew4Dpc-coM/view:
+        Previous class lecture  on Sept 9 2024
+    - https://drive.google.com/file/d/16mnJaGcfhiEXLEcvWywo01Ew4Dpc-coM/view:
+        Previous class lecture on Sept 11 2024
+learning-linreg-as-optimization.pptx:
+  num_slides: 19
+  summary: warmup with bernoulli, exact linreg derivation
 matmul-in-spark.pptx:
   num_slides: 4
   summary: matmul in spark

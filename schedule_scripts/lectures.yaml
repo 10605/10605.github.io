@@ -51,15 +51,26 @@
 #  parallel optimization: matrix factorization
 #  parallel optimization abstractions: autodiff 
 #  recitations: AWS, probabilities
-- title: Learning as Optimization
+- title: Learning as Optimization 1
+  slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/17PqIrFvBbQ-wvY8aCKIuz0UW8dBcFo-9/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   summary: Linear Regression, Logistic Regression
   content:
-  - learning-as-optimization-short.pptx 
-  - linear-regression.pptx - to fix!
-  - sgd-for-logistic-regression.pptx 
-- title: Parallel Optimization 1
+  - learning-linreg-as-optimization.pptx 
+  - batch-gradient-linear-regression.pptx
+  - sgd-and-parallel-linear-regression.pptx
+  - k-means-in-spark-example.pptx
+  - linreg-to-logreg-sgd.pptx
+- title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
   content: 
+  - ridge-reg-and-basis-vecs.pptx
+  - linreg-kernels.pptx
+  - hash-kernels.pptx #update with new paper!
+  - parallel-sgd.pptx #maybe, but shorter
+  - mcdonald-structured-parallel-perceptron-paper.pptx # maybe, but shorter
+  - allreduce.pptx # maybe, but shorter
+  # hash kernels
   - '* HW 2 out - Parallel Linear Regression in Spark'
   - '* HW 1 due'
 - title: 'No Recitation'
