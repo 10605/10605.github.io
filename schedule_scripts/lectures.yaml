@@ -56,23 +56,38 @@
 #  parallel optimization: matrix factorization
 #  parallel optimization abstractions: autodiff 
 #  recitations: AWS, probabilities
-- title: Learning as Optimization
+- title: Learning as Optimization 1
+  slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/17PqIrFvBbQ-wvY8aCKIuz0UW8dBcFo-9/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   summary: Linear Regression, Logistic Regression
   content:
-  - learning-as-optimization-short.pptx 
-  - linear-regression.pptx - to fix!
-  - sgd-for-logistic-regression.pptx 
-- title: Parallel Optimization 1
+  - learning-linreg-as-optimization.pptx 
+  - batch-gradient-linear-regression.pptx
+  - sgd-and-parallel-linear-regression.pptx
+  - k-means-in-spark-example.pptx
+  - linreg-to-logreg-sgd.pptx
+- title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
+  slide_link: https://drive.google.com/file/d/1QZBcHQm0872EVQelHAYGFjo2gq_SnoM9/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/1f7BKrPbP8lZwmZhpfnHhHTTjwUtjmUWA/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   content: 
+  - ridge-reg-and-basis-vecs.pptx
+  - linreg-kernels.pptx
+  - sparsity-linreg-and-sgd.pptx
+  - hash-kernels-linreg.pptx
   - '* HW 2 out - Parallel Linear Regression in Spark'
   - '* HW 1 due'
 - title: 'No Recitation'
   type: recitation
   summary: ''
 
-- title: Parallel Optimization 2
+- title: Learning as Optimization 3
   summary: Matrix Factorization and Other Tasks
+  content:
+  - parallel-ml-overview.pptx
+  - allreduce.pptx
+  - matrix-factorization-defined.pptx
+  - matrix-factorization-via-distributed-sgd.pptx
 - title: 'AutoDiff as Optimization Infrastructure'
   summary: ''
 - title: 'Recitation: Probability for LSH '

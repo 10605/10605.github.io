@@ -1,6 +1,46 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+hash-kernels-linreg.pptx:
+  num_slides: 17
+  summary: hash trick, two langford papers
+  links:
+    - https://proceedings.mlr.press/v5/shi09a.html:
+        Hash Kernels, PMLR 2009
+    - https://dl.acm.org/doi/abs/10.1145/1553374.1553516:
+        Feature hashing for large scale multitask learning, ICML 2009
+parallel-ml-overview.pptx:
+  num_slides: 16
+  summary: data/model parallism, some extremes, iterative parameter mixing
+sparsity-linreg-and-sgd.pptx:
+  num_slides: 11
+  summary: sparsity updates for linreg and logistic regression, sparsity and overfitting, no sparse-update tricks
+linreg-kernels.pptx:
+  num_slides: 16
+  summary: kernels linreg, poly and gaussian kernels, exact kernel ridge regression
+  links:
+    - https://drive.google.com/file/d/175P2ftDaS9-diVjO7I8oC57PoGQJKg8B/view:
+        Previous class lecture on Sept 16 2024
+ridge-reg-and-basis-vecs.pptx:
+  num_slides: 13
+  summary: ridge regression, basis vectors, background needed for HW2 S25 601
+linreg-to-logreg-sgd.pptx:
+  num_slides: 7
+  summary: derive sgd update for logreg, point out similarity to linreg
+sgd-and-parallel-linear-regression.pptx:
+  num_slides: 11
+  summary: sgd background, derivation for linear regression
+batch-gradient-linear-regression.pptx:
+  num_slides: 14
+  summary: linreg with batch, plus parallel gradient descent
+  links:
+    - https://drive.google.com/file/d/16mnJaGcfhiEXLEcvWywo01Ew4Dpc-coM/view:
+        Previous class lecture  on Sept 9 2024
+    - https://drive.google.com/file/d/16mnJaGcfhiEXLEcvWywo01Ew4Dpc-coM/view:
+        Previous class lecture on Sept 11 2024
+learning-linreg-as-optimization.pptx:
+  num_slides: 19
+  summary: warmup with bernoulli, exact linreg derivation
 matmul-in-spark.pptx:
   num_slides: 4
   summary: matmul in spark
