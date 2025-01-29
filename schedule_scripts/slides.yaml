@@ -1,6 +1,12 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+parallel-ml-overview.pptx:
+  num_slides: 16
+  summary: data/model parallism, some extremes, iterative parameter mixing
+sparsity-linreg-and-sgd.pptx:
+  num_slides: 11
+  summary: sparsity updates for linreg and logistic regression, sparsity and overfitting, no sparse-update tricks
 linreg-kernels.pptx:
   num_slides: 16
   summary: kernels linreg, poly and gaussian kernels, exact kernel ridge regression
