@@ -74,17 +74,20 @@
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
   - sparsity-linreg-and-sgd.pptx
-  - hash-kernels.pptx #update with new paper!
-  - parallel-ml-overview.pptx
-  - allreduce.pptx # maybe, but shorter
+  - hash-kernels-linreg.pptx
   - '* HW 2 out - Parallel Linear Regression in Spark'
   - '* HW 1 due'
 - title: 'No Recitation'
   type: recitation
   summary: ''
 
-- title: Learning and Optimization 3
+- title: Learning as Optimization 3
   summary: Matrix Factorization and Other Tasks
+  content:
+  - parallel-ml-overview.pptx
+  - allreduce.pptx
+  - matrix-factorization-defined.pptx
+  - matrix-factorization-via-distributed-sgd.pptx
 - title: 'AutoDiff as Optimization Infrastructure'
   summary: ''
 - title: 'Recitation: Probability for LSH '
