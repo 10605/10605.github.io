@@ -301,7 +301,7 @@ if __name__ == '__main__':
         k = 0
         for lec_d in lecture_data:
             lmon, lday, _ = lec_d['numeric_date']
-            if lmon >= mon and lday >= day:
+            if lmon > mon or (lmon==mon and lday >= day):
                 show_lecture(**lec_d)
                 k += 1
                 if k >= args.n:

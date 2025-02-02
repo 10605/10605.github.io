@@ -1,6 +1,21 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+param-server-short.pptx:
+  num_slides: 6
+  summary: param server main idea
+short-matrix-factorization-via-distributed-sgd.pptx:
+  num_slides: 14
+  summary: second part of Gemulla's paper
+k-means-recap.pptx:
+  num_slides: 6
+  summary: quick recap of k-means algorithm
+autodiff-writeup.pptx:
+  num_slides: 29
+  summary: detailed walkthru of my code
+sparse-regularized-sgd-reveal.pptx:
+  num_slides: 6
+  summary: answers questions raised in sparsity-linreg-and-sgd.pptx
 hash-kernels-linreg.pptx:
   num_slides: 17
   summary: hash trick, two langford papers
@@ -12,6 +27,13 @@ hash-kernels-linreg.pptx:
 parallel-ml-overview.pptx:
   num_slides: 16
   summary: data/model parallism, some extremes, iterative parameter mixing
+  links:
+    - https://proceedings.neurips.cc/paper_files/paper/2011/hash/218a0aefd1d1a4be65601cc6ddc1520e-Abstract.html:
+        Hogwild, A Lock-Free Approach to Parallelizing Stochastic Gradient Descent, Rech et al, 2011
+    - https://fasttext.cc/:
+        FastText classification library
+    - https://arxiv.org/abs/1607.01759:
+        Bag of Tricks for Efficient Text Classification, Joulin et al 2016
 sparsity-linreg-and-sgd.pptx:
   num_slides: 11
   summary: sparsity updates for linreg and logistic regression, sparsity and overfitting, no sparse-update tricks
@@ -78,6 +100,12 @@ adagrad.pptx:
 alias-fenwick-tree-sampling-lda.pptx:
   num_slides: 10
   summary: '!lda mimno''s sparse LDA'
+tree-allreduce.pptx:
+  num_slides:
+  summary: allreduce walkthru
+  links:
+  - https://www.jmlr.org/papers/volume15/agarwal14a/agarwal14a.pdf:
+      Agarwal et al, A Reliable Effective Terascale Linear Learning System
 allreduce.pptx:
   num_slides: 14
   summary: All-reduce
@@ -363,7 +391,7 @@ matrix-backprop.pptx:
   num_slides: 14
   summary: ' bprop with square loss and logistic units | BackProp following Nielson'
 matrix-factorization-defined.pptx:
-  num_slides: 20
+  num_slides: 19
   summary: abstract definition, collab filtering, image modeling, modeling text |
     Matrix factorization
 matrix-factorization-via-distributed-sgd-short.pptx:
@@ -379,7 +407,7 @@ matrix-factorization-via-sgd.pptx:
   summary: from gemulla's slide deck | Matrix factorization with SGD
 matrix-factorization-vs-clustering.pptx:
   num_slides: 2
-  summary: ''
+  summary: compare k-means and MF
 mcdonald-structured-parallel-perceptron-paper.pptx:
   num_slides: 20
   summary: including analysis +ipm | Iterative parameter mixing paper
@@ -409,8 +437,8 @@ naive-bayes.pptx:
   summary: stupid version w/ all attributes independent, streaming naive bayes algorithm
     +nbayes | streaming Naive Bayes
 online-lsh.pptx:
-  num_slides: 14
-  summary: ' | Online LSH'
+  num_slides: 19
+  summary: 'online lsh for word embedding like things, pooling | Online LSH'
 other-work-with-phrases.pptx:
   num_slides: 10
   summary: turney semantic orientation, downey long NE finding !phrases | Other work
