@@ -50,6 +50,9 @@ parallel-ml-overview.pptx:
 sparsity-linreg-and-sgd.pptx:
   num_slides: 11
   summary: sparsity updates for linreg and logistic regression, sparsity and overfitting, no sparse-update tricks
+  links: 
+  - https://www.cs.cmu.edu/~wcohen/10-605/notes/sgd-notes.pdf:
+      "William's notes on SGD for Logistic Regression and Sparsity"
 linreg-kernels.pptx:
   num_slides: 16
   summary: kernels linreg, poly and gaussian kernels, exact kernel ridge regression
