@@ -96,7 +96,7 @@
   - allreduce.pptx
   - matrix-factorization-defined.pptx
   - k-means-recap.pptx
-  - matrix-factorization-vs-clustering.pptx  #add PCA, SVD???
+  - matrix-factorization-vs-clustering.pptx
   - short-matrix-factorization-via-distributed-sgd.pptx
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
   summary: Bloom Filters and Count-Min -Sketchs
@@ -106,7 +106,7 @@
   - uses-of-bloom-filters.pptx
   - count-min-sketch.pptx
   - uses-of-count-min-sketch.pptx
-  - mad-with-countmin-sketch.pptx
+  - faithful-kb-queries.pptx 
 - title: 'Recitation: Probability for LSH '
   type: recitation
   summary: ''
@@ -118,14 +118,6 @@
   - online-lsh.pptx
   - '* HW 2 due'
   - '* HW 3 out - Locality-Sensitive Hashing'
-- title: 'Parallel Optimization with GPUs 1'
-  summary: ''
-  content:
-  - gpu-intro.pptx
-  - gpu-programming-intro.pptx
-  - vectorize-logreg.pptx
-- title: 'Recitation: AWS'
-  type: recitation
 - title: 'AutoDiff as Optimization Infrastructure'
   summary: ''
   content: #needs to be compressed
@@ -133,6 +125,17 @@
   - autodiff-systems.pptx # add more on pytorch
   - autodiff-details.pptx
   - autodiff-writeup.pptx 
+- title: 'Recitation: AWS'
+  type: recitation
+- title: 'Parallel Optimization with GPUs 1'
+  summary: ''
+  content:
+  - gpu-intro.pptx
+  - gpu-programming-intro.pptx
+  - vectorize-logreg.pptx
+- title: 'Parallel Optimization with GPUs 2'
+  summary: ''
+  content: []
 - title: 'Recitation: Practice Exam'
   type: recitation
   summary: ''
