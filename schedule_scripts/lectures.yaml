@@ -102,6 +102,7 @@
   summary: Bloom Filters and Count-Min -Sketchs
   pptx_link: https://docs.google.com/presentation/d/1mUz9O44Lhbb5O6j56Bm6J5iiMzXJquCb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hZBKcOcuFpdHGv4Mik7VtaDlnt4748tE/view?usp=drive_link
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0e484642-c9a7-45da-9fc1-b27b013a1332
   content:
   - hash-trick-to-bloom-filter.pptx
   - bloom-filter.pptx
