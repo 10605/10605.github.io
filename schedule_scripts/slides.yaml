@@ -167,6 +167,8 @@ bloom-filter.pptx:
   links:
     - https://www.cs.cmu.edu/~wcohen/10-605/notes/randomized-algs.pdf:
         "William's Notes on Randomized Algorithms"
+    - https://github.com/10605/S25SampleCode/blob/main/bloomfilter.py:
+        "Demo Bloom filter implementation in Python"
 chinchilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
@@ -212,6 +214,9 @@ count-min-recap.pptx:
 count-min-sketch.pptx:
   num_slides: 8
   summary: +countmin | The countmin sketch
+  links:
+    - https://drive.google.com/file/d/17OyCk5jMM1Kfjt3MuQDm00DJWJoBCuxi/view:
+        Previous course lecture, 9/25/2024
 deep-learners-have-unstable-gradients.pptx:
   num_slides: 10
   summary: '!deep | Exploding and vanishing gradients'
