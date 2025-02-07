@@ -12,7 +12,7 @@ LECTURE_DAY_OF_WEEK: 0
 START_DATE: [1, 13]
 YEAR: 2025
 # for generating HTML version of schedule
-BASEDIR: /Users/wcohen/Documents/code/10605.github.io
+BASEDIR: D:\0-cmu\10605\10605.github.io
 SCHEDULE_FILE: schedule.html
 HEADER: schedule_scripts/schedule_head.html
 FOOTER: schedule_scripts/schedule_foot.html
