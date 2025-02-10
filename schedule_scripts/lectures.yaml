@@ -118,14 +118,18 @@
 
 - title: Randomized Algorithms 2 - Locality Sensitive Hashing
   summary: Locality-Sensitive Hashing
+  pptx_link: https://docs.google.com/presentation/d/14jh-3VGtyozntMn5wfm62FZ2_tr2JeXJ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1pK_1WwK4FXvO8q_tkUqz4nyEUvRMt17g/view?usp=drive_link
   content: #need to add more on vector search, and relation to k-means
   - lsh.pptx
   - online-lsh.pptx
+  - lsh-knn-pq.pptx
   - '* HW 2 due'
   - '* HW 3 out - Locality-Sensitive Hashing'
 - title: 'AutoDiff as Optimization Infrastructure'
   summary: ''
   content: #needs to be compressed
+  - short-faithful-kb-queries.pptx 
   - autodiff.pptx
   - autodiff-systems.pptx # add more on pytorch
   - autodiff-details.pptx

@@ -1,6 +1,19 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+bloom-filter-countmin-recap.pptx:
+  num_slides: 9
+  summary: review of math for both
+lsh-knn-pq.pptx:
+  num_slides: 12
+  summary: LSH, multi-hash indices, k-NN indices, PQ indices
+  links:
+    - https://arxiv.org/pdf/1307.2982:
+        Fast Exact Search in Hamming Space with Multi-Index Hashing, 2014
+    - https://arxiv.org/abs/1908.10396:
+        Accelerating Large-Scale Inference with Anisotropic Vector Quantization, 2020
+    - https://arxiv.org/pdf/2401.08281:
+        The FAISS library, 2024
 faithful-kb-queries.pptx:
   num_slides: 30
   summary: EMNLP paper with Haitian
@@ -169,6 +182,8 @@ bloom-filter.pptx:
         "William's Notes on Randomized Algorithms"
     - https://github.com/10605/S25SampleCode/blob/main/bloomfilter.py:
         "Demo Bloom filter implementation in Python"
+    - https://openreview.net/pdf?id=S1hsDCNFx:
+        Short and Deep: Sketching and Neural Networks, Daniely et al
 chinchilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
@@ -694,6 +709,9 @@ uses-of-bloom-filters.pptx:
 uses-of-count-min-sketch.pptx:
   num_slides: 4
   summary: '!countmin'
+  links:
+    - https://aclanthology.org/D12-1100.pdf:
+        Sketch Algorithms for Estimating Point Queries in NLP, 2012
 vectorize-logreg.pptx:
   num_slides: 29
   summary: ' | Vectorization'
