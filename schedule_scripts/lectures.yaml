@@ -120,6 +120,7 @@
   summary: Locality-Sensitive Hashing
   pptx_link: https://docs.google.com/presentation/d/14jh-3VGtyozntMn5wfm62FZ2_tr2JeXJ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1pK_1WwK4FXvO8q_tkUqz4nyEUvRMt17g/view?usp=drive_link
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=942bba4c-77e8-4c71-a72e-b280013d0ead
   content: #need to add more on vector search, and relation to k-means
   - lsh.pptx
   - online-lsh.pptx
