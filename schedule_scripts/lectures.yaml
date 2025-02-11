@@ -121,12 +121,13 @@
   pptx_link: https://docs.google.com/presentation/d/14jh-3VGtyozntMn5wfm62FZ2_tr2JeXJ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1pK_1WwK4FXvO8q_tkUqz4nyEUvRMt17g/view?usp=drive_link
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=942bba4c-77e8-4c71-a72e-b280013d0ead
+  hw_link: https://github.com/10605/S25_HW3/archive/refs/tags/hw3.zip
   content: #need to add more on vector search, and relation to k-means
   - lsh.pptx
   - online-lsh.pptx
   - lsh-knn-pq.pptx
-  - '* HW 2 due'
   - '* HW 3 out - Locality-Sensitive Hashing'
+  - '* HW 2 due'
 - title: 'AutoDiff as Optimization Infrastructure'
   summary: ''
   content: #needs to be compressed
