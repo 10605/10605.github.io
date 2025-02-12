@@ -126,14 +126,13 @@
   - lsh-knn-pq.pptx
   - '* HW 2 due'
   - '* HW 3 out - Locality-Sensitive Hashing'
-- title: 'AutoDiff as Optimization Infrastructure'
+- title: 'Countmin Application / AutoDiff'
+  slide_link: https://drive.google.com/file/d/1gGgJj26yHCZjzzZlqtJu-GGHVnrvysgt/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1lzTrAilDrabR73TBV2ioQZNDSwegT30a/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   summary: ''
-  content: #needs to be compressed
+  content:
   - short-faithful-kb-queries.pptx 
   - autodiff.pptx
-  - autodiff-systems.pptx # add more on pytorch
-  - autodiff-details.pptx
-  - autodiff-writeup.pptx 
 - title: 'Recitation: AWS'
   type: recitation
 - title: 'Parallel Optimization with GPUs 1'

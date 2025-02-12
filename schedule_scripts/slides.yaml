@@ -14,9 +14,9 @@ lsh-knn-pq.pptx:
         Accelerating Large-Scale Inference with Anisotropic Vector Quantization, 2020
     - https://arxiv.org/pdf/2401.08281:
         The FAISS library, 2024
-faithful-kb-queries.pptx:
-  num_slides: 30
-  summary: EMNLP paper with Haitian
+short-faithful-kb-queries.pptx:
+  num_slides: 37
+  summary: EmQL paper with Haitian
   links:
     -  https://proceedings.neurips.cc/paper/2020/hash/fe74074593f21197b7b7be3c08678616-Abstract.html:
          Faithful KB Embeddings - Sun et al, 2020
@@ -145,8 +145,13 @@ autodiff-systems.pptx:
   num_slides: 5
   summary: Theano and some other examples !autodiff | Some systems using autodiff
 autodiff.pptx:
-  num_slides: 14
+  num_slides: 35
   summary: ' +autodiff | Reverse-mode differentiation (autodiff)'
+  links:
+    - https://justindomke.wordpress.com/2009/03/24/a-simple-explanation-of-reverse-mode-automatic-differentiation/:
+       A simple explanation of reverse-mode automatic differentiation, Justin Domke
+    - https://github.com/10605/S25SampleCode/blob/main/ad.py:
+       Sample code for autodiff with Wengert lists
 autodiff.txt:
   num_slides: 0
   summary: writeup of autodiff assignment | Symbolic reverse-mode differentiation
