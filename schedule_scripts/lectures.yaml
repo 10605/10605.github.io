@@ -130,12 +130,10 @@
 - title: 'Countmin Application / AutoDiff'
   slide_link: https://drive.google.com/file/d/1gGgJj26yHCZjzzZlqtJu-GGHVnrvysgt/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1lzTrAilDrabR73TBV2ioQZNDSwegT30a/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-- title: 'Applications of Countmin / AutoDiff'
   summary: ''
   content:
   - short-faithful-kb-queries.pptx 
   - autodiff.pptx
-  - '* HW 2 due'
 - title: 'Recitation: AWS'
   type: recitation
 - title: 'Parallel Optimization with GPUs 1'
