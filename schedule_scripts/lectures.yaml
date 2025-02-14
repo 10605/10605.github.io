@@ -137,6 +137,7 @@
   - autodiff.pptx
 - title: 'Recitation: AWS'
   type: recitation
+  pptx_link: https://docs.google.com/presentation/d/11hTKXffZhdyMhDlTV6DrYBroX1mwt-q4/edit?usp=sharing&ouid=111761201318109814132&rtpof=true&sd=true
 - title: 'Parallel Optimization with GPUs 1'
   summary: ''
   content:
