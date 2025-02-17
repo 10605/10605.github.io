@@ -1,6 +1,20 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+dl_finetuning.pptx:
+  num_slides: 20
+  summary: Ginger's slides on PEFT, including additions about BERT
+distributed_dl.pptx:
+  num_slides: 57
+  summary: Ginger's slides on GPU-related optimization, includes ring all-reduce
+gpu-programming-short.pptx:
+  num_slides: 40 #newer, not really shorter
+  summary: cuda !gpu | GPUS, intro to minibatch SGD, Cuda/Pytorch examples
+  links:
+    - https://www.youtube.com/watch?v=-P28LKWTzrI: Mythbusters explain GPUs
+    - https://ourworldindata.org/grapher/gpu-price-performance: GFlops / dollar up to 2022
+    - https://github.com/10605/S25SampleCode/blob/main/gpu.py: Benchmarking GPUs in PyTorch on a Mac
+    - https://drive.google.com/file/d/1-qTFQw7rW1rIsGf8kN4-pxv_edbfFfmp/view?usp=sharing: Fall 2024 10-605 lecture on ML hardware
 bloom-filter-countmin-recap.pptx:
   num_slides: 9
   summary: review of math for both

@@ -1,3 +1,5 @@
+########## Week 1/13 ##########
+
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
   slide_link: https://drive.google.com/file/d/1bOg-_CoG7hWjoZ0vlRQx_4dUaJUOB-OJ/view?usp=sharing
@@ -9,6 +11,7 @@
   - chinchilla-scaling.pptx
   - complexity.pptx #also cost of operations
   - short-stream-and-sort.pptx
+
 - title: 'Map-Reduce and Spark'
   summary: 'Stream and sort paradigm, map-reduce'
   slide_link: https://drive.google.com/file/d/1qgMx4UeB13HSoRBEsuDfItJ1PjU2lozz/view?usp=drive_link
@@ -23,12 +26,16 @@
   - map-reduce-abstractions.pptx #can simplify - (w, {y: n(w,y)}) join (w, docid) 
   - spark-overview.pptx
   - '* HW 1 out - Entity Resolution and Naive Bayes in Spark'
+
 - title: 'Recitation: PySpark'
   slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
   notebook_link: https://drive.google.com/file/d/1CvXouTClAVLROO0z0B4mGG0CvkmZ3-7Q/view?usp=sharing
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d331b160-54e6-45ae-aae0-b2680133fb5b
   type: recitation
+
+########## Week 1/20 - 1/20 is MLK day ##########
+
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
   slide_link: https://drive.google.com/file/d/1AsxiIdiYa8U11G7nr5_jctoRjddVsc8a/view?usp=drive_link
@@ -43,6 +50,7 @@
   - iterative-pagerank-in-spark.pptx
   - k-means-in-spark-example.pptx
   - matmul-in-spark.pptx
+
 - title: 'Recitation: Linear Algebra Review'
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   slide_link: https://drive.google.com/file/d/1U5CfdI1-J1Dh4T9Cu7N2YrZgMQYFAIGY/view?usp=drive_link
@@ -50,12 +58,8 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0d446099-478b-4ae8-b1f2-b26f012ef7a5&start=0.872264
   type: recitation
 
-# weeks 3-4: optimization (4 lectures; 2 recitations; distrib linreg HW)
-#  learning as optimization: linear reg, pca, and logreg
-#  parallel optimization: param mixing, all-reduce
-#  parallel optimization: matrix factorization
-#  parallel optimization abstractions: autodiff 
-#  recitations: AWS, probabilities
+########## Week 1/27 ##########
+
 - title: Learning as Optimization 1
   slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/17PqIrFvBbQ-wvY8aCKIuz0UW8dBcFo-9/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -67,6 +71,7 @@
   - sgd-and-parallel-linear-regression.pptx
   - k-means-in-spark-example.pptx
   - linreg-to-logreg-sgd.pptx
+
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
   slide_link: https://drive.google.com/file/d/1QZBcHQm0872EVQelHAYGFjo2gq_SnoM9/view?usp=sharing
@@ -80,9 +85,12 @@
   - hash-kernels-linreg.pptx
   - '* HW 2 out - Parallel Linear Regression in Spark'
   - '* HW 1 due'
+
 - title: 'No Recitation'
   type: recitation
   summary: ''
+
+########## Week 2/3 ##########
 
 - title: Learning as Optimization 3
   pptx_link: https://docs.google.com/presentation/d/1dpzFa115Ypsl4RTxEAXJgK3Q1gQvFPZJ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -98,6 +106,7 @@
   - k-means-recap.pptx
   - matrix-factorization-vs-clustering.pptx
   - short-matrix-factorization-via-distributed-sgd.pptx
+
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
   summary: Bloom Filters and Count-Min -Sketchs
   pptx_link: https://docs.google.com/presentation/d/1mUz9O44Lhbb5O6j56Bm6J5iiMzXJquCb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -110,11 +119,14 @@
   - count-min-sketch.pptx
   - uses-of-count-min-sketch.pptx
   - faithful-kb-queries.pptx 
+
 - title: 'Recitation: Probability for LSH '
   type: recitation
   pptx_link: https://docs.google.com/presentation/d/1WPkbtCihIjPxqUmM_0ptvzci9a8UXMk0/edit?usp=drive_link&ouid=111761201318109814132&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=81ac9d29-ab6f-412c-9a07-b27d012d2fd6
   summary: ''
+
+########## Week 2/10 ##########
 
 - title: Randomized Algorithms 2 - Locality Sensitive Hashing
   summary: Locality-Sensitive Hashing
@@ -127,6 +139,7 @@
   - online-lsh.pptx
   - lsh-knn-pq.pptx
   - '* HW 3 out - Locality-Sensitive Hashing'
+
 - title: 'Countmin Application / AutoDiff'
   slide_link: https://drive.google.com/file/d/1gGgJj26yHCZjzzZlqtJu-GGHVnrvysgt/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1lzTrAilDrabR73TBV2ioQZNDSwegT30a/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -135,66 +148,86 @@
   content:
   - short-faithful-kb-queries.pptx 
   - autodiff.pptx
+
 - title: 'Recitation: AWS'
-  type: recitation
   pptx_link: https://docs.google.com/presentation/d/11hTKXffZhdyMhDlTV6DrYBroX1mwt-q4/edit?usp=sharing&ouid=111761201318109814132&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f357a04-c7fa-4d43-b840-b28401338256
+  type: recitation
+
+########## Week 2/17 ##########
+
 - title: 'Parallel Optimization with GPUs 1'
+  pptx_link: https://docs.google.com/presentation/d/1MmBHOqE856MeM9yAb054_bjsemY8Wfeq/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1qKOiJTf2QO7G2LKsGI6JNTBmS5oT5R1N/view?usp=drive_link
   summary: ''
   content:
   - gpu-intro.pptx
-  - gpu-programming-intro.pptx
-  - vectorize-logreg.pptx
+  - gpu-programming-short.pptx
+
 - title: 'Parallel Optimization with GPUs 2'
   summary: ''
-  content: []
+  content: 
+  - distributed_dl.pptx
+  - dl_finetuning.pptx
+
 - title: 'Recitation: Practice Exam'
   type: recitation
   summary: ''
   content: 
   - '* HW 3 due'
 
-# week 7: review and midterm
+########## Week 2/24 ##########
+
 - title: Exam Review and QA
+
 - title: Exam 1
+
+########## Week 3/3 ##########
 
 # week 8: spring break
 # week 9-10: deep learning architectures (LoRA HW)
-#  lstms, transformers and matmul
-#  adapters, LoRA and related methods
-#  more on autodiff and distributed computation
-#  more on distributed optimization
+
+########## Week 3/10 ##########
+
 - title: 'Deep Learning: Background and Architectures'
-  summary: 'History, expressiveness, instability'
+  summary: 'Transformers, instability, ...'
   content:
   - '* HW: LoRA'
+
 - title: 'Deep Learning: Architectures and Param Efficient Tuning'
-  summary: 'Transformers, Adapters and LoRA'
+  summary: 'Adapters and LoRA'
+
 - title: 'Recitation: PyTorch'
   type: recitation
 
+########## Week 3/17 ##########
+
 - title: 'Deep Learning: Scaling Transformers 1'
+  summary: 'Large-context transformers'  #tentatively Greg Kochanski
+  content: []
+
+- title: 'Deep Learning: Scaling Transformers 2'
   summary: 'Key-value caches and memory'
   content: []
-- title: 'Deep Learning: Scaling Transformers 1'
-  summary: 'Large-context transformers'
-  content: []
+
 - title: Recitation TBD
   summary: 
   content: []
 
-# weeks 12-13: scaling deep learning: long context models, KV caching; BTM  (GPT-2 HW + miniproject)
+########## Week 3/24 ##########
 
-- title: Hyperparameter Search and Scaling Laws
-  summary: 
-  content: []
+- title: Guest lecture - Haitian Sun,  Apple
+  summary: Foundation model development in Real Life 
   content:
   - '* HW: GPT-2 Training and Miniproject released'
-- title: Distributed Training Methods
-  summary: Branch-Train-Merge
+
+- title: Hyperparameter Search and Scaling Laws
+  summary: guest lecture 
+
 - title: Recitation TBD
   type: recitation
-#
+
+
 - title: Contrastive learning 1
   summary: training for retrieval and similarities
   content: 
