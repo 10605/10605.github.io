@@ -101,6 +101,10 @@ k-means-in-spark-example.pptx:
 iterative-pagerank-in-spark.pptx:
   num_slides: 7
   summary: slow and fast implementations
+  links:
+  - https://github.com/10605/S25SampleCode/blob/main/pagerank_slow.py: Code for slow implementation of PageRank
+  - https://github.com/10605/S25SampleCode/blob/main/pagerank_opt1.py: Faster implementation of PageRank
+  - https://github.com/10605/S25SampleCode/blob/main/pagerank_opt2.py: Fastest implementation of PageRank (v2)
 comparing-corpora.pptx:
   num_slides: 11
   summary: phraseness pipeline
@@ -152,6 +156,8 @@ autodiff.pptx:
        A simple explanation of reverse-mode automatic differentiation, Justin Domke
     - https://github.com/10605/S25SampleCode/blob/main/ad.py:
        Sample code for autodiff with Wengert lists
+    - https://github.com/10605/S25SampleCode/blob/main/checkad.py:
+        Sample code for checking autodiff implementation with PyTorch
 autodiff.txt:
   num_slides: 0
   summary: writeup of autodiff assignment | Symbolic reverse-mode differentiation
@@ -173,6 +179,8 @@ bigdata-history.pptx:
       Norvig, Pereira, Halevy (2009). The Unreasonable Effectiveness of Data
   - https://www.nowpublishers.com/article/Details/MAL-006:
       Yoshua Bengio (2009). Learning Deep Architectures for AI
+  - https://github.com/10605/S25SampleCode/blob/main/ngram_query.py:
+      Sample code from lecture for doing ngram queries
 bloom-filter-countmin-review.pptx:
   num_slides: 14
   summary: +bloom | Review of Bloom filters
@@ -189,6 +197,8 @@ bloom-filter.pptx:
         "Demo Bloom filter implementation in Python"
     - https://openreview.net/pdf?id=S1hsDCNFx:
         Short and Deep: Sketching and Neural Networks, Daniely et al
+    - https://github.com/10605/S25SampleCode/blob/main/bloomfilter.py: 
+        Code from lecture for bloom filter implementation
 chinchilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
@@ -541,7 +551,7 @@ phrase-finding-in-pig-example.pptx:
     join, store, cross, udf, !phrases | Phrase-finding in Pig'
 phrase-finding-paper.pptx:
   num_slides: 19
-  summary: +phrases | Phrase finding
+  summary: +phrases | 
 pic-paper.pptx:
   num_slides: 22
   summary: lots of results - todo, add some stuff on later math/analysis !spectral~average
@@ -657,6 +667,10 @@ spark-overview.pptx:
 spark-details.pptx:
   num_slides: 11
   summary: More about working with Spark
+  links:
+  - https://github.com/10605/S25SampleCode/blob/main/Lecture_3_demo_code.ipynb: Demo code from lecture (all in one file)
+  - https://github.com/10605/S25SampleCode/blob/main/redvsblue.py: Code from lecture for doing wordcounts in Spark
+  - https://github.com/10605/S25SampleCode/blob/main/phrases.py: Code for phrase-finding using Spark
 sparse-averaged-perceptron.pptx:
   num_slides: 8
   summary: ''
