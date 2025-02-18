@@ -15,6 +15,7 @@ gpu-programming-short.pptx:
     - https://ourworldindata.org/grapher/gpu-price-performance: GFlops / dollar up to 2022
     - https://github.com/10605/S25SampleCode/blob/main/gpu.py: Benchmarking GPUs in PyTorch on a Mac
     - https://drive.google.com/file/d/1-qTFQw7rW1rIsGf8kN4-pxv_edbfFfmp/view?usp=sharing: Fall 2024 10-605 lecture on ML hardware
+    - https://github.com/10605/S25SampleCode/blob/main/gpu.py: Code for comparing GPU vs CPU times in PyTorch
 bloom-filter-countmin-recap.pptx:
   num_slides: 9
   summary: review of math for both
