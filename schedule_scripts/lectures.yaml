@@ -201,7 +201,7 @@
 - title: 'Deep Learning: Architectures and Param Efficient Tuning'
   summary: 'Adapters and LoRA'
 
-- title: 'Recitation: PyTorch'
+- title: 'Recitation: PyTorch / HW4'
   type: recitation
 
 ########## Week 3/17 ##########
@@ -214,7 +214,8 @@
   summary: 'Key-value caches and memory'
   content: []
 
-- title: Recitation TBD
+- title: Recitation - HW5
+  type: recitation
   summary: 
   content: []
 
@@ -228,7 +229,7 @@
 - title: Hyperparameter Search and Scaling Laws
   summary: guest lecture 
 
-- title: Recitation TBD
+- title: Recitation - Miniproject
   type: recitation
 
 
@@ -244,14 +245,14 @@
   - '* Previous HW due'
 - title: Parameter Servers
   content: []
-- title: Recitation TBD
+- title: No Recitation
   type: recitation
 
 # weeks 14-15: other topics
 
 - title: Scalable Graph Processing 1
 - title: Scalable Graph Processing 2
-- title: Recitation TBD
+- title: Recitation - Practice Exam
   type: recitation
 
 # week 16: review and final
