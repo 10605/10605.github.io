@@ -167,6 +167,8 @@
 
 - title: 'Parallel Optimization with GPUs 2'
   summary: ''
+  pptx_link: https://docs.google.com/presentation/d/17cuukfDjIdamj1Z5KD97I2whyrV6NhGr/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1Q3qIGg3-o3ixJOAROkRP8Y7I1itjUceA/view?usp=sharing
   content: 
   - distributed_dl.pptx
   - dl_finetuning.pptx
