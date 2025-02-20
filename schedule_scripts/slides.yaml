@@ -4,9 +4,15 @@
 dl_finetuning.pptx:
   num_slides: 20
   summary: Ginger's slides on PEFT, including additions about BERT
+  links:
+    - https://drive.google.com/file/d/1-qTFQw7rW1rIsGf8kN4-pxv_edbfFfmp/view?usp=sharing:
+       Previous class lecture on Oct 21 2024
 distributed_dl.pptx:
   num_slides: 57
   summary: Ginger's slides on GPU-related optimization, includes ring all-reduce
+  links:
+    - https://drive.google.com/file/d/1-MLmngnoJAAgjVm4CpCLXcjm6WQsjFkU/view?usp=sharing: 
+       Previous class lecture on Nov 4 2024
 gpu-programming-short.pptx:
   num_slides: 40 #newer, not really shorter
   summary: cuda !gpu | GPUS, intro to minibatch SGD, Cuda/Pytorch examples

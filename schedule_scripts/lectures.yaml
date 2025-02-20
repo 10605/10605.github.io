@@ -206,11 +206,11 @@
 
 ########## Week 3/17 ##########
 
-- title: 'Deep Learning: Scaling Transformers 1'
-  summary: 'Large-context transformers'  #tentatively Greg Kochanski
+- title: Guest lecture - Greg Kochanski, Google Deep Mind
+  summary: Efficient hyperparameter search
   content: []
 
-- title: 'Deep Learning: Scaling Transformers 2'
+- title: 'Deep Learning: Scaling Transformers'
   summary: 'Key-value caches and memory'
   content: []
 
@@ -226,27 +226,34 @@
   content:
   - '* HW: GPT-2 Training and Miniproject released'
 
-- title: Hyperparameter Search and Scaling Laws
-  summary: guest lecture 
+- title: 'Scaling Transformers / Hyperparameter Search and Scaling Laws'
+  summary: More depth on scaling LLMs
 
 - title: Recitation - Miniproject
   type: recitation
 
 
-- title: Contrastive learning 1
+########## Week 3/31 ##########
+
+- title: Contrastive learning
   summary: training for retrieval and similarities
   content: 
   - lsh-vs-deep-hash.pptx #deephash paper is old, see survey https://dl.acm.org/doi/full/10.1145/3532624
 - title: Retrieval Augmented Generation 1
 # carnival
 
+########## Week 4/7 ##########
+
 - title: Retrieval Augmented Generation 2
   content:
   - '* Previous HW due'
+
 - title: Parameter Servers
   content: []
 - title: No Recitation
   type: recitation
+
+########## Week 4/14 ##########
 
 # weeks 14-15: other topics
 
@@ -254,6 +261,8 @@
 - title: Scalable Graph Processing 2
 - title: Recitation - Practice Exam
   type: recitation
+
+########## Week 4/21 ##########
 
 # week 16: review and final
 - title: Exam Review and QA
