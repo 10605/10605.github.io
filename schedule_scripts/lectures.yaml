@@ -199,6 +199,7 @@
   summary: 'Transformers, instability, ...'
   slide_link: https://drive.google.com/file/d/1VmrX01Df_kQW_DsLBKgD-p2M2smPxEip/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1lAIJpCfVIaiJfJfPhtdBD0qyvo2mXiuV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0e48ad15-eab1-4e3f-bd5e-b29c012e84b2
   content: #idea history of DL
     - evolution-of-transformers.pptx 
     - '* HW: LoRA'
