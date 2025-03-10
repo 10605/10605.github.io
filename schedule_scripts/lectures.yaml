@@ -186,56 +186,21 @@
   pptx_link: https://docs.google.com/presentation/d/1i-1_bm6h5vA3vM4ABe1hc8RCr5FcRAfu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/10LXo5Hk74je5fJCuxM7cdpbuodjd4zUb/view?usp=sharing
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=5bef3251-2ddf-424a-9603-b28e013569cd
-  
 
 - title: Exam 1
 
 ########## Week 3/3 ##########
 
-# week 8: spring break
-# week 9-10: deep learning architectures (LoRA HW)
+# spring break
 
 ########## Week 3/10 ##########
 
-# annotated transformer: https://nlp.seas.harvard.edu/annotated-transformer/
-#   input x, output (= shifted input)
-#   output layer: projection to embedding space, similarity, softmax
-#   K identical layers of Transformers
-# another good source: https://e2eml.school/transformers.html
-# GPT2 paper https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf
-# TODO: BPE slides
-# TODO: Transformer slides - maybe 15 or so
-#   tokenization: for text, etc
-#   onehot->embedding as matmul
-#   position encoding as addition
-#   "de-embedding": embedding -> one-hot as matmul, argmax OR softmax and cross-entropy in training
-#   no sequential model as in RNNs - just repeatedly (1) attend to embeddings in previous layer (KV)
-#     (2) aggregate and (3) project to a new 'value' W ... RASP formulation ...
-#   except do this multiple ways - multiple 'heads' that read the 'tape' of previous encodings
-#   to get back to the same size, push that result through a MLP
-#   masked attention 
-#   skip connections
-#   layer normalization
-#   encoder-decoder transformers and cross-attention 
-
-# attention history:
-#  early hinton https://proceedings.neurips.cc/paper/2010/file/677e09724f0e2df9b6c000b75b5da10d-Paper.pdf
-#  seq2seq https://proceedings.neurips.cc/paper/2014/hash/a14ac55a4f27472c5d894ec1c3c743d2-Abstract.html
-#  encoder-decoder bottleneck
-#  early NMT https://3dvar.com/Bahdanau2014Neural.pdf - need to go back to EM and alignment/translation
-#  example of influence: gated-attention: https://arxiv.org/pdf/1606.01549
-
 - title: 'Deep Learning: Background and Architectures'
   summary: 'Transformers, instability, ...'
+  slide_link: https://drive.google.com/file/d/1VmrX01Df_kQW_DsLBKgD-p2M2smPxEip/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1lAIJpCfVIaiJfJfPhtdBD0qyvo2mXiuV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content: #idea history of DL
-    - deep-learning-intro-and-history.pptx # history
-    - deep-networks-are-expressive.pptx # expressiveness
-    - deep-learners-have-unstable-gradients.pptx # issues, saturation, unstable gradients
-    - modern-deep-network-tricks.pptx # note modern is 2010 or so
-    - cnn.pptx # shorten this a lot - really want an overview, AND add resnet idea
-    - rnn.pptx # shorten this a lot - note this is char-level 
-    - rnn-apps.pptx # mentions attention - need to discuss this more
-    - word2vec+glove.pptx # PMI matrix - https://proceedings.neurips.cc/paper/2014/file/feab05aa91085b7a8012516bc3533958-Paper.pdf
+    - evolution-of-transformers.pptx 
     - '* HW: LoRA'
 
 - title: 'Deep Learning: Architectures and Param Efficient Tuning'

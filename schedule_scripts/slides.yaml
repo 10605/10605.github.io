@@ -1,6 +1,32 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+transformer.pptx:
+  num_slides: 33
+  summary: walkthru of transformers 
+  links:
+    - https://nlp.seas.harvard.edu/annotated-transformer/: The Annotated Transformer
+    - https://github.com/rasbt/LLMs-from-scratch: LLMs from scratch book on Github
+    - https://e2eml.school/transformers.html: A bit like the annotated transformer but with more depth in some areas
+    - https://dl.acm.org/doi/abs/10.5555/2627435.2670313: Dropout paper, Srinivasta et al JMLR 2014
+    - https://arxiv.org/abs/1607.06450: LayerNorm paper,  Ba et al, 2016.
+evolution-of-transformers.pptx:
+  num_slides: 97
+  summary: history of DL
+  links:
+    - http://neuralnetworksanddeeplearning.com/: online book on deep networks
+    - https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf: 
+       Understanding the difficulty of training deep feedforward neural networks, Glorot and Bengio, AIStats 2010
+    - https://deeplizard.com/resource/pavq7noze2: Convolution demo
+    - https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html:
+       Deep Residual Learning for Image Recognition, He et al, CVPR 2016
+    - https://arxiv.org/abs/1301.3781: 
+       Efficient Estimation of Word Representations in Vector Space, Mikolov et al, 2013
+    - https://projector.tensorflow.org/: Visualize Word2Vec
+    - http://karpathy.github.io/2015/05/21/rnn-effectiveness/: Karpathy blog post on LSTMs
+    - https://wtf-deeplearning.github.io/machine-translation/1409.0473.pdf:
+        NMT by jointly learning to align and translate, 2016
+
 dl_finetuning.pptx:
   num_slides: 20
   summary: Ginger's slides on PEFT, including additions about BERT
