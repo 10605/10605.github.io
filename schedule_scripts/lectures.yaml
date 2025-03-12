@@ -207,6 +207,7 @@
 - title: 'Deep Learning: Transformers'
   slide_link: https://drive.google.com/file/d/1GGEG8EbYQG3Uojj_fYYlDPNe1TnAuZnA/view?usp=drive_link 
   pptx_link: https://docs.google.com/presentation/d/12f_y8WIEk4t-LEpAZETZRsq_8F-rSMLO/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7c087404-7e1c-45b9-8516-b29e012ef7e3
   summary: 'Annotated transformer'
   content:
     - evolution-of-transformers-summary.pptx
