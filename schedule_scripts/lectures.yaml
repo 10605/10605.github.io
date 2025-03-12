@@ -204,8 +204,16 @@
     - evolution-of-transformers.pptx 
     - '* HW: LoRA'
 
-- title: 'Deep Learning: Architectures and Param Efficient Tuning'
-  summary: 'Adapters and LoRA'
+- title: 'Deep Learning: Transformers'
+  slide_link: https://drive.google.com/file/d/1GGEG8EbYQG3Uojj_fYYlDPNe1TnAuZnA/view?usp=drive_link 
+  pptx_link: https://docs.google.com/presentation/d/12f_y8WIEk4t-LEpAZETZRsq_8F-rSMLO/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  summary: 'Annotated transformer'
+  content:
+    - evolution-of-transformers-summary.pptx
+    - transformer.pptx
+    - lora-recap.pptx
+    - transformer-discussion.pptx
+    - transformer-bpe.pptx
 
 - title: 'Recitation: PyTorch / HW4'
   type: recitation

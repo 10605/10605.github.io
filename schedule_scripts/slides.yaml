@@ -1,6 +1,12 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+lora-recap.pptx:
+  num_slides: 9
+  summary: recap of lora, how it's use for transformers/BERT
+transformer-bpe.pptx:
+  num_slides: 21
+  summary: BPE, wordpieces, ViT tokenization
 transformer.pptx:
   num_slides: 33
   summary: walkthru of transformers 
@@ -10,6 +16,12 @@ transformer.pptx:
     - https://e2eml.school/transformers.html: A bit like the annotated transformer but with more depth in some areas
     - https://dl.acm.org/doi/abs/10.5555/2627435.2670313: Dropout paper, Srinivasta et al JMLR 2014
     - https://arxiv.org/abs/1607.06450: LayerNorm paper,  Ba et al, 2016.
+evolution-of-transformers-summary.pptx:
+  num_slides: 11
+  summary: quick overview of key points
+transformer-discussion.pptx:
+  num_slides: 8
+  summary: some high-level observations
 evolution-of-transformers.pptx:
   num_slides: 97
   summary: history of DL
