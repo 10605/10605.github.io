@@ -223,9 +223,14 @@
 
 ########## Week 3/17 ##########
 
-- title: Guest lecture - Greg Kochanski, Google Deep Mind
+- title: Guest lecture - Greg Kochanski, Google Deep Mind, and then Transformer Tokenization
   summary: Efficient hyperparameter search
-  content: []
+  slide_link: https://drive.google.com/file/d/1-I7qs5J7MWHcHps_2DshnLVXKCRSynBA/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1U9RWSd5m5jOrA-OThEbwZ_RvXNM-sxXp/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  content:
+   - vizier.pdf
+   - transformer-bpe.pptx
+   - transformer-kv-intro.pptx 
 
 - title: 'Deep Learning: Scaling Transformers'
   summary: 'Key-value caches and memory'

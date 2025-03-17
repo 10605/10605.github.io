@@ -1,12 +1,29 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+vizier.pdf:
+  num_slides: 49
+  summary: Vizier talk from Greg
+  links:
+  - https://drive.google.com/file/d/1T4s3CPBHazGhGFZpBcLa6HtnvS7PRcMT/view?usp=drive_link: PDF of Greg's slide deck  
+hyperparam.pptx:
+  num_slides: 35
+  summary: overview of grid, adaptive, random search, hyperband
 lora-recap.pptx:
   num_slides: 9
   summary: recap of lora, how it's use for transformers/BERT
+transformer-kv-intro.pptx:
+  num_slides: 10
+  summary: why key-value caching works
 transformer-bpe.pptx:
   num_slides: 21
   summary: BPE, wordpieces, ViT tokenization
+  links:
+  - https://arxiv.org/pdf/1508.07909: Neural Machine Translation of Rare Words with Subword Units, Sennrich et al 2016
+  - https://huggingface.co/docs/transformers/tokenizer_summary: Huggingface's guide to BPE and similar
+  - https://arxiv.org/pdf/2010.11929/1000: 
+     'An Image is Worth 16x16 Words: Transformers for Image Recognition, ICLR 2021'
+  - https://arxiv.org/abs/2210.02928: MuRag Multimodal Retrieval-Augmented Generation ..., Chen et al 2022
 transformer.pptx:
   num_slides: 33
   summary: walkthru of transformers 
