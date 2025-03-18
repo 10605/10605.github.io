@@ -230,11 +230,16 @@
   content:
    - vizier.pdf
    - transformer-bpe.pptx
-   - transformer-kv-intro.pptx 
 
-- title: 'Deep Learning: Scaling Transformers'
-  summary: 'Key-value caches and memory'
-  content: []
+- title: Hyperparameter parameter search and other topics
+  summary: 'Hyperband, Vision tokens, Quantization, Distillation, Key-Value Intro'
+  slide_link: https://drive.google.com/file/d/1R_x3otF59Dt3XvTU4-XqlszpU3Qg9RQo/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1B8Ai5FAX5_l8Dfz0BE3lkB3xh4zlVHzm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  content:
+   - transformer-bpe-short.pptx
+   - hyperparam.pptx 
+   - quantize-distill.pptx
+   - transformer-kv-intro.pptx 
 
 - title: Recitation - HW5
   type: recitation
