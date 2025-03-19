@@ -218,8 +218,8 @@
 
 - title: 'Recitation: PyTorch / HW4'
   type: recitation
-  notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a8ca568d-8444-49f4-ad82-b2a0011f6345
+  notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
   summary: 'Introduction to using PyTorch with a coding demo'
 
 ########## Week 3/17 ##########
@@ -239,9 +239,9 @@
   pptx_link: https://docs.google.com/presentation/d/1B8Ai5FAX5_l8Dfz0BE3lkB3xh4zlVHzm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
    - transformer-bpe-short.pptx
+   - transformer-kv-intro.pptx 
    - hyperparam.pptx 
    - quantize-distill.pptx
-   - transformer-kv-intro.pptx 
 
 - title: Recitation - HW5
   type: recitation

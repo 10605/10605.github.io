@@ -4,6 +4,14 @@
 quantize-distill.pptx:
   num_slides: 17
   summary: quantization and distillation
+  links:
+   - https://arxiv.org/pdf/1503.02531: Distilling the Knowledge in a Neural Network, Hinton, Vinyals, Dean, 2015
+   - https://dl.acm.org/doi/pdf/10.1145/1150402.1150464: Model Compression, Bucila et al, 2006
+   - https://sebastianraschka.com/blog/2023/llm-mixed-precision-copy.html: Raschka blog post, 2023
+   - https://leimao.github.io/article/Neural-Networks-Quantization/: Lei Mao blog post, 2023
+   - https://proceedings.neurips.cc/paper_files/paper/2022/file/c3ba4962c05c49636d4c6206a97e9c8a-Paper-Conference.pdf: LLM.int8(), Dettmers et al 2022
+   - https://openreview.net/forum?id=i8tGb1ab1j: Dettmers and Zettlemoyer 2023
+   - https://proceedings.neurips.cc/paper_files/paper/2024/file/091166620a04a289c555f411d8899049-Paper-Conference.pdf: PV-Tuning, Malinovskii et al, 2024
 transformer-bpe-short.pptx:
   num_slides: 11
   summary: vision transformers and murag
@@ -15,12 +23,19 @@ vizier.pdf:
 hyperparam.pptx:
   num_slides: 35
   summary: overview of grid, adaptive, random search, hyperband
+  links:
+   - https://arxiv.org/abs/2203.15556:
+       Hoffman et al (2022). Training Compute-Optimal LLMs
+   - https://openreview.net/forum?id=xI71dsS3o4: (Mis)fitting - a study of scaling laws, ICLR 2025
+   - https://www.jmlr.org/papers/v18/16-558.html: Hyperband - A Novel Bandit Based Approach to Hyperparameter Optimization, JMLR 2018
 lora-recap.pptx:
   num_slides: 9
   summary: recap of lora, how it's use for transformers/BERT
 transformer-kv-intro.pptx:
   num_slides: 10
   summary: why key-value caching works
+  links:
+    - https://medium.com/@joaolages/kv-caching-explained-276520203249: João Lages blog post
 transformer-bpe.pptx:
   num_slides: 21
   summary: BPE, wordpieces, ViT tokenization
