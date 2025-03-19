@@ -219,6 +219,7 @@
 - title: 'Recitation: PyTorch / HW4'
   type: recitation
   notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a8ca568d-8444-49f4-ad82-b2a0011f6345
   summary: 'Introduction to using PyTorch with a coding demo'
 
 ########## Week 3/17 ##########
@@ -227,6 +228,7 @@
   summary: Efficient hyperparameter search
   slide_link: https://drive.google.com/file/d/1-I7qs5J7MWHcHps_2DshnLVXKCRSynBA/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1U9RWSd5m5jOrA-OThEbwZ_RvXNM-sxXp/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9f2d6eb7-c369-4f5e-85e2-b2a3012d9f0d
   content:
    - vizier.pdf
    - transformer-bpe.pptx
