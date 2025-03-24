@@ -253,13 +253,19 @@
 
 ########## Week 3/24 ##########
 
-- title: Guest lecture - Haitian Sun,  Apple
-  summary: Foundation model development in Real Life 
+- title: Quantization and Pruning for LLMs
+  summary: Quantization, Pruning
   content:
-  - '* HW: GPT-2 Training and Miniproject released'
+   - quantize.pptx
+   - cats-and-sentiment.pptx 
+   - pruning.pptx
+   - '* HW: GPT-2 Training and Miniproject released'
 
-- title: 'Scaling Transformers / Hyperparameter Search and Scaling Laws'
-  summary: More depth on scaling LLMs
+- title: KV-Caching for LLMs
+  summary: overview, H2O, StreamLLM
+  content:
+  - kv-cache-transformer-1.pptx
+  - kv-cache-transformer-2.pptx
 
 - title: Recitation - Miniproject
   type: recitation

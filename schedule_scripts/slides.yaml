@@ -1,6 +1,38 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+kv-cache-transformer-2.pptx:
+  num_slides: 18
+  summary: H2O and StreamLLM #to add SnapKV
+kv-cache-transformer-1.pptx:
+  num_slides: 25 # some long animations
+  summary: motivating and explaining kv-caches
+cats-and-sentiment.pptx:
+  num_slides: 19
+  summary: cat neuron and face detector neuron from Ng, sentiment neuron from OpenAI
+  links:
+    - https://static.googleusercontent.com/media/research.google.com/en//archive/unsupervised_icml2012.pdf: The cat neuron paper
+    - https://arxiv.org/pdf/1704.01444: Learning to Generate Reviews and Discovering Sentiment, Radford et al 2017
+pruning.pptx:
+  num_slides: 42
+  summary: summary of a number of pruning papers
+  links:
+    - https://arxiv.org/pdf/1710.01878: To prune or not to prune ..., Zhu and Gupta 2017
+    - https://arxiv.org/abs/2306.11695: A simple and effective approach ... (the Wanda paper), Sun et al
+    - https://arxiv.org/abs/2104.08378: Accelerating Sparse Deep Neural Networks, Mishra et al 2021
+    - https://proceedings.neurips.cc/paper_files/paper/2023/file/44956951349095f74492a5471128a7e0-Paper-Conference.pdf: LLM Pruner, 2023
+    - https://openreview.net/forum?id=18VGxuOdpu: Shortened Llama, ... Kim et al 2024
+    - https://arxiv.org/pdf/2310.06694: Sheared LLama ... , Xia et al, 2024
+    - https://arxiv.org/pdf/1510.00149: Han et al 2016
+quantize.pptx:
+  num_slides: 17
+  summary: quantization and distillation
+  links:
+   - https://sebastianraschka.com/blog/2023/llm-mixed-precision-copy.html: Raschka blog post, 2023
+   - https://leimao.github.io/article/Neural-Networks-Quantization/: Lei Mao blog post, 2023
+   - https://proceedings.neurips.cc/paper_files/paper/2022/file/c3ba4962c05c49636d4c6206a97e9c8a-Paper-Conference.pdf: LLM.int8(), Dettmers et al 2022
+   - https://openreview.net/forum?id=i8tGb1ab1j: Dettmers and Zettlemoyer 2023
+   - https://proceedings.neurips.cc/paper_files/paper/2024/file/091166620a04a289c555f411d8899049-Paper-Conference.pdf: PV-Tuning, Malinovskii et al, 2024
 quantize-distill.pptx:
   num_slides: 17
   summary: quantization and distillation
