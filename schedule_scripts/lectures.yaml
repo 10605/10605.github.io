@@ -256,6 +256,7 @@
 - title: Quantization and Pruning for LLMs
   slide_link: https://drive.google.com/file/d/10UsEvCOqcQsIYHIoYPCTlnJG6WnUHD55/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1anzsrc1b6mQmfYKyU3Pmi0RC0rfnMIhu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4924e2f4-3909-4b6c-9189-b2aa012ce3b7
   summary: Quantization, Pruning
   content:
    - quantize.pptx
