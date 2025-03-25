@@ -1,9 +1,28 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+structured-pruning.pptx:
+  num_slides: 20
+  summary: summary of a number of pruning papers
+  links:
+    - https://proceedings.neurips.cc/paper_files/paper/2023/file/44956951349095f74492a5471128a7e0-Paper-Conference.pdf: LLM Pruner, 2023
+    - https://openreview.net/forum?id=18VGxuOdpu: Shortened Llama, ... Kim et al 2024
+    - https://arxiv.org/pdf/2310.06694: Sheared LLama ... , Xia et al, 2024
+    - https://arxiv.org/pdf/1510.00149: Han et al 2016
 kv-cache-transformer-2.pptx:
-  num_slides: 18
+  num_slides: 36
   summary: H2O and StreamLLM #to add SnapKV
+  links:
+    - https://arxiv.org/abs/2004.08483: "ETC: Encoding Long and Structured Inputs in Transformers, Ainsle et al 2020"
+    - https://proceedings.neurips.cc/paper/2020/hash/c8512d142a2d849725f31a9a7a361ab9-Abstract.html:
+        Big Bird: Transformers for Longer Sequences, Zaheer et al, 2020
+    - https://arxiv.org/abs/2001.04451: "Reformer: the Efficient Transformer, Kitaev et al, 2020"
+    - https://proceedings.neurips.cc/paper_files/paper/2023/hash/6ceefa7b15572587b78ecfcebb2827f8-Abstract-Conference.html:
+        "H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models, Zhang et al 2023"
+    - https://arxiv.org/pdf/2309.17453: Efficient streaming LMs with attention sinks, Xiao et al 2024
+    - https://proceedings.neurips.cc/paper_files/paper/2024/hash/28ab418242603e0f7323e54185d19bde-Abstract-Conference.html:
+        "SnapKV: LLM Knows What You are Looking for Before Generation, Li et al 2024"
+
 kv-cache-transformer-1.pptx:
   num_slides: 25 # some long animations
   summary: motivating and explaining kv-caches

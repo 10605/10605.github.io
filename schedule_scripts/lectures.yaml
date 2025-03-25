@@ -267,6 +267,7 @@
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
   content:
+  - structured-pruning.pptx
   - kv-cache-transformer-1.pptx
   - kv-cache-transformer-2.pptx
 
