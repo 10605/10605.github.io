@@ -268,6 +268,7 @@
   summary: overview, H2O, StreamLLM
   slide_link: https://drive.google.com/file/d/1n_z0DaBo9KS-syaiPa7Sbc7hgIYsLBDi/view?usp=sharing 
   pptx_link: https://docs.google.com/presentation/d/1Ues6oYaAK6jCSEfRqwmnUhAnFOXTTKIb/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8da29bf6-2b84-46b1-b927-b2ac012c2ee1
   content:
   - structured-pruning.pptx
   - kv-cache-transformer-1.pptx
