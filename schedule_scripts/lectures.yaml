@@ -280,16 +280,23 @@
 
 ########## Week 3/31 ##########
 
+- title: Guest lecture - Haitian Sun, Apple, and then Model Compression Recap
+  content: 
+   - kv-cache-transformer-2-short.pptx
+   - model-compression-recap.pptx
+
 - title: Contrastive learning
   summary: training for retrieval and similarities
   content: 
   - lsh-vs-deep-hash.pptx #deephash paper is old, see survey https://dl.acm.org/doi/full/10.1145/3532624
-- title: Retrieval Augmented Generation 1
-# carnival
+
+
+# carnival - no recitation
+
 
 ########## Week 4/7 ##########
 
-- title: Retrieval Augmented Generation 2
+- title: Retrieval Augmented Generation
   content:
   - '* Previous HW due'
 
