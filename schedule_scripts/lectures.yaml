@@ -291,19 +291,18 @@
 - title: Contrastive learning
   summary: training for retrieval and similarities
   content: 
-  - lsh-vs-deep-hash.pptx #deephash paper is old, see survey https://dl.acm.org/doi/full/10.1145/3532624
-
+  - contrastive.pptx
 
 # carnival - no recitation
 
 
 ########## Week 4/7 ##########
 
-- title: Retrieval Augmented Generation
+- title: Retrieval Augmented Generation 1
   content:
   - '* Previous HW due'
 
-- title: Parameter Servers
+- title: Retrieval Augmented Generation 2
   content: []
 - title: No Recitation
   type: recitation
@@ -312,8 +311,8 @@
 
 # weeks 14-15: other topics
 
-- title: Scalable Graph Processing 1
-- title: Scalable Graph Processing 2
+- title: Embarrasingly Parallel Training
+- title: Scalable Evaluation
 - title: Recitation - Practice Exam
   type: recitation
 

@@ -1,6 +1,9 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+contrastive.pptx:
+  num_slides: 43
+  summary: overview of contrastive learning, DPR, contriever, a few comments about ColBERT and EntityQuestions
 model-compression-recap.pptx:
   num_slides: 35
   summary: looking back at pruning, quantization, and kv-caching as "learning"
