@@ -4,9 +4,15 @@
 rag-overview.pptx:
   num_slides: 8
   summary: RAG pipeline at high-level
-contrastive-for-retrieval.pptx:
-  num_slides: 43
+contrastive-overview.pptx:
+  num_slides: 18
   summary: overview of contrastive learning, DPR, contriever, a few comments about ColBERT and EntityQuestions
+contrastive-for-retrieval.pptx:
+  num_slides: 23
+  summary: DPR, contriever, a few comments about ColBERT and EntityQuestions
+rag-complications.pptx:
+  num_slides: 0
+  summary: knowledge conflicts, quadratic cost
 model-compression-recap.pptx:
   num_slides: 35
   summary: looking back at pruning, quantization, and kv-caching as "learning"

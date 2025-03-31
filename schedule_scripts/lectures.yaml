@@ -286,13 +286,11 @@
 - title: Guest lecture - Haitian Sun, Apple
   slide_link: https://drive.google.com/file/d/1sx5nGou-Ir9m_ynHG5qAoyCw_tB1uV3t/view?usp=sharing
 
-- title: KV Caching and Model Compression Recap, Contrastive learning and retrieval
-  summary: training for retrieval and similarities
+- title: KV Caching and Model Compression Recap
+  summary: recap of KV caching, SnapKV and FastGen, big recap of model compression
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
-   - rag-overview.pptx
-   - contrastive-for-retrieval.pptx
 
 # carnival - no recitation
 
@@ -301,7 +299,10 @@
 
 - title: Retrieval Augmented Generation 1
   content:
-  - '* Previous HW due'
+    - rag-overview.pptx
+    - contrastive-overview.pptx
+    - contrastive-for-retrieval.pptx
+    - '* Previous HW due'
 
 - title: Retrieval Augmented Generation 2
   content: []
