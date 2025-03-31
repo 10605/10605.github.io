@@ -284,14 +284,17 @@
 ########## Week 3/31 ##########
 
 - title: Guest lecture - Haitian Sun, Apple, and then Model Compression Recap
+  slide_link: https://drive.google.com/file/d/1FePZqmxh_WMkeEpz222yhF7DH-OZHlgV/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/17rzS6_XDgN6bCY3pH14qvuyRmDw2dMxZ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
 
-- title: Contrastive learning
+- title: Contrastive learning and retrieval
   summary: training for retrieval and similarities
   content: 
-  - contrastive.pptx
+  - rag-overview.pptx
+  - contrastive-for-retrieval.pptx
 
 # carnival - no recitation
 
