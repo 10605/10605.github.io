@@ -1,6 +1,9 @@
 # database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+rag-conflicts-hyde.pptx:
+  num_slides: 17
+  summary: HyDe and Sameer paper on knowledge conflicts
 rag-overview.pptx:
   num_slides: 8
   summary: RAG pipeline at high-level
@@ -8,7 +11,7 @@ contrastive-overview.pptx:
   num_slides: 18
   summary: overview of contrastive learning, DPR, contriever, a few comments about ColBERT and EntityQuestions
 contrastive-for-retrieval.pptx:
-  num_slides: 23
+  num_slides: 30
   summary: DPR, contriever, a few comments about ColBERT and EntityQuestions
 rag-complications.pptx:
   num_slides: 0
