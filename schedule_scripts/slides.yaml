@@ -1,21 +1,50 @@
-# database of info on slide decks for individual "modules"
+# Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
-rag-conflicts-hyde.pptx:
-  num_slides: 17
-  summary: HyDe and Sameer paper on knowledge conflicts
+rag-genllm.pptx:
+  num_slides: 9
+  summary: echo embeddings and promptEOL
+  links:
+   - https://aclanthology.org/2023.acl-long.99.pdf: HyDE paper
+   - https://arxiv.org/pdf/2304.14233: LameR paperx
+   - https://openreview.net/pdf?id=Ahlrf2HGJR: Echo embedding paper
+   - https://arxiv.org/pdf/2307.16645: PromptEOL paper
+fido-etc.pptx:
+  num_slides: 24
+  summary: fido, lumen, glimmer
+rag-fid.pptx:
+  num_slides: 16
+  summary: og rag paper, FiD paper
+rag-conflicts.pptx:
+  num_slides: 11
+  summary: Sameer paper on knowledge conflicts
 rag-overview.pptx:
   num_slides: 8
   summary: RAG pipeline at high-level
+  links:
+    - https://dl.acm.org/doi/abs/10.1145/3078971.3078983: DeepHash paper, 2017
 contrastive-overview.pptx:
   num_slides: 18
   summary: overview of contrastive learning, DPR, contriever, a few comments about ColBERT and EntityQuestions
-contrastive-for-retrieval.pptx:
-  num_slides: 30
-  summary: DPR, contriever, a few comments about ColBERT and EntityQuestions
-rag-complications.pptx:
-  num_slides: 0
-  summary: knowledge conflicts, quadratic cost
+contrastive-dpr.pptx:
+  num_slides: 7
+  summary: DPR
+  links:
+    - https://arxiv.org/pdf/2004.04906v2/1000: DPR paper, 2020
+contrastive-tricks.pptx:
+  num_slides: 20
+  summary: mega-batching, hard negatives, in-batch negatives, queues, moco
+  links:
+   - https://arxiv.org/pdf/2104.08253: Condenser paper
+   - https://arxiv.org/pdf/2109.08535: EntityQuestions paper
+   - https://dl.acm.org/doi/abs/10.1145/3397271.3401075: ColBERT paper
+   - https://openaccess.thecvf.com/content_CVPR_2020/papers/He_Momentum_Contrast_for_Unsupervised_Visual_Representation_Learning_CVPR_2020_paper.pdf: MoCo paper
+contriever.pptx:
+  num_slides: 11
+  summary: contriever
+  links:
+   - https://arxiv.org/pdf/2112.09118: Contreiver paper
+   - https://openaccess.thecvf.com/content_CVPR_2020/papers/He_Momentum_Contrast_for_Unsupervised_Visual_Representation_Learning_CVPR_2020_paper.pdf: MoCo paper
 model-compression-recap.pptx:
   num_slides: 35
   summary: looking back at pruning, quantization, and kv-caching as "learning"
@@ -443,6 +472,8 @@ deep-sketches.pptx:
 deephash:
   num_slides: 17
   summary: '!lsh | DeepHash'
+  links:
+    - https://dl.acm.org/doi/abs/10.1145/3078971.3078983: DeepHash paper, 2017
 delta-trick-for-vp.pptx:
   num_slides: 3
   summary: ' | The "delta trick"'

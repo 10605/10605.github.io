@@ -301,14 +301,22 @@
 ########## Week 4/7 ##########
 
 - title: Retrieval Augmented Generation 1
+  slide_link: https://drive.google.com/file/d/1JyaHkbT1S7ydyauFPY_n45T5471nmAJO/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/1x7cP66jiH5TPo7icUesTq1060k0CTh4E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - rag-overview.pptx
     - contrastive-overview.pptx
-    - contrastive-for-retrieval.pptx
+    - contrastive-dpr.pptx
+    - contrastive-tricks.pptx
+    - contriever.pptx
+    - rag-genllm.pptx
     - '* Previous HW due'
 
 - title: Retrieval Augmented Generation 2
-  content: []
+  content:  #add LLM-based fid-like things, PCW and sparse-RAG, add wrap-up
+    - rag-fid.pptx
+    - fido-etc.pptx
+    - rag-conflicts.pptx
 - title: No Recitation
   type: recitation
 
