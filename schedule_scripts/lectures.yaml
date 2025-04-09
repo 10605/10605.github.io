@@ -290,6 +290,7 @@
 - title: KV Caching and Model Compression Recap
   slide_link: https://drive.google.com/file/d/1iEXkHXKFP_EoSZc4gXCDCcSGZVSKkT8w/view?usp=drive_link 
   pptx_link: https://docs.google.com/presentation/d/1SmnhfUe4B7qgr3xCoOewKc_smq_8kj_q/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d05b69bc-924c-481b-89fb-b2b301285322
   summary: recap of KV caching, SnapKV and FastGen, big recap of model compression
   content: 
    - kv-cache-transformer-2-short.pptx
@@ -303,6 +304,7 @@
 - title: Retrieval Augmented Generation 1
   slide_link: https://drive.google.com/file/d/1JyaHkbT1S7ydyauFPY_n45T5471nmAJO/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1x7cP66jiH5TPo7icUesTq1060k0CTh4E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=456d04d2-3ca5-4d91-9145-b2b8012d8277
   content:
     - rag-overview.pptx
     - contrastive-overview.pptx
@@ -314,6 +316,7 @@
 - title: Retrieval Augmented Generation 2
   slide_link: https://drive.google.com/file/d/1PyLM9ZLeOf0LyOhIftsu4HyeZiuC3dTZ/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1cvQqBM01nFacwPDrEINGYsi3jSiXjXX3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=06e5d8e1-2408-486c-815f-b2ba012ec337
   content:
     - rag-recap.pptx  # add: scale out to access more knowledge
     - rag-genllm.pptx # rag-conflicts.pptx, was 11 slides
