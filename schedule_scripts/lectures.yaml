@@ -309,14 +309,16 @@
     - contrastive-dpr.pptx
     - contrastive-tricks.pptx
     - contriever.pptx
-    - rag-genllm.pptx
     - '* Previous HW due'
 
 - title: Retrieval Augmented Generation 2
-  content:  #add LLM-based fid-like things, PCW and sparse-RAG, add wrap-up
+  content:
+    - rag-recap.pptx  # add: scale out to access more knowledge
+    - rag-genllm.pptx # rag-conflicts.pptx, was 11 slides
     - rag-fid.pptx
-    - fido-etc.pptx
-    - rag-conflicts.pptx
+    - fido-etc.pptx # add math/parallelism on this, pointer to flashattention and flexattention
+    - fid-genllm.pptx #add flash attention? or wait till next week?
+
 - title: No Recitation
   type: recitation
 
