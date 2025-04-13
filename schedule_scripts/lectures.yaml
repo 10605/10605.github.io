@@ -333,8 +333,17 @@
 
 # weeks 14-15: other topics
 
-- title: Embarrasingly Parallel Training
+- title: RAG3 and Embarrasingly Parallel Training
+  content:
+   - rag-fid-recap.pptx
+   - fid-genllm.pptx
+   - branch-train-merge.pptx
+   - task-vectors.pptx
+
 - title: Scalable Evaluation
+  content:
+    - ppi.pptx
+
 - title: Recitation - Practice Exam
   type: recitation
 
