@@ -318,11 +318,11 @@
   pptx_link: https://docs.google.com/presentation/d/1cvQqBM01nFacwPDrEINGYsi3jSiXjXX3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=06e5d8e1-2408-486c-815f-b2ba012ec337
   content:
-    - rag-recap.pptx  # add: scale out to access more knowledge
-    - rag-genllm.pptx # rag-conflicts.pptx, was 11 slides
+    - rag-recap.pptx
+    - rag-genllm.pptx
     - rag-fid.pptx
-    - fido-etc.pptx # add math/parallelism on this, pointer to flashattention and flexattention
-    - fid-genllm.pptx #add flash attention? or wait till next week?
+    - fido-etc.pptx
+    - fid-genllm.pptx
 
 
 
