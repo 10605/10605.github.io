@@ -335,6 +335,8 @@
 
 - title: RAG3 and Embarrasingly Parallel Training
   content:
+  slide_link: https://drive.google.com/file/d/1TSK_PXvtQQHbftTBwwUPjyF-DzaZetMy/view?usp=sharing
+  pptx_link: https://docs.google.com/presentation/d/1VffbGozb5MhSABq2rwrfhUpfnLqjAJcW/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
    - rag-fid-recap.pptx
    - fid-genllm.pptx
    - branch-train-merge.pptx
