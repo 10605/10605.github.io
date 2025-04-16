@@ -341,7 +341,9 @@
    - fid-genllm.pptx
    - branch-train-merge.pptx
 
-- title: Scalable Evaluation
+- title: Embarassingly Parallel Train 2 and Scalable Evaluation
+  slide_link: https://drive.google.com/file/d/1qQSIQWkp1o4wW7frtfHn3K8RPqSNGtyy/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1OSrKdMRZu-mdP5e6yfCOKWwj4LGLK-XW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - task-vectors.pptx
     - ppi.pptx
