@@ -336,6 +336,7 @@
 - title: RAG3 and Embarrasingly Parallel Training
   slide_link: https://drive.google.com/file/d/1TSK_PXvtQQHbftTBwwUPjyF-DzaZetMy/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1VffbGozb5MhSABq2rwrfhUpfnLqjAJcW/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=27f7ac45-534b-4406-b054-b2bf012ea193
   content:
    - rag-fid-recap.pptx
    - fid-genllm.pptx
@@ -344,6 +345,7 @@
 - title: Embarassingly Parallel Train 2 and Scalable Evaluation
   slide_link: https://drive.google.com/file/d/1qQSIQWkp1o4wW7frtfHn3K8RPqSNGtyy/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1OSrKdMRZu-mdP5e6yfCOKWwj4LGLK-XW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=19f302f4-88b7-4b55-a513-b2c1012a27ab
   content:
     - task-vectors.pptx
     - ppi.pptx
@@ -357,6 +359,7 @@
 - title: Exam Review and QA
   slide_link: https://drive.google.com/file/d/1jAhksI8TZa1-M7iw5rzep4_HY-LbniYX/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/17HbHQVS-WWrLsSFDftQ2-TRSr112z8O-/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2d64793f-4517-47c9-bed6-b2c601237891
   content:
   - '* Miniproject due'
 - title: Exam 2
