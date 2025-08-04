@@ -1,4 +1,4 @@
-########## 
+########## Overview, Map/Reduce, Spark
 
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
@@ -34,7 +34,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d331b160-54e6-45ae-aae0-b2680133fb5b
   type: recitation
 
-########## 
+########## Map/Reduce Workflows
 
 ## Labor day
 
@@ -60,7 +60,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0d446099-478b-4ae8-b1f2-b26f012ef7a5&start=0.872264
   type: recitation
 
-########## 
+########## Learning as (Parallel) Optimization
 
 - title: Learning as Optimization 1
   slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
@@ -92,7 +92,7 @@
   type: recitation
   summary: ''
 
-########## 
+########## Optimization, Randomized Algs
 
 - title: Learning as Optimization 3
   pptx_link: https://docs.google.com/presentation/d/1dpzFa115Ypsl4RTxEAXJgK3Q1gQvFPZJ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -128,7 +128,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=81ac9d29-ab6f-412c-9a07-b27d012d2fd6
   summary: ''
 
-########## Week 
+########## Randomized Algs, Autodiff
 
 - title: Randomized Algorithms 2 - Locality Sensitive Hashing
   summary: Locality-Sensitive Hashing
@@ -156,7 +156,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f357a04-c7fa-4d43-b840-b28401338256
   type: recitation
 
-########## Week 
+########## Week GPUs1
 
 - title: 'Parallel Optimization with GPUs 1'
   pptx_link: https://docs.google.com/presentation/d/1MmBHOqE856MeM9yAb054_bjsemY8Wfeq/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -182,7 +182,7 @@
   content: 
   - '* HW 3 due'
 
-########## Week 
+########## Exam 1
 
 - title: Exam Review and QA
   pptx_link: https://docs.google.com/presentation/d/1i-1_bm6h5vA3vM4ABe1hc8RCr5FcRAfu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -197,9 +197,7 @@
   summary: ''
 
 
-
-
-########## Week 
+########## Transformers
 
 - title: 'Deep Learning: Background and Architectures'
   summary: 'Transformers, instability, ...'
@@ -228,7 +226,7 @@
   notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
   summary: 'Introduction to using PyTorch with a coding demo'
 
-########## Week 3/17 ##########
+########## Hyperparams, KV, BPE
 
 - title: Guest lecture - Greg Kochanski, Google Deep Mind, and then Transformer Tokenization
   summary: Efficient hyperparameter search
@@ -257,7 +255,7 @@
   summary: 
   content: []
 
-########## Week 3/24 ##########
+########## Caching and Pruning
 
 - title: Quantization and Pruning for LLMs
   slide_link: https://drive.google.com/file/d/10UsEvCOqcQsIYHIoYPCTlnJG6WnUHD55/view?usp=drive_link
@@ -287,7 +285,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa657fcf-f529-436e-bfd2-b2ae011e47b1
 
 
-########## Week 3/31 ##########
+########## Caching and RAG
 
 - title: KV Caching and Model Compression Recap
   slide_link: https://drive.google.com/file/d/1iEXkHXKFP_EoSZc4gXCDCcSGZVSKkT8w/view?usp=drive_link 
@@ -297,8 +295,6 @@
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
-
-########## Week 4/7 ##########
 
 - title: Retrieval Augmented Generation 1
   slide_link: https://drive.google.com/file/d/1JyaHkbT1S7ydyauFPY_n45T5471nmAJO/view?usp=sharing
@@ -315,7 +311,9 @@
 - title: No Recitation
   type: recitation
 
-- title: Retrieval Augmented Generation 2
+########## RAG, Parallel Training, PPI
+
+- title: Optimizing Transformer Architectures - Guest Lecture, Michiel de Jong, Cursor
   slide_link: https://drive.google.com/file/d/1PyLM9ZLeOf0LyOhIftsu4HyeZiuC3dTZ/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1cvQqBM01nFacwPDrEINGYsi3jSiXjXX3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=06e5d8e1-2408-486c-815f-b2ba012ec337
@@ -326,10 +324,6 @@
     - fido-etc.pptx
     - fid-genllm.pptx
 
-
-########## Week 4/14 ##########
-
-# weeks 14-15: other topics
 
 - title: RAG3 and Embarrasingly Parallel Training
   slide_link: https://drive.google.com/file/d/1TSK_PXvtQQHbftTBwwUPjyF-DzaZetMy/view?usp=sharing
@@ -351,7 +345,7 @@
     - task-vectors.pptx
     - ppi.pptx
 
-########## Week 4/21 ##########
+########## Exam
 
 # week 16: review and final
 - title: Exam Review and QA
@@ -361,6 +355,3 @@
   content:
   - '* Miniproject due'
 - title: Exam 2
-##############################################################################
-# Weeks 1-2 - spark/hadoop/streaming, soft joins - 3 lectures
-##############################################################################
