@@ -1,4 +1,4 @@
-########## 
+########## Week 1/13 ##########
 
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
@@ -34,9 +34,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d331b160-54e6-45ae-aae0-b2680133fb5b
   type: recitation
 
-########## 
-
-## Labor day
+########## Week 1/20 - 1/20 is MLK day ##########
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
@@ -60,7 +58,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0d446099-478b-4ae8-b1f2-b26f012ef7a5&start=0.872264
   type: recitation
 
-########## 
+########## Week 1/27 ##########
 
 - title: Learning as Optimization 1
   slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
@@ -92,7 +90,7 @@
   type: recitation
   summary: ''
 
-########## 
+########## Week 2/3 ##########
 
 - title: Learning as Optimization 3
   pptx_link: https://docs.google.com/presentation/d/1dpzFa115Ypsl4RTxEAXJgK3Q1gQvFPZJ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -128,7 +126,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=81ac9d29-ab6f-412c-9a07-b27d012d2fd6
   summary: ''
 
-########## Week 
+########## Week 2/10 ##########
 
 - title: Randomized Algorithms 2 - Locality Sensitive Hashing
   summary: Locality-Sensitive Hashing
@@ -156,7 +154,7 @@
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f357a04-c7fa-4d43-b840-b28401338256
   type: recitation
 
-########## Week 
+########## Week 2/17 ##########
 
 - title: 'Parallel Optimization with GPUs 1'
   pptx_link: https://docs.google.com/presentation/d/1MmBHOqE856MeM9yAb054_bjsemY8Wfeq/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -182,7 +180,7 @@
   content: 
   - '* HW 3 due'
 
-########## Week 
+########## Week 2/24 ##########
 
 - title: Exam Review and QA
   pptx_link: https://docs.google.com/presentation/d/1i-1_bm6h5vA3vM4ABe1hc8RCr5FcRAfu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
@@ -191,15 +189,11 @@
 
 - title: Exam 1
 
+########## Week 3/3 ##########
 
-- title: 'No Recitation'
-  type: recitation
-  summary: ''
+# spring break
 
-
-
-
-########## Week 
+########## Week 3/10 ##########
 
 - title: 'Deep Learning: Background and Architectures'
   summary: 'Transformers, instability, ...'
@@ -289,6 +283,10 @@
 
 ########## Week 3/31 ##########
 
+- title: Guest lecture - Haitian Sun, Apple
+  slide_link: https://drive.google.com/file/d/1sx5nGou-Ir9m_ynHG5qAoyCw_tB1uV3t/view?usp=sharing
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=83c87a53-96e4-47c6-a23a-b2b1012edf3c
+
 - title: KV Caching and Model Compression Recap
   slide_link: https://drive.google.com/file/d/1iEXkHXKFP_EoSZc4gXCDCcSGZVSKkT8w/view?usp=drive_link 
   pptx_link: https://docs.google.com/presentation/d/1SmnhfUe4B7qgr3xCoOewKc_smq_8kj_q/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -297,6 +295,9 @@
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
+
+# carnival - no recitation
+
 
 ########## Week 4/7 ##########
 
@@ -312,9 +313,6 @@
     - contriever.pptx
     - '* Previous HW due'
 
-- title: No Recitation
-  type: recitation
-
 - title: Retrieval Augmented Generation 2
   slide_link: https://drive.google.com/file/d/1PyLM9ZLeOf0LyOhIftsu4HyeZiuC3dTZ/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1cvQqBM01nFacwPDrEINGYsi3jSiXjXX3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -326,6 +324,10 @@
     - fido-etc.pptx
     - fid-genllm.pptx
 
+
+
+- title: No Recitation
+  type: recitation
 
 ########## Week 4/14 ##########
 
@@ -340,9 +342,6 @@
    - fid-genllm.pptx
    - branch-train-merge.pptx
 
-- title: No Recitation
-  type: recitation
-
 - title: Embarassingly Parallel Train 2 and Scalable Evaluation
   slide_link: https://drive.google.com/file/d/1qQSIQWkp1o4wW7frtfHn3K8RPqSNGtyy/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1OSrKdMRZu-mdP5e6yfCOKWwj4LGLK-XW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -350,6 +349,9 @@
   content:
     - task-vectors.pptx
     - ppi.pptx
+
+- title: Recitation - Practice Exam
+  type: recitation
 
 ########## Week 4/21 ##########
 

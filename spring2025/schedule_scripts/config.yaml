@@ -1,16 +1,15 @@
 # for getting the dates of each lecture
 CLASS_NUM: 10-605
 DATES_WITH_NO_CLASS:
-- [9, 1]
-- [10, 13]
-- [10, 15]
-- [10, 17]
-- [11, 4]
-- [11, 26]
-- [11, 28]
-END_DATE: [12, 5]
+- [1, 20]
+- [2, 28]
+- [3, 3]
+- [3, 5]
+- [3, 7]
+- [4, 4]
+END_DATE: [4, 25]
 LECTURE_DAY_OF_WEEK: 0
-START_DATE: [8, 25]
+START_DATE: [1, 13]
 YEAR: 2025
 # for generating HTML version of schedule
 BASEDIR: /Users/wcohen/Documents/code/10605.github.io

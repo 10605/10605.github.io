@@ -319,8 +319,6 @@ if __name__ == '__main__':
             for line in open(schedule_headname):
                 fp.write(line)
             for lec_d in lecture_data:
-                if 'printable_date' not in lec_d:
-                    lec_d['printable_date'] = '?NO DATE - probably too many lectures scheduled'
                 fp.write(lecture_row_as_str(**lec_d))
             for line in open(schedule_footname):
                 fp.write(line)
