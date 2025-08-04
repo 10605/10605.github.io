@@ -16,7 +16,6 @@
   summary: 'Stream and sort paradigm, map-reduce'
   slide_link: https://drive.google.com/file/d/1qgMx4UeB13HSoRBEsuDfItJ1PjU2lozz/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1szuxvUdiRBrB3j2WvVW2FEqQohnENbOg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  hw_link: https://github.com/10605/S25_HW1/archive/refs/tags/hw1-v2.zip
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b41db72c-4aa9-4f61-bf0a-b266013d2bc9
   content: #ER and HW1 task
   - cost-of-operations.pptx
@@ -79,7 +78,6 @@
   slide_link: https://drive.google.com/file/d/1QZBcHQm0872EVQelHAYGFjo2gq_SnoM9/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1f7BKrPbP8lZwmZhpfnHhHTTjwUtjmUWA/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=944defc2-8d98-4eb4-a6b2-b274013dfdec
-  hw_link: https://github.com/10605/S25_HW2/archive/refs/tags/HW2.zip
   content: 
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
@@ -135,7 +133,6 @@
   pptx_link: https://docs.google.com/presentation/d/14jh-3VGtyozntMn5wfm62FZ2_tr2JeXJ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1pK_1WwK4FXvO8q_tkUqz4nyEUvRMt17g/view?usp=drive_link
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=942bba4c-77e8-4c71-a72e-b280013d0ead
-  hw_link: https://github.com/10605/S25_HW3/archive/refs/tags/hw3.zip
   content: #need to add more on vector search, and relation to k-means
   - lsh.pptx
   - online-lsh.pptx
