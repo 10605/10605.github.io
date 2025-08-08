@@ -90,7 +90,7 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
         recitation='<strong class="label label-red">Recitation</strong>',
         lecture='<strong class="label label-pink">Lecture</strong>')
     assignments = get_assignments(content=content) or ['']
-    rsrc_links = [it for c in lec_d['content'] for link in c.get('links',[]) for it in link.items()]
+    rsrc_links = dict([it for c in lec_d['content'] for link in c.get('links',[]) for it in link.items()]).items()
     def make_href(link, text):
         if link:
             return f'<a href="{link}">{text}</a>'

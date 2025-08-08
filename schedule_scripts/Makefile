@@ -7,6 +7,9 @@ next:
 next2:
 	python3 util.py next --n 2
 
+next3:
+	python3 util.py next --n 3
+
 gitpush:
 	git add lectures.yaml slides.yaml ../schedule.html
 	git commit -m 'updated lecture'

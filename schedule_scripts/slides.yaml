@@ -1,6 +1,13 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+spork.pptx:
+  num_slides: 3
+  summary: simplified but constant-memory version of Spark
+mr-origins-hazsoup.py:
+  num_slides: 27
+  summary: unix hacks, sort, map-reduce va hazsoup
+
 ppi.pptx:
   num_slides: 50
   summary: discussion, info cascade, watts science paper, schelling, bayesian ppi, stratppi
@@ -129,7 +136,7 @@ kv-cache-transformer-2.pptx:
   links:
     - https://arxiv.org/abs/2004.08483: "ETC: Encoding Long and Structured Inputs in Transformers, Ainsle et al 2020"
     - https://proceedings.neurips.cc/paper/2020/hash/c8512d142a2d849725f31a9a7a361ab9-Abstract.html:
-        Big Bird: Transformers for Longer Sequences, Zaheer et al, 2020
+        "Big Bird: Transformers for Longer Sequences, Zaheer et al, 2020"
     - https://arxiv.org/abs/2001.04451: "Reformer: the Efficient Transformer, Kitaev et al, 2020"
     - https://proceedings.neurips.cc/paper_files/paper/2023/hash/6ceefa7b15572587b78ecfcebb2827f8-Abstract-Conference.html:
         "H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models, Zhang et al 2023"

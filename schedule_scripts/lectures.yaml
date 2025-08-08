@@ -2,29 +2,24 @@
 
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
-  slide_link: https://drive.google.com/file/d/1bOg-_CoG7hWjoZ0vlRQx_4dUaJUOB-OJ/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1Dx7ZfwlnENpTEuFN-CF0NHisBaNm9-Cg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7402cfaa-439c-4938-8a61-b26401406afd
   content:
-  - 605-administrivia.pptx
+  - 605-administrivia.pptx   #todo: TA slides
   - bigdata-history.pptx
   - chinchilla-scaling.pptx
-  - complexity.pptx #also cost of operations
-  - short-stream-and-sort.pptx
+  - complexity.pptx
+  - '* HW 1 out - Entity Resolution and Naive Bayes in Spark'
 
 - title: 'Map-Reduce and Spark'
   summary: 'Stream and sort paradigm, map-reduce'
-  slide_link: https://drive.google.com/file/d/1qgMx4UeB13HSoRBEsuDfItJ1PjU2lozz/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1szuxvUdiRBrB3j2WvVW2FEqQohnENbOg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b41db72c-4aa9-4f61-bf0a-b266013d2bc9
   content: #ER and HW1 task
   - cost-of-operations.pptx
-  - density-vs-naive-bayes.pptx
   - short-stream-sort-to-mr.pptx # keys and values
   - map-reduce-frameworks.pptx
   - map-reduce-abstractions.pptx #can simplify - (w, {y: n(w,y)}) join (w, docid) 
   - spark-overview.pptx
-  - '* HW 1 out - Entity Resolution and Naive Bayes in Spark'
+  - density-vs-naive-bayes.pptx
 
 - title: 'Recitation: PySpark'
   slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
@@ -39,18 +34,15 @@
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
-  slide_link: https://drive.google.com/file/d/1AsxiIdiYa8U11G7nr5_jctoRjddVsc8a/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1LAgfi1ZRRvu2E7e6-FUzuq_zWvMFG48z/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=56e166b2-69d8-4c73-b8d5-b26d013e2b73&start=0.404204
   content: #add motivation for entity resolution
-  - recap-longer-stream-sort-mr.pptx
-  - parallel-stream-and-sort.pptx
+  - mr-origins-hazsoup.py
   - spark-details.pptx
+  - spork.pptx
   - comparing-corpora.pptx
   - pagerank-intro.pptx
   - iterative-pagerank-in-spark.pptx
   - k-means-in-spark-example.pptx
-  - matmul-in-spark.pptx
 
 - title: 'Recitation: Linear Algebra Review'
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
@@ -62,29 +54,26 @@
 ########## Learning as (Parallel) Optimization
 
 - title: Learning as Optimization 1
-  slide_link: https://drive.google.com/file/d/1aVwblnJLYk0iEu8uysKZgh5Nx90Ap5gz/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/17PqIrFvBbQ-wvY8aCKIuz0UW8dBcFo-9/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=eaf41ef7-005e-451c-b366-b27201390f4d
   summary: Linear Regression, Logistic Regression
   content:
+  - matmul-in-spark.pptx
   - learning-linreg-as-optimization.pptx 
   - batch-gradient-linear-regression.pptx
   - sgd-and-parallel-linear-regression.pptx
   - k-means-in-spark-example.pptx
   - linreg-to-logreg-sgd.pptx
+  - '* HW 2 out - Parallel Linear Regression in Spark'
+  - '* HW 1 due'
 
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
-  slide_link: https://drive.google.com/file/d/1QZBcHQm0872EVQelHAYGFjo2gq_SnoM9/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1f7BKrPbP8lZwmZhpfnHhHTTjwUtjmUWA/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=944defc2-8d98-4eb4-a6b2-b274013dfdec
   content: 
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
   - sparsity-linreg-and-sgd.pptx
   - hash-kernels-linreg.pptx
-  - '* HW 2 out - Parallel Linear Regression in Spark'
-  - '* HW 1 due'
 
 - title: 'No Recitation'
   type: recitation
@@ -94,8 +83,6 @@
 
 - title: Learning as Optimization 3
   pptx_link: https://docs.google.com/presentation/d/1dpzFa115Ypsl4RTxEAXJgK3Q1gQvFPZJ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/16HnEvrshywYLkys6l_RvX1URPrBtAju6/view?usp=sharing
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a6dd4308-b342-456e-b137-b279013c7c66
   summary: Matrix Factorization and Other Tasks
   content:
   - sparse-regularized-sgd-reveal.pptx
@@ -293,7 +280,7 @@
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
 
-- title: Retrieval Augmented Generation 1
+- title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
   slide_link: https://drive.google.com/file/d/1JyaHkbT1S7ydyauFPY_n45T5471nmAJO/view?usp=sharing
   pptx_link: https://docs.google.com/presentation/d/1x7cP66jiH5TPo7icUesTq1060k0CTh4E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=456d04d2-3ca5-4d91-9145-b2b8012d8277
