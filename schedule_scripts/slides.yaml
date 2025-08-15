@@ -1,6 +1,10 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+minhash-and-index.pptx:
+  num_slides: 13
+  summary: Jaccard, MinHash compared to SimHash, multihash indexing
+
 spork.pptx:
   num_slides: 3
   summary: simplified but constant-memory version of Spark
@@ -267,9 +271,8 @@ gpu-programming-short.pptx:
   links:
     - https://www.youtube.com/watch?v=-P28LKWTzrI: Mythbusters explain GPUs
     - https://ourworldindata.org/grapher/gpu-price-performance: GFlops / dollar up to 2022
-    - https://github.com/10605/S25SampleCode/blob/main/gpu.py: Benchmarking GPUs in PyTorch on a Mac
+    - https://github.com/10605/LectureSampleCode/blob/main/autodiff/gpu.py: code for benchmarking GPUs
     - https://drive.google.com/file/d/1-qTFQw7rW1rIsGf8kN4-pxv_edbfFfmp/view?usp=sharing: Fall 2024 10-605 lecture on ML hardware
-    - https://github.com/10605/S25SampleCode/blob/main/gpu.py: Code for comparing GPU vs CPU times in PyTorch
 bloom-filter-countmin-recap.pptx:
   num_slides: 9
   summary: review of math for both
@@ -370,10 +373,6 @@ k-means-in-spark-example.pptx:
 iterative-pagerank-in-spark.pptx:
   num_slides: 7
   summary: slow and fast implementations
-  links:
-  - https://github.com/10605/S25SampleCode/blob/main/pagerank_slow.py: Code for slow implementation of PageRank
-  - https://github.com/10605/S25SampleCode/blob/main/pagerank_opt1.py: Faster implementation of PageRank
-  - https://github.com/10605/S25SampleCode/blob/main/pagerank_opt2.py: Fastest implementation of PageRank (v2)
 comparing-corpora.pptx:
   num_slides: 11
   summary: phraseness pipeline
@@ -423,10 +422,8 @@ autodiff.pptx:
   links:
     - https://justindomke.wordpress.com/2009/03/24/a-simple-explanation-of-reverse-mode-automatic-differentiation/:
        A simple explanation of reverse-mode automatic differentiation, Justin Domke
-    - https://github.com/10605/S25SampleCode/blob/main/ad.py:
-       Sample code for autodiff with Wengert lists
-    - https://github.com/10605/S25SampleCode/blob/main/checkad.py:
-        Sample code for checking autodiff implementation with PyTorch
+    - https://github.com/10605/LectureSampleCode/tree/main/autodiff:
+       code for autodiff with Wengert lists
 autodiff.txt:
   num_slides: 0
   summary: writeup of autodiff assignment | Symbolic reverse-mode differentiation
@@ -448,8 +445,8 @@ bigdata-history.pptx:
       Norvig, Pereira, Halevy (2009). The Unreasonable Effectiveness of Data
   - https://www.nowpublishers.com/article/Details/MAL-006:
       Yoshua Bengio (2009). Learning Deep Architectures for AI
-  - https://github.com/10605/S25SampleCode/blob/main/ngram_query.py:
-      Sample code from lecture for doing ngram queries
+  - https://github.com/10605/LectureSampleCode/tree/main/ngrams: 
+      code for doing ngram queries
 bloom-filter-countmin-review.pptx:
   num_slides: 14
   summary: +bloom | Review of Bloom filters
@@ -457,17 +454,15 @@ bloom-filter-recap.pptx:
   num_slides: 6
   summary: '!bloom !countmin recap of bloom-filter.pptx | Review of Bloom filters'
 bloom-filter.pptx:
-  num_slides: 10
+  num_slides: 15
   summary: +bloom | Bloom filters
   links:
     - https://www.cs.cmu.edu/~wcohen/10-605/notes/randomized-algs.pdf:
         "William's Notes on Randomized Algorithms"
-    - https://github.com/10605/S25SampleCode/blob/main/bloomfilter.py:
-        "Demo Bloom filter implementation in Python"
+    - https://github.com/10605/LectureSampleCode/blob/main/randomized/bloomfilter.py:
+        code for Bloom Filter 
     - https://openreview.net/pdf?id=S1hsDCNFx:
-        Short and Deep: Sketching and Neural Networks, Daniely et al
-    - https://github.com/10605/S25SampleCode/blob/main/bloomfilter.py: 
-        Code from lecture for bloom filter implementation
+        'Short and Deep: Sketching and Neural Networks, Daniely et al'
 chinchilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
@@ -499,8 +494,9 @@ cost-of-operations.pptx:
   - https://ourworldindata.org/grapher/historical-cost-of-computer-memory-and-storage?time=1990..latest:
       Historical cost of storage
   - https://github.com/erikfrey/bashreduce:
-      Bash Reduce - minimal implementation of Map-Reduce
-      
+      code for Bash Reduce - a minimal implementation of Map-Reduce
+  - https://github.com/10605/LectureSampleCode/tree/main/hazsoup:
+      code for Hazsoup - a more readable minimal implementation of Map-Reduce
 construct-wengert-list.pptx:
   num_slides: 6
   summary: constructing a wengert list
@@ -511,7 +507,7 @@ count-min-recap.pptx:
   num_slides: 4
   summary: recap of count-min | Review of count min
 count-min-sketch.pptx:
-  num_slides: 8
+  num_slides: 11
   summary: +countmin | The countmin sketch
   links:
     - https://drive.google.com/file/d/17OyCk5jMM1Kfjt3MuQDm00DJWJoBCuxi/view:
@@ -629,7 +625,7 @@ hash-trick-review.pptx:
   num_slides: 6
   summary: ''
 hash-trick-to-bloom-filter.pptx:
-  num_slides: 5
+  num_slides: 6
   summary: ''
 hashed-logreg.pptx:
   num_slides: 14
@@ -939,9 +935,10 @@ spark-details.pptx:
   num_slides: 11
   summary: More about working with Spark
   links:
-  - https://github.com/10605/S25SampleCode/blob/main/Lecture_3_demo_code.ipynb: Demo code from lecture (all in one file)
-  - https://github.com/10605/S25SampleCode/blob/main/redvsblue.py: Code from lecture for doing wordcounts in Spark
-  - https://github.com/10605/S25SampleCode/blob/main/phrases.py: Code for phrase-finding using Spark
+  - https://github.com/10605/LectureSampleCode/tree/main/spark-workflows:
+      code for sample workflows in Spark
+  - https://github.com/10605/LectureSampleCode/blob/main/hazsoup/spork_micro.py:
+      code for a minimal map-reduce, without distributed processing, using Spark syntax
 sparse-averaged-perceptron.pptx:
   num_slides: 8
   summary: ''
@@ -997,7 +994,7 @@ uses-of-bloom-filters.pptx:
   - https://aclanthology.org/D12-1100.pdf:
       Sketch Algorithms for Estimating Point Queries in NLP - Goyal et al 2012
 uses-of-count-min-sketch.pptx:
-  num_slides: 4
+  num_slides: 7
   summary: '!countmin'
   links:
     - https://aclanthology.org/D12-1100.pdf:
