@@ -2,7 +2,8 @@
 
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
-  pptx_link: https://docs.google.com/presentation/d/1Dx7ZfwlnENpTEuFN-CF0NHisBaNm9-Cg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
+  pptx_link: https://docs.google.com/presentation/d/1u5vYdVO4ZbMTRJ-VRlFb-NJ0yaqcpu-X/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1hoPMf0hKRY9nk_DY5cJlorN4EJq5t1sp/view?usp=drive_link
   content:
   - 605-administrivia.pptx   #todo: TA slides
   - bigdata-history.pptx
@@ -12,7 +13,6 @@
 
 - title: 'Map-Reduce and Spark'
   summary: 'Stream and sort paradigm, map-reduce'
-  pptx_link: https://docs.google.com/presentation/d/1szuxvUdiRBrB3j2WvVW2FEqQohnENbOg/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   content: #ER and HW1 task
   - cost-of-operations.pptx
   - short-stream-sort-to-mr.pptx # keys and values
@@ -22,10 +22,7 @@
   - density-vs-naive-bayes.pptx
 
 - title: 'Recitation: PySpark'
-  slide_link: https://docs.google.com/presentation/d/1c1qwJWB6O-Nc-lrvQNL1a1CxmSOdjTwD/
-  notebook_link: https://drive.google.com/file/d/1CvXouTClAVLROO0z0B4mGG0CvkmZ3-7Q/view?usp=sharing
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d331b160-54e6-45ae-aae0-b2680133fb5b
   type: recitation
 
 ########## Map/Reduce Workflows
@@ -34,7 +31,6 @@
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
-  pptx_link: https://docs.google.com/presentation/d/1LAgfi1ZRRvu2E7e6-FUzuq_zWvMFG48z/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   content: #add motivation for entity resolution
   - mr-origins-hazsoup.py
   - spark-details.pptx
@@ -46,15 +42,11 @@
 
 - title: 'Recitation: Linear Algebra Review'
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
-  slide_link: https://drive.google.com/file/d/1U5CfdI1-J1Dh4T9Cu7N2YrZgMQYFAIGY/view?usp=drive_link
-  notebook_link: https://drive.google.com/file/d/1nddT8bfOsq6Ykigs3nGHgd6_86Dul29U/view?usp=sharing
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0d446099-478b-4ae8-b1f2-b26f012ef7a5&start=0.872264
   type: recitation
 
 ########## Learning as (Parallel) Optimization
 
 - title: Learning as Optimization 1
-  pptx_link: https://docs.google.com/presentation/d/17PqIrFvBbQ-wvY8aCKIuz0UW8dBcFo-9/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   summary: Linear Regression, Logistic Regression
   content:
   - matmul-in-spark.pptx
@@ -68,7 +60,6 @@
 
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
-  pptx_link: https://docs.google.com/presentation/d/1f7BKrPbP8lZwmZhpfnHhHTTjwUtjmUWA/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   content: 
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
@@ -82,7 +73,6 @@
 ########## Optimization, Randomized Algs
 
 - title: Learning as Optimization 3
-  pptx_link: https://docs.google.com/presentation/d/1dpzFa115Ypsl4RTxEAXJgK3Q1gQvFPZJ/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   summary: Matrix Factorization and Other Tasks
   content:
   - sparse-regularized-sgd-reveal.pptx
@@ -96,7 +86,6 @@
 
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
   summary: Bloom Filters and Count-Min -Sketchs
-  pptx_link: https://docs.google.com/presentation/d/1mUz9O44Lhbb5O6j56Bm6J5iiMzXJquCb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
   - hash-trick-to-bloom-filter.pptx
   - bloom-filter.pptx
@@ -107,14 +96,12 @@
 
 - title: 'Recitation: Probability for LSH '
   type: recitation
-  pptx_link: https://docs.google.com/presentation/d/1WPkbtCihIjPxqUmM_0ptvzci9a8UXMk0/edit?usp=drive_link&ouid=111761201318109814132&rtpof=true&sd=true
   summary: ''
 
 ########## Randomized Algs, Autodiff
 
 - title: Randomized Algorithms 2 - Locality Sensitive Hashing
   summary: Locality-Sensitive Hashing
-  pptx_link: https://docs.google.com/presentation/d/14jh-3VGtyozntMn5wfm62FZ2_tr2JeXJ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content: #need to add more on vector search, and relation to k-means
   - lsh.pptx
   - minhash-and-index.pptx
@@ -123,20 +110,16 @@
   - '* HW 3 out - Locality-Sensitive Hashing'
 
 - title: 'HW2 Writing Session / AutoDiff'
-  pptx_link: https://docs.google.com/presentation/d/1lzTrAilDrabR73TBV2ioQZNDSwegT30a/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   summary: ''
   content:
   - autodiff.pptx
 
 - title: 'Recitation: AWS'
-  pptx_link: https://docs.google.com/presentation/d/11hTKXffZhdyMhDlTV6DrYBroX1mwt-q4/edit?usp=sharing&ouid=111761201318109814132&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2f357a04-c7fa-4d43-b840-b28401338256
   type: recitation
 
 ########## Week GPUs1
 
 - title: 'Parallel Optimization with GPUs 1'
-  pptx_link: https://docs.google.com/presentation/d/1MmBHOqE856MeM9yAb054_bjsemY8Wfeq/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
   summary: ''
   content:
   - gpu-intro.pptx
@@ -144,7 +127,6 @@
 
 - title: 'Parallel Optimization with GPUs 2'
   summary: ''
-  pptx_link: https://docs.google.com/presentation/d/17cuukfDjIdamj1Z5KD97I2whyrV6NhGr/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
   content: 
   - distributed_dl.pptx
   - dl_finetuning.pptx
@@ -158,10 +140,8 @@
 ########## Exam 1
 
 - title: Exam Review and QA
-  pptx_link: https://docs.google.com/presentation/d/1i-1_bm6h5vA3vM4ABe1hc8RCr5FcRAfu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
 
 - title: Exam 1
-
 
 - title: 'No Recitation'
   type: recitation
@@ -172,18 +152,12 @@
 
 - title: 'Deep Learning: Background and Architectures'
   summary: 'Transformers, instability, ...'
-  slide_link: https://drive.google.com/file/d/1VmrX01Df_kQW_DsLBKgD-p2M2smPxEip/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1lAIJpCfVIaiJfJfPhtdBD0qyvo2mXiuV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0e48ad15-eab1-4e3f-bd5e-b29c012e84b2
   content: #idea history of DL
     - evolution-of-transformers.pptx 
     - '* HW: TBD'
 
 
 - title: 'Deep Learning: Transformers'
-  slide_link: https://drive.google.com/file/d/1GGEG8EbYQG3Uojj_fYYlDPNe1TnAuZnA/view?usp=drive_link 
-  pptx_link: https://docs.google.com/presentation/d/12f_y8WIEk4t-LEpAZETZRsq_8F-rSMLO/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7c087404-7e1c-45b9-8516-b29e012ef7e3
   summary: 'Annotated transformer'
   content:
     - evolution-of-transformers-summary.pptx
@@ -202,18 +176,12 @@
 
 - title: Guest lecture - Greg Kochanski, Google Deep Mind, and then Transformer Tokenization
   summary: Efficient hyperparameter search
-  slide_link: https://drive.google.com/file/d/1-I7qs5J7MWHcHps_2DshnLVXKCRSynBA/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1U9RWSd5m5jOrA-OThEbwZ_RvXNM-sxXp/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9f2d6eb7-c369-4f5e-85e2-b2a3012d9f0d
   content:
    - vizier.pdf
    - transformer-bpe.pptx
 
 - title: Hyperparameter parameter search and other topics
   summary: 'Hyperband, Vision tokens, Quantization, Distillation, Key-Value Intro'
-  slide_link: https://drive.google.com/file/d/1R_x3otF59Dt3XvTU4-XqlszpU3Qg9RQo/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1B8Ai5FAX5_l8Dfz0BE3lkB3xh4zlVHzm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=68d4492d-a2a9-4364-bff8-b2a5012d2909
   content:
    - transformer-bpe-short.pptx
    - transformer-kv-intro.pptx 
@@ -222,17 +190,12 @@
 
 - title: Recitation - HW5
   type: recitation
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=bd95971f-5765-40ef-9c09-b2a701289fea
-  slide_link: https://docs.google.com/presentation/d/1SPNMLoh2Q-e4RB8Htcw0MD5B0hv3-2X3/edit?usp=drive_link&ouid=111761201318109814132&rtpof=true&sd=true
   summary: 
   content: []
 
 ########## Caching and Pruning
 
 - title: Quantization and Pruning for LLMs
-  slide_link: https://drive.google.com/file/d/10UsEvCOqcQsIYHIoYPCTlnJG6WnUHD55/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1anzsrc1b6mQmfYKyU3Pmi0RC0rfnMIhu/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4924e2f4-3909-4b6c-9189-b2aa012ce3b7
   summary: Quantization, Pruning
   content:
    - quantize.pptx
@@ -242,9 +205,6 @@
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
-  slide_link: https://drive.google.com/file/d/1n_z0DaBo9KS-syaiPa7Sbc7hgIYsLBDi/view?usp=sharing 
-  pptx_link: https://docs.google.com/presentation/d/1Ues6oYaAK6jCSEfRqwmnUhAnFOXTTKIb/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8da29bf6-2b84-46b1-b927-b2ac012c2ee1
   content:
   - structured-pruning.pptx
   - kv-cache-transformer-1.pptx
@@ -252,26 +212,17 @@
 
 - title: Recitation - Miniproject
   type: recitation
-  slide_link: https://drive.google.com/file/d/1Rw7-WTMFlLk9J5yJz5tzGNRqeAExiue3/view?usp=sharing
-  pptx_link: https://docs.google.com/presentation/d/1FQt3AeydK6Uh-NEgXKomnspLH43J6a8n/edit?usp=sharing&ouid=111761201318109814132&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa657fcf-f529-436e-bfd2-b2ae011e47b1
 
 
 ########## Caching and RAG
 
 - title: KV Caching and Model Compression Recap
-  slide_link: https://drive.google.com/file/d/1iEXkHXKFP_EoSZc4gXCDCcSGZVSKkT8w/view?usp=drive_link 
-  pptx_link: https://docs.google.com/presentation/d/1SmnhfUe4B7qgr3xCoOewKc_smq_8kj_q/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d05b69bc-924c-481b-89fb-b2b301285322
   summary: recap of KV caching, SnapKV and FastGen, big recap of model compression
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
 
 - title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
-  slide_link: https://drive.google.com/file/d/1JyaHkbT1S7ydyauFPY_n45T5471nmAJO/view?usp=sharing
-  pptx_link: https://docs.google.com/presentation/d/1x7cP66jiH5TPo7icUesTq1060k0CTh4E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=456d04d2-3ca5-4d91-9145-b2b8012d8277
   content:
     - rag-overview.pptx
     - contrastive-overview.pptx
@@ -286,9 +237,6 @@
 ########## RAG, Parallel Training, PPI
 
 - title: Optimizing Transformer Architectures - Guest Lecture, Michiel de Jong, Cursor
-  slide_link: https://drive.google.com/file/d/1PyLM9ZLeOf0LyOhIftsu4HyeZiuC3dTZ/view?usp=sharing
-  pptx_link: https://docs.google.com/presentation/d/1cvQqBM01nFacwPDrEINGYsi3jSiXjXX3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=06e5d8e1-2408-486c-815f-b2ba012ec337
   content:
     - rag-recap.pptx
     - rag-genllm.pptx
@@ -298,9 +246,6 @@
 
 
 - title: RAG3 and Embarrasingly Parallel Training
-  slide_link: https://drive.google.com/file/d/1TSK_PXvtQQHbftTBwwUPjyF-DzaZetMy/view?usp=sharing
-  pptx_link: https://docs.google.com/presentation/d/1VffbGozb5MhSABq2rwrfhUpfnLqjAJcW/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=27f7ac45-534b-4406-b054-b2bf012ea193
   content:
    - rag-fid-recap.pptx
    - fid-genllm.pptx
@@ -310,9 +255,6 @@
   type: recitation
 
 - title: Embarassingly Parallel Train 2 and Scalable Evaluation
-  slide_link: https://drive.google.com/file/d/1qQSIQWkp1o4wW7frtfHn3K8RPqSNGtyy/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1OSrKdMRZu-mdP5e6yfCOKWwj4LGLK-XW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=19f302f4-88b7-4b55-a513-b2c1012a27ab
   content:
     - task-vectors.pptx
     - ppi.pptx
@@ -321,9 +263,6 @@
 
 # week 16: review and final
 - title: Exam Review and QA
-  slide_link: https://drive.google.com/file/d/1jAhksI8TZa1-M7iw5rzep4_HY-LbniYX/view?usp=sharing
-  pptx_link: https://docs.google.com/presentation/d/17HbHQVS-WWrLsSFDftQ2-TRSr112z8O-/edit?usp=sharing&ouid=108006266785637771510&rtpof=true&sd=true
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=2d64793f-4517-47c9-bed6-b2c601237891
   content:
   - '* Miniproject due'
 - title: Exam 2
