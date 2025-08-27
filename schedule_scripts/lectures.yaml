@@ -14,6 +14,8 @@
 
 - title: 'Map-Reduce and Spark'
   summary: 'Stream and sort paradigm, map-reduce'
+  pptx_link: https://docs.google.com/presentation/d/1gXUlGgdJcUb05npuRFT7kZ4RdW66LP_i/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1pwR78M0Jt0PprnXiBSoSuoDe1XyHw9Ao/view?usp=drive_link
   content: #ER and HW1 task
   - cost-of-operations.pptx
   - short-stream-sort-to-mr.pptx # keys and values
