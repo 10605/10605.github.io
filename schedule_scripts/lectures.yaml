@@ -58,8 +58,6 @@
   - sgd-and-parallel-linear-regression.pptx
   - k-means-in-spark-example.pptx
   - linreg-to-logreg-sgd.pptx
-  - '* HW 2 out - Parallel Linear Regression in Spark'
-  - '* HW 1 due'
 
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
@@ -68,6 +66,8 @@
   - linreg-kernels.pptx
   - sparsity-linreg-and-sgd.pptx
   - hash-kernels-linreg.pptx
+  - '* HW 2 out - Parallel Linear Regression in Spark'
+  - '* HW 1 due'
 
 - title: 'HW1 Writing Session'
   type: recitation
