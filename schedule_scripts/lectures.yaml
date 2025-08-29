@@ -16,6 +16,7 @@
   summary: 'Stream and sort paradigm, map-reduce'
   pptx_link: https://docs.google.com/presentation/d/1gXUlGgdJcUb05npuRFT7kZ4RdW66LP_i/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1pwR78M0Jt0PprnXiBSoSuoDe1XyHw9Ao/view?usp=drive_link
+  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8deab927-46a4-4dfe-a052-b3460114a90d
   content: #ER and HW1 task
   - cost-of-operations.pptx
   - short-stream-sort-to-mr.pptx # keys and values
