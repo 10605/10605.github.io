@@ -35,6 +35,8 @@
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
+  pptx_link: https://docs.google.com/presentation/d/1VBUBbove1Y1PAMcRKwBc4WuLMScMoiAq/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1pV8xIVsdK8flc1l4A87rEJkcwWFSODEO/view?usp=drive_link
   content: #add motivation for entity resolution
   - mr-origins-hazsoup.py
   - spark-details.pptx
@@ -51,6 +53,8 @@
 ########## Learning as (Parallel) Optimization
 
 - title: Learning as Optimization 1
+  pptx_link: https://docs.google.com/presentation/d/130ZVQB3ukw45Vo7JQrxiccMw1bqNAepW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1M1fxuQU8G4nwwijmRZBLkDi60IByVp8y/view?usp=drive_link
   summary: Linear Regression, Logistic Regression
   content:
   - matmul-in-spark.pptx
