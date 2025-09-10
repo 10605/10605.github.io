@@ -59,18 +59,18 @@
   content:
   - matmul-in-spark.pptx
   - learning-linreg-as-optimization.pptx 
-  - batch-gradient-linear-regression.pptx
-  - sgd-and-parallel-linear-regression.pptx
   - k-means-in-spark-example.pptx
-  - linreg-to-logreg-sgd.pptx
 
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
+  pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
   content: 
+  - batch-gradient-linear-regression.pptx
+  - sgd-and-parallel-linear-regression.pptx
+  - linreg-to-logreg-sgd.pptx
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
-  - sparsity-linreg-and-sgd.pptx
-  - hash-kernels-linreg.pptx
   - '* HW 2 out - Parallel Linear Regression in Spark'
   - '* HW 1 due'
 
@@ -83,7 +83,8 @@
 - title: Learning as Optimization 3
   summary: Matrix Factorization and Other Tasks
   content:
-  - sparse-regularized-sgd-reveal.pptx
+  - sparsity-linreg-and-sgd.pptx
+  - hash-kernels-linreg.pptx
   - parallel-ml-overview.pptx
   - param-server-short.pptx
   - allreduce.pptx
