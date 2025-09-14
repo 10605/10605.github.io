@@ -82,12 +82,12 @@
 
 - title: Learning as Optimization 3
   summary: Matrix Factorization and Other Tasks
+  pptx_link: https://docs.google.com/presentation/d/1ZQNwjbCLYiDJLdG851B8JZzzbROEMAsm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/15GwrI7Ky35G0i7fUDbTyL9yLzNTGYcnr/view?usp=drive_link
   content:
   - sparsity-linreg-and-sgd.pptx
   - hash-kernels-linreg.pptx
   - parallel-ml-overview.pptx
-  - param-server-short.pptx
-  - allreduce.pptx
   - matrix-factorization-defined.pptx
   - k-means-recap.pptx
   - matrix-factorization-vs-clustering.pptx
