@@ -94,8 +94,11 @@
   - short-matrix-factorization-via-distributed-sgd.pptx
 
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
+  pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1ATVOyDt9Sb9PEkn0quMKeBIknENwBYm_/view?usp=drive_link
   summary: Bloom Filters and Count-Min -Sketchs
   content:
+  - tree-allreduce.pptx
   - hash-trick-to-bloom-filter.pptx
   - bloom-filter.pptx
   - uses-of-bloom-filters.pptx
