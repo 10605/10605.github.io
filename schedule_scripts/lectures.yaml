@@ -183,18 +183,17 @@
 
 ########## Hyperparams, KV, BPE
 
-- title: Guest lecture - Greg Kochanski, Google Deep Mind, and then Transformer Tokenization
-  summary: Efficient hyperparameter search
+- title: Hyperparameter Search 
+  summary: Vizier, Hyperband
   content:
    - vizier.pdf
-   - transformer-bpe.pptx
-
-- title: Hyperparameter parameter search and other topics
-  summary: 'Hyperband, Vision tokens, Quantization, Distillation, Key-Value Intro'
-  content:
-   - transformer-bpe-short.pptx
-   - transformer-kv-intro.pptx 
    - hyperparam.pptx 
+
+- title: Tokenization and Model compression
+  summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
+  content:
+   - transformer-bpe.pptx
+   - transformer-kv-intro.pptx 
    - quantize-distill.pptx
 
 - title: Recitation - HW5
