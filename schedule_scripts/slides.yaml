@@ -1017,3 +1017,10 @@ zookeeper.pptx:
 linear-regression.pptx:
   num_slides: 46
   summary: messy version of ginger's slides
+recitation-3.pptx:
+# Dummy file to hold recitation 3 handout and solutions links
+  num_slides: 1
+  summary: 'Handouts for Recitation 3'
+  links:
+  - https://drive.google.com/file/d/1lh9Rcvpuw9iyKbFi8m-iwXd2bwOVPkJO/view?usp=drive_link: Recitation 3 Handout
+  - https://drive.google.com/file/d/19DaDoXbClZXIFeyEO-WW3og1odnAL4uX/view?usp=sharing: Solutions for Recitation 3
