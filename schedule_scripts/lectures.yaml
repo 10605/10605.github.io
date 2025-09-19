@@ -106,9 +106,10 @@
   - uses-of-count-min-sketch.pptx
   - bloom-filter-countmin-recap.pptx
 
-- title: 'Recitation: Probability for LSH '
+- title: 'Recitation: Probability, Evaluation Metrics and Minhashing'
   type: recitation
   summary: ''
+  slide_link: https://drive.google.com/file/d/1lh9Rcvpuw9iyKbFi8m-iwXd2bwOVPkJO/view?usp=sharing
 
 ########## Randomized Algs, Autodiff
 
