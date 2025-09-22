@@ -110,13 +110,16 @@
   type: recitation
   summary: Review of topics for Homework 3
   content:
-  - recitation-3.pptx
+   - recitation-3.pptx
 
 ########## Randomized Algs, Autodiff
 
-- title: Randomized Algorithms 2 - Locality Sensitive Hashing
+- title: 'Randomized Algorithms 2 - Locality Sensitive Hashing'
   summary: Locality-Sensitive Hashing
-  content: #need to add more on vector search, and relation to k-means
+  content: LSH for Minhash and SimHash
+  pptx_link: https://docs.google.com/presentation/d/1Iug_RuHS0S19V-DyHvMUSOCnSdz7kSvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1GJs5tX9AhRbF1jbb_qGlBqw9stohRjOM/view?usp=drive_link
+  content:
   - lsh.pptx
   - minhash-and-index.pptx
   - online-lsh.pptx
