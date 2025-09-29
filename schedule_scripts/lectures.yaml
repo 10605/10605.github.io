@@ -140,6 +140,8 @@
 
 - title: 'Parallel Optimization with GPUs 1'
   summary: ''
+  pptx_link: https://docs.google.com/presentation/d/1W-vLRtHi7NC9glhYlL7Jsp9dVLlG5Whi/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1r-iiUsjfhOrIjInB078siaO0r6rvnizS/view?usp=drive_link
   content:
   - gpu-intro.pptx
   - gpu-programming-short.pptx
