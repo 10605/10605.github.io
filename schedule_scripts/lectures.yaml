@@ -4,7 +4,6 @@
   summary: 'Course Overview, History, Review of Complexity'
   pptx_link: https://docs.google.com/presentation/d/1u5vYdVO4ZbMTRJ-VRlFb-NJ0yaqcpu-X/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hoPMf0hKRY9nk_DY5cJlorN4EJq5t1sp/view?usp=drive_link
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0fdf8250-16e0-4f42-b394-b3440113e792
   content:
   - 605-administrivia.pptx   #todo: TA slides
   - bigdata-history.pptx
@@ -16,7 +15,6 @@
   summary: 'Stream and sort paradigm, map-reduce'
   pptx_link: https://docs.google.com/presentation/d/1gXUlGgdJcUb05npuRFT7kZ4RdW66LP_i/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1pwR78M0Jt0PprnXiBSoSuoDe1XyHw9Ao/view?usp=drive_link
-  movie_link: https://scs.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=8deab927-46a4-4dfe-a052-b3460114a90d
   content: #ER and HW1 task
   - cost-of-operations.pptx
   - short-stream-sort-to-mr.pptx # keys and values
@@ -28,6 +26,8 @@
 - title: 'Recitation: PySpark'
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
+  pptx_link: https://docs.google.com/presentation/d/1mK96hu0AEhFGX2GnSAulIfaHmQeUtiRJ/edit?usp=sharing&ouid=110525818057885587911&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/149HVLW2c0w9MI9v_2vhCS_Ci06x7PceH/view?usp=sharing">/ Slides (pdf)
 
 ########## Map/Reduce Workflows
 
@@ -49,6 +49,7 @@
 - title: 'Recitation: Linear Algebra Review'
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
+  slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
 
 ########## Learning as (Parallel) Optimization
 
@@ -135,6 +136,8 @@
 
 - title: 'Recitation: AWS'
   type: recitation
+  pptx_link: https://docs.google.com/presentation/d/1S89CC7WADu422IzCd6nuOTqYzCUD6fsSQ5gSvPA1SPc/edit?usp=sharing
+  slide_link: https://docs.google.com/presentation/d/1b_oCgDOmMKGhi4ulT6U9FSieHhO8BjS8/edit?usp=sharing&ouid=107762809756333661643&rtpof=true&sd=true
 
 ########## Week GPUs1
 
