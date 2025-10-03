@@ -168,6 +168,7 @@
 
 - title: Exam Review and QA
 
+
 - title: Exam 1
 
 - title: 'No Recitation'
@@ -181,7 +182,7 @@
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW: TBD'
+    - '* HW: HW4, LoRA'
 
 
 - title: 'Deep Learning: Transformers'
