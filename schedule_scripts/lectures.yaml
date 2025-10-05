@@ -162,11 +162,13 @@
   type: recitation
   summary: ''
   content: 
-  - '* HW 3 due'
+  - '* HW 3 due (updated deadline: Sat 10/4)'
 
 ########## Exam 1
 
 - title: Exam Review and QA
+  pptx_link: https://docs.google.com/presentation/d/1TIJoHupSDdyfvm9hINmT0umBeeT1JaAV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1hFRV-8LUdr4d8dIIIWvz5acpEOCm5mHm/view?usp=drive_link
 
 
 - title: Exam 1
