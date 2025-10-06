@@ -176,6 +176,8 @@
 - title: 'No Recitation'
   type: recitation
   summary: ''
+  content:
+  - '* Miniproject deadline: CVs for miniproject leaders'
 
 
 ########## Transformers
@@ -185,7 +187,7 @@
   content: #idea history of DL
     - evolution-of-transformers.pptx 
     - '* HW: HW4, LoRA'
-
+    - '* Miniproject deadline: project proposals submitted'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
@@ -207,6 +209,7 @@
   content:
    - vizier.pdf
    - hyperparam.pptx 
+   - '* Miniproject deadline: project proposals submitted'
 
 - title: Tokenization and Model compression
   summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
@@ -228,7 +231,8 @@
    - quantize.pptx
    - cats-and-sentiment.pptx 
    - pruning.pptx
-   - '* HW: GPT-2 Training and Miniproject released'
+   - '* HW: GPT-2 Training'
+   - '* Miniproject: Model compression miniproject released'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
