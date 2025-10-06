@@ -177,7 +177,7 @@
   type: recitation
   summary: ''
   content:
-  - '* Miniproject deadline: CVs for miniproject leaders'
+  - '* Miniproject: 10-605 students apply to lead a miniproject'
 
 
 ########## Transformers
@@ -187,7 +187,7 @@
   content: #idea history of DL
     - evolution-of-transformers.pptx 
     - '* HW: HW4, LoRA'
-    - '* Miniproject deadline: project proposals submitted'
+    - '* Miniproject: project proposals due'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
@@ -209,7 +209,7 @@
   content:
    - vizier.pdf
    - hyperparam.pptx 
-   - '* Miniproject deadline: project proposals submitted'
+   - '* Miniproject: feedback on miniproject proposals given'
 
 - title: Tokenization and Model compression
   summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
@@ -232,7 +232,7 @@
    - cats-and-sentiment.pptx 
    - pruning.pptx
    - '* HW: GPT-2 Training'
-   - '* Miniproject: Model compression miniproject released'
+   - '* Miniproject: Structured miniproject details released'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
@@ -241,7 +241,7 @@
   - kv-cache-transformer-1.pptx
   - kv-cache-transformer-2.pptx
 
-- title: Recitation - Miniproject
+- title: Recitation - Structured miniproject
   type: recitation
 
 
@@ -295,5 +295,5 @@
 # week 16: review and final
 - title: Exam Review and QA
   content:
-  - '* Miniproject due'
+  - '* Miniprojects due'
 - title: Exam 2
