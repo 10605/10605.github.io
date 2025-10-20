@@ -183,6 +183,8 @@
 ########## Transformers
 
 - title: 'Deep Learning: Background and Architectures'
+  pptx_link: https://docs.google.com/presentation/d/1I0PthhFUlurZtJqzKJ6Izj3xZniIrtxl/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1U1zRW8irQWJTROy17rYaf5KWRSc2hC94/view?usp=drive_link
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
