@@ -17,7 +17,7 @@ push:
 
 # Create copy of config.yaml named config-local.yaml and update that with the proper base dir path, then use this command.
 push-local:
-	python3 util.py html --config config-local.yaml
+	/Users/Nikash/miniforge3/envs/piechart/bin/python util.py html --config config-local.yaml
 	git add lectures.yaml slides.yaml ../schedule.html
 	git commit -m 'updated lecture'
 	echo now git push
