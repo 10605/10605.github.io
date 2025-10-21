@@ -19,7 +19,7 @@ push:
 push-local:
 	python util.py html --config config-local.yaml
 	git add lectures.yaml slides.yaml ../schedule.html
-	-git commit -m 'updated lecture' -- lectures.yaml slides.yaml ../schedule.html
+	git commit -m 'updated lecture' -- lectures.yaml slides.yaml ../schedule.html
 	echo now git push
 
 gitpull:
