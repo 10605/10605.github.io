@@ -2,3 +2,4 @@
 *.html~
 *.yaml~
 config-local.yaml
+.history/
