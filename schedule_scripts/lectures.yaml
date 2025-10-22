@@ -201,7 +201,7 @@
     - transformer-discussion.pptx
     - transformer-bpe.pptx
   content:
-    - '* Miniproject: project proposals due on Oct 23'
+    - '* Miniproject: open-ended miniproject proposals due on Thursday Oct 23'
 
 - title: 'Recitation: PyTorch / HW4'
   type: recitation
@@ -214,7 +214,7 @@
   content:
    - vizier.pdf
    - hyperparam.pptx 
-   - '* Miniproject: feedback on miniproject proposals given'
+   - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
 - title: Tokenization and Model compression
   summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
