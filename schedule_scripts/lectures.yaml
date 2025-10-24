@@ -50,7 +50,7 @@
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
   slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
-  notebook_link: <a href="https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
+  notebook_link: https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
 
 ########## Learning as (Parallel) Optimization
 
