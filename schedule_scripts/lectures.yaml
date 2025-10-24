@@ -27,7 +27,7 @@
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
   pptx_link: https://docs.google.com/presentation/d/1mK96hu0AEhFGX2GnSAulIfaHmQeUtiRJ/edit?usp=sharing&ouid=110525818057885587911&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/149HVLW2c0w9MI9v_2vhCS_Ci06x7PceH/view?usp=sharing">/ Slides (pdf)
+  slide_link: https://drive.google.com/file/d/149HVLW2c0w9MI9v_2vhCS_Ci06x7PceH/view?usp=sharing
 
 ########## Map/Reduce Workflows
 
@@ -50,7 +50,7 @@
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
   slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
-  notebook_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing">Slides (pdf)</a> / <a href="https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
+  notebook_link: <a href="https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
 
 ########## Learning as (Parallel) Optimization
 
@@ -206,7 +206,7 @@
 - title: 'Recitation: PyTorch / HW4'
   type: recitation
   summary: 'Introduction to using PyTorch with a coding demo'
-  notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
+  notebook_link: https://drive.google.com/file/d/1i52B4KkcU2CUA0Km4bAmXufwcaFRGkyp/view?usp=sharing
 
 ########## Hyperparams, KV, BPE
 
