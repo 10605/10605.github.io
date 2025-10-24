@@ -206,6 +206,7 @@
 - title: 'Recitation: PyTorch / HW4'
   type: recitation
   summary: 'Introduction to using PyTorch with a coding demo'
+  notebook_link: https://drive.google.com/file/d/1yuHDmUkg9OOfSY-cCHhL8k88PPgU4fnD/view?usp=sharing
 
 ########## Hyperparams, KV, BPE
 
