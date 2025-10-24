@@ -211,6 +211,8 @@
 ########## Hyperparams, KV, BPE
 
 - title: Hyperparameter Search 
+  pptx_link: https://docs.google.com/presentation/d/1ZS2S-5xvnqcEmI86PoQ8ynRbqctWQ2kb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1FpHW6MpZHlwfKQzrusxzItHVD519O2MO/view?usp=drive_link
   summary: Vizier, Hyperband
   content:
    - vizier.pdf
@@ -220,7 +222,6 @@
 - title: Tokenization and Model compression
   summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
   content:
-   - transformer-bpe.pptx
    - transformer-kv-intro.pptx 
    - quantize-distill.pptx
 
