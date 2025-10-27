@@ -271,7 +271,7 @@
     - contriever.pptx
     - '* Previous HW due'
 
-- title: No Recitation
+- title: HW4 Writing Session
   type: recitation
 
 ########## RAG, Parallel Training, PPI
@@ -294,7 +294,7 @@
     - '* Miniproject: project check in due (written report OR oral check-in)'
   
 
-- title: No Recitation
+- title: HW5 Writing Session
   type: recitation
 
 - title: Embarassingly Parallel Train 2 and Scalable Evaluation
