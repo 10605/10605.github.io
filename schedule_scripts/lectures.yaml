@@ -219,11 +219,14 @@
    - hyperparam.pptx 
    - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
-- title: Tokenization and Model compression
-  summary: 'Vision tokens, Quantization, Distillation, Key-Value Intro'
+- title: Model compression
+  pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1B5nLCqT3DBh5UnmNVfsvNaD20sEAQe_y/view?usp=drive_link
+  summary: 'Quantization, Pruning, and Distillation'
   content:
-   - transformer-kv-intro.pptx 
    - quantize-distill.pptx
+   - cats-and-sentiment.pptx 
+   - pruning.pptx
 
 - title: Recitation - HW5
   type: recitation
@@ -232,12 +235,9 @@
 
 ########## Caching and Pruning
 
-- title: Quantization and Pruning for LLMs
-  summary: Quantization, Pruning
+- title: Embarrasingly Parallel Training
+  summary: branch-train-merge.pptx
   content:
-   - quantize.pptx
-   - cats-and-sentiment.pptx 
-   - pruning.pptx
    - '* HW: GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
@@ -285,7 +285,7 @@
     - fid-genllm.pptx
 
 
-- title: RAG3 and Embarrasingly Parallel Training
+- title: More on RAG and Embarrasingly Parallel Training
   content:
    - rag-fid-recap.pptx
    - fid-genllm.pptx
@@ -297,7 +297,7 @@
 - title: HW5 Writing Session
   type: recitation
 
-- title: Embarassingly Parallel Train 2 and Scalable Evaluation
+- title: Network Effects and Scalable Evaluation
   content:
     - task-vectors.pptx
     - ppi.pptx
