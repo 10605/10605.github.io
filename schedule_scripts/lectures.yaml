@@ -235,19 +235,19 @@
 
 ########## Caching and Pruning
 
-- title: Embarrasingly Parallel Training
-  summary: branch-train-merge.pptx
+- title: Embarrassingly Parallel Training
+  summary: 
   content:
+   - branch-train-merge.pptx
+   - task-vectors.pptx
    - '* HW: GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
   content:
-  - structured-pruning.pptx
-  - kv-cache-transformer-1.pptx
-  - kv-cache-transformer-2.pptx
-  content:
+    - kv-cache-transformer-1.pptx
+    - kv-cache-transformer-2.pptx
     - '* Miniproject: structured miniproject survey due'
 
 - title: Recitation - Structured miniproject
