@@ -236,7 +236,9 @@
 ########## Caching and Pruning
 
 - title: Embarrassingly Parallel Training
-  summary: 
+  pptx_link: https://docs.google.com/presentation/d/167TcvMTMtt9RbHuYenmyckaa-eHFHJmL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1jFbpVzatVfmBa2P5z37p4m9jW9HCGk6J/view?usp=drive_link
+  summary: BTM, BTX, FlexOLMO, and Task Vectors
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
