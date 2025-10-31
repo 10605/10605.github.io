@@ -287,11 +287,10 @@
     - fid-genllm.pptx
 
 
-- title: More on RAG and Embarrasingly Parallel Training
+- title: Wrapup of recent topics and TBD
   content:
    - rag-fid-recap.pptx
    - fid-genllm.pptx
-   - branch-train-merge.pptx
   content:
     - '* Miniproject: project check in due (written report OR oral check-in)'
   
