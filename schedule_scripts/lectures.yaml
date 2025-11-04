@@ -198,6 +198,7 @@
   summary: 'Annotated transformer'
   pptx_link: https://docs.google.com/presentation/d/1_8eblsK_ieS9zsGiqNlowKmqgbZ_vX6G/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1H4Ia8d0k3wYweOJS83Q16TNM8cE1RnTp/view?usp=drive_link
+  hw_link: https://piazza.com/class_profile/get_resource/mduh9or2tg140/mgzw30gdpeo573
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
@@ -253,6 +254,7 @@
   summary: overview, H2O, StreamLLM
   pptx_link: https://docs.google.com/presentation/d/1xd31ZNQOGyoobxslUORib2qgS4v9p8p3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/17kVEtqGU40wtrMmqwfnqnM3VbW3a0qpq/view?usp=drive_link
+  hw_link: https://piazza.com/class_profile/get_resource/mduh9or2tg140/mgzw3tr0aj378h
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
