@@ -112,12 +112,16 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
     lines.append(f'{tab}<td>{printable_date}</td>')
     lines.append(f'{tab}<td>{meeting_type[kw.get("type", "lecture")]}</td>')
     lines.append(f'{tab}<td>{title} {slide_href} {pptx_href} {notebook_href} {movie_href}</td>')
-    lines.append(f'{tab}<td>')
-    lines.append(f'{tab}  <ul>')
-    for url, text in rsrc_links:
-        lines.append(f'{tab}  <li><a href="{url}">{text}</a>')
-    lines.append(f'{tab}  </ul>')
-    lines.append(f'{tab}</td>')
+    if not rsrc_links:
+        lines.append(f'{tab}<td></td>')
+    else:
+        lines.append(f'{tab}<td><details><summary style="color:SteelBlue;text-decoration: underline;">Resources</strong></summary>')
+        lines.append(f'{tab}  <ul>')
+        for url, text in rsrc_links:
+            lines.append(f'{tab}  <li><a href="{url}">{text}</a>')
+        lines.append(f'{tab}  </ul>')
+        lines.append(f'{tab}  </details>')
+        lines.append(f'{tab}</td>')
     lines.append(f'{tab}<td>{hw_href}</td>')
     lines.append(f'{" "*20}</tr>')
     lines.append(f'{" "*20}<tr>')
