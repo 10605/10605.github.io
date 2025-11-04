@@ -4,6 +4,7 @@
   summary: 'Course Overview, History, Review of Complexity'
   pptx_link: https://docs.google.com/presentation/d/1u5vYdVO4ZbMTRJ-VRlFb-NJ0yaqcpu-X/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hoPMf0hKRY9nk_DY5cJlorN4EJq5t1sp/view?usp=drive_link
+  hw_link: https://github.com/10605/F25_HW1_v3/archive/refs/tags/hw1-v3.zip
   content:
   - 605-administrivia.pptx   #todo: TA slides
   - bigdata-history.pptx
@@ -67,6 +68,7 @@
   summary: Parameter Mixing, All-Reduce
   pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
+  hw_link: https://github.com/10605/F25_HW2/archive/refs/tags/hw2.zip
   content: 
   - batch-gradient-linear-regression.pptx
   - sgd-and-parallel-linear-regression.pptx
@@ -121,6 +123,7 @@
   content: LSH for Minhash and SimHash
   pptx_link: https://docs.google.com/presentation/d/1Iug_RuHS0S19V-DyHvMUSOCnSdz7kSvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1GJs5tX9AhRbF1jbb_qGlBqw9stohRjOM/view?usp=drive_link
+  hw_link: https://github.com/10605/F25_HW3/archive/refs/tags/hw3.zip
   content:
   - lsh.pptx
   - minhash-and-index.pptx
@@ -185,10 +188,11 @@
 - title: 'Deep Learning: Background and Architectures'
   pptx_link: https://docs.google.com/presentation/d/1I0PthhFUlurZtJqzKJ6Izj3xZniIrtxl/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1U1zRW8irQWJTROy17rYaf5KWRSc2hC94/view?usp=drive_link
+  hw_link: https://github.com/10605/F25_HW4/archive/refs/tags/hw4.zip
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW: HW4, LoRA'
+    - '* HW 4 out - LoRA'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
