@@ -247,7 +247,7 @@
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
-   - '* HW: GPT-2 Training'
+   - '* HW 5 out - GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
 - title: KV-Caching for LLMs
