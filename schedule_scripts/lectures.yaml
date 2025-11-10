@@ -269,9 +269,12 @@
 
 - title: KV Caching and Model Compression Recap
   summary: recap of KV caching, SnapKV and FastGen, big recap of model compression
+  pptx_link: https://docs.google.com/presentation/d/1WV7ccG23e6JD97W6HoGEj2FOAL0GtGvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1M7CGCWes9ln5r1qlV7-ggc-pUOsi2HYF/view?usp=drive_link
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
+   - kv-cache-recent-2025.pptx
 
 - title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
   content:

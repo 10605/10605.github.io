@@ -92,6 +92,12 @@ rag-overview.pptx:
   summary: RAG pipeline at high-level
   links:
     - https://dl.acm.org/doi/abs/10.1145/3078971.3078983: DeepHash paper, 2017
+kv-cache-recent-2025.pptx:
+  num_slides: 10
+  summary: two 2025 papers on on KV caching
+  links:
+  - https://proceedings.neurips.cc/paper_files/paper/2024/file/9e23d020c18e4c40d81c6a0fc7a46f68-Paper-Conference.pdf: Cross-Layer Attention paper, NeurIPS 2024
+  - https://www.usenix.org/system/files/fast25-qin.pdf: Mooncake paper, usenix 2025
 contrastive-overview.pptx:
   num_slides: 18
   summary: overview of contrastive learning, DPR, contriever, a few comments about ColBERT and EntityQuestions
