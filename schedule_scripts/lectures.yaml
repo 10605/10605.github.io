@@ -277,6 +277,9 @@
    - kv-cache-recent-2025.pptx
 
 - title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
+  summary: Overvier of contrastive learning, neural retrieval, and RAG
+  pptx_link: https://docs.google.com/presentation/d/1xz6SA5fmllg8gBip0tugn-u00k57e9_E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1Lt0Mnw49TjR4GmYajLrZ5FRu9YTDHy0X/view?usp=drive_link
   content:
     - rag-overview.pptx
     - contrastive-overview.pptx
