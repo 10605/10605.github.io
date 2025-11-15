@@ -292,10 +292,11 @@
 
 ########## RAG, Parallel Training, PPI
 
-- title: Optimizing Transformer Architectures - Guest Lecture, Michiel de Jong, Cursor
-  slide_link: https://drive.google.com/file/d/1XnekUWkdbkh6xYPl02XnKlY5_Exuv-YQ/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1NuGs8A1qcqTHu5-9krBDgLTU0n5wBUYI56_787bWlkI/edit?slide=id.g338b0198859_0_0#slide=id.g338b0198859_0_0
+- title: RAG / Optimizing Transformer Architectures - Guest Lecture, Michiel de Jong, Cursor
+  slide_link: https://drive.google.com/file/d/1APvIkvM9K1-3uGAp9bpWEcAbgDmAli_D/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1_L9vVD0w95El8ScDAmCxClhPnVQC2C9f/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
+    - michiel-guest-lecture.pptx
     - rag-fid.pptx
     - fido-etc.pptx
     - rag-recap.pptx
