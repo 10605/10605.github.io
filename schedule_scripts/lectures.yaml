@@ -299,7 +299,7 @@
     - rag-fid.pptx
     - rag-recap.pptx
     - rag-genllm.pptx
-    - michiel-guest-lecture.pptx #fake
+    - michiel-guest-lecture.pptx #fake file
     - fido-etc.pptx
 
 - title: Wrapup of recent topics and TBD
@@ -307,7 +307,7 @@
    - rag-fid-recap.pptx
    - fid-genllm.pptx
   content:
-    - '* Miniproject: project check in due (written report OR oral check-in)'
+    - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
   
 
 - title: <s>HW5 Writing Session</s> No Recitation 
