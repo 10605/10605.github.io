@@ -296,11 +296,11 @@
   slide_link: https://drive.google.com/file/d/1APvIkvM9K1-3uGAp9bpWEcAbgDmAli_D/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1_L9vVD0w95El8ScDAmCxClhPnVQC2C9f/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
-    - michiel-guest-lecture.pptx
     - rag-fid.pptx
-    - fido-etc.pptx
     - rag-recap.pptx
     - rag-genllm.pptx
+    - michiel-guest-lecture.pptx #fake
+    - fido-etc.pptx
 
 - title: Wrapup of recent topics and TBD
   content:
