@@ -302,12 +302,14 @@
     - michiel-guest-lecture.pptx #fake file
     - fido-etc.pptx
 
-- title: Wrapup of recent topics and TBD
+- title: Wrapup of recent topics
+  slide_link: https://drive.google.com/file/d/1mWEEldxfPMxyItgKqv3juOeTGT2ppSGp/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1Kw87AyffWPBYLTORgnN4k_8VNYBEqMlP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
    - rag-fid-recap.pptx
+   - rag-genllm.pptx
    - fid-genllm.pptx
-  content:
-    - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
+   - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
   
 
 - title: <s>HW5 Writing Session</s> No Recitation 
