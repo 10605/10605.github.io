@@ -316,8 +316,9 @@
   type: recitation
 
 - title: Network Effects and Scalable Evaluation
+  slide_link: https://drive.google.com/file/d/1oz0ZGlq6z6Bvmte7PrXfXScglJCjVBTB/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
-    - task-vectors.pptx
     - ppi.pptx
     - '* Previous HW due'
 
