@@ -19,8 +19,8 @@
   - spark-overview.pptx
   - density-vs-naive-bayes.pptx
 
-- title: 'Recitation 1: PySpark'
-  summary: 'An introduction to using Databricks and PySpark, with coding demo.'
+- title: 'Recitation 1: Python Polars'
+  summary: 'An introduction to using Python Polars, with a coding demo.'
   type: recitation
 
 ########## Map/Reduce Workflows
@@ -50,8 +50,6 @@
 - title: 'Recitation 2: Linear Algebra Review'
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
-  content:
-  - '* Semester add deadline (EoD)'
 
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
@@ -148,7 +146,6 @@
 - title: Exam Review and QA
   content:
   - '* HW3 Slot B Due'
-  - '* Semester drop deadline'
 
 
 - title: Exam 1
