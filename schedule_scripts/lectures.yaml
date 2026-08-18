@@ -112,14 +112,14 @@
   - online-lsh.pptx
   - lsh-knn-pq.pptx
 
-- title: 'HW2 Writing Session / AutoDiff'
+- title: 'Autodiff'
   summary: ''
   content:
   - autodiff.pptx
   - '* HW 2 Slot A Due'
   - '* HW 3 Out - Locality sensitive hashing'
 
-- title: 'AWS (cancel???) / HW2 Writing Session (?)'
+- title: 'HW2 Writing Session'
   type: recitation
   content:
   - '* HW 2 Slot A Grading Deadline'
@@ -139,7 +139,7 @@
   - dl_finetuning.pptx
   - '* HW 3 Slot A Due'
 
-- title: 'Practice exam / HW3 Writing Session (?)'
+- title: 'HW3 Writing Session'
   type: recitation
   summary: ''
   content: 
@@ -240,7 +240,7 @@
    - kv-cache-recent-2025.pptx
    - '* HW4 slot B deadline'
 
-- title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
+- title: Contrastive learning and retrieval
   summary: Overview of contrastive learning, neural retrieval, and RAG
   content:
     - rag-overview.pptx
@@ -254,7 +254,7 @@
 
 ########## RAG, Parallel Training, PPI
 
-- title: RAG / Optimizing Transformer Architectures - Guest Lecture, Michiel de Jong, Cursor
+- title: RAG / Optimizing Transformer Architectures
   content:
     - rag-fid.pptx
     - rag-recap.pptx
