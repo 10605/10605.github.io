@@ -4,13 +4,12 @@
   summary: 'Course Overview, History, Review of Complexity'
   pptx_link: https://docs.google.com/presentation/d/1u5vYdVO4ZbMTRJ-VRlFb-NJ0yaqcpu-X/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hoPMf0hKRY9nk_DY5cJlorN4EJq5t1sp/view?usp=drive_link
-  hw_link: https://github.com/10605/F25_HW1_v3/archive/refs/tags/hw1-v3.zip
   content:
   - 605-administrivia.pptx   #todo: TA slides
   - bigdata-history.pptx
   - chinchilla-scaling.pptx
   - complexity.pptx
-  - '* HW 1 out - Entity Resolution and Naive Bayes in Spark'
+  - '* HW 1 Out - Entity Resolution and Naive Bayes'
 
 - title: 'Map-Reduce and Spark'
   summary: 'Stream and sort paradigm, map-reduce'
@@ -24,7 +23,7 @@
   - spark-overview.pptx
   - density-vs-naive-bayes.pptx
 
-- title: 'Recitation: PySpark'
+- title: 'Recitation 1: PySpark'
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
   pptx_link: https://docs.google.com/presentation/d/1mK96hu0AEhFGX2GnSAulIfaHmQeUtiRJ/edit?usp=sharing&ouid=110525818057885587911&rtpof=true&sd=true
@@ -47,12 +46,6 @@
   - iterative-pagerank-in-spark.pptx
   - k-means-in-spark-example.pptx
 
-- title: 'Recitation: Linear Algebra Review'
-  summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
-  type: recitation
-  slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
-  notebook_link: https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
-
 ########## Learning as (Parallel) Optimization
 
 - title: Learning as Optimization 1
@@ -64,23 +57,32 @@
   - learning-linreg-as-optimization.pptx 
   - k-means-in-spark-example.pptx
 
+- title: 'Recitation 2: Linear Algebra Review'
+  summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
+  type: recitation
+  slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
+  notebook_link: https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
+  content:
+  - '* Semester add deadline (EoD)'
+
 - title: Learning as Optimization 2
   summary: Parameter Mixing, All-Reduce
   pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
-  hw_link: https://github.com/10605/F25_HW2/archive/refs/tags/hw2.zip
   content: 
   - batch-gradient-linear-regression.pptx
   - sgd-and-parallel-linear-regression.pptx
   - linreg-to-logreg-sgd.pptx
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
-  - '* HW 2 out - Parallel Linear Regression in Spark'
-  - '* HW 1 due'
+  - '* HW 1 Slot A Due'
+  - '* HW 2 Out - Logistic Regression'
 
 - title: 'HW1 Writing Session'
   type: recitation
   summary: ''
+  content:
+  - '* HW1 Slot A Grading Deadline'
 
 ########## Optimization, Randomized Algs
 
@@ -96,6 +98,7 @@
   - k-means-recap.pptx
   - matrix-factorization-vs-clustering.pptx
   - short-matrix-factorization-via-distributed-sgd.pptx
+  - '* HW1 Slot B Due'
 
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
   pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -123,13 +126,11 @@
   content: LSH for Minhash and SimHash
   pptx_link: https://docs.google.com/presentation/d/1Iug_RuHS0S19V-DyHvMUSOCnSdz7kSvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1GJs5tX9AhRbF1jbb_qGlBqw9stohRjOM/view?usp=drive_link
-  hw_link: https://github.com/10605/F25_HW3/archive/refs/tags/hw3.zip
   content:
   - lsh.pptx
   - minhash-and-index.pptx
   - online-lsh.pptx
   - lsh-knn-pq.pptx
-  - '* HW 3 out - Locality-Sensitive Hashing'
 
 - title: 'HW2 Writing Session / AutoDiff'
   pptx_link: https://docs.google.com/presentation/d/1CoGtIeLsWo08CEy8QXT-OjnjSauKRFnj/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -137,11 +138,15 @@
   summary: ''
   content:
   - autodiff.pptx
+  - '* HW 2 Slot A Due'
+  - '* HW 3 Out - Locality sensitive hashing'
 
-- title: 'Recitation: AWS'
+- title: 'AWS (cancel???) / HW2 Writing Session (?)'
   type: recitation
   pptx_link: https://docs.google.com/presentation/d/1S89CC7WADu422IzCd6nuOTqYzCUD6fsSQ5gSvPA1SPc/edit?usp=sharing
   slide_link: https://docs.google.com/presentation/d/1b_oCgDOmMKGhi4ulT6U9FSieHhO8BjS8/edit?usp=sharing&ouid=107762809756333661643&rtpof=true&sd=true
+  content:
+  - '* HW 2 Slot A Grading Deadline'
 
 ########## Week GPUs1
 
@@ -160,18 +165,22 @@
   content: 
   - distributed_dl.pptx
   - dl_finetuning.pptx
+  - '* HW 3 Slot A Due'
 
-- title: 'Recitation: Practice Exam'
+- title: 'Practice exam / HW3 Writing Session (?)'
   type: recitation
   summary: ''
   content: 
-  - '* HW 3 due (updated deadline: Sat 10/4)'
+  - '* HW3 Slot A Grading Deadline'
 
 ########## Exam 1
 
 - title: Exam Review and QA
   pptx_link: https://docs.google.com/presentation/d/1TIJoHupSDdyfvm9hINmT0umBeeT1JaAV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hFRV-8LUdr4d8dIIIWvz5acpEOCm5mHm/view?usp=drive_link
+  content:
+  - '* HW3 Slot B Due'
+  - '* Semester drop deadline'
 
 
 - title: Exam 1
@@ -180,7 +189,7 @@
   type: recitation
   summary: ''
   content:
-  - '* Miniproject: 10-605 students apply to lead a miniproject'
+  - '* 10-605 students apply to lead an open-ended miniproject'
 
 
 ########## Transformers
@@ -188,27 +197,25 @@
 - title: 'Deep Learning: Background and Architectures'
   pptx_link: https://docs.google.com/presentation/d/1I0PthhFUlurZtJqzKJ6Izj3xZniIrtxl/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1U1zRW8irQWJTROy17rYaf5KWRSc2hC94/view?usp=drive_link
-  hw_link: https://github.com/10605/F25_HW4/archive/refs/tags/hw4.zip
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW 4 out - LoRA'
+    - '* HW 4 Out - LoRA'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
   pptx_link: https://docs.google.com/presentation/d/1_8eblsK_ieS9zsGiqNlowKmqgbZ_vX6G/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1H4Ia8d0k3wYweOJS83Q16TNM8cE1RnTp/view?usp=drive_link
-  hw_link: https://piazza.com/class_profile/get_resource/mduh9or2tg140/mgzw30gdpeo573
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
     - lora-recap.pptx
     - transformer-discussion.pptx
     - transformer-bpe.pptx
-  content:
-    - '* Miniproject: open-ended miniproject proposals due on Thursday Oct 23'
+    - '* Open-ended miniproject proposals due Thu Oct 22'
+    - '* Mid-Semester Grades Due'
 
-- title: 'Recitation: PyTorch / HW4'
+- title: 'PyTorch / HW4'
   type: recitation
   summary: 'Introduction to using PyTorch with a coding demo'
   notebook_link: https://drive.google.com/file/d/1i52B4KkcU2CUA0Km4bAmXufwcaFRGkyp/view?usp=sharing
@@ -222,7 +229,7 @@
   content:
    - vizier.pdf
    - hyperparam.pptx 
-   - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
+   - '* Feedback on proposals; proposals posted for class'
 
 - title: Model compression
   pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -247,18 +254,20 @@
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
-   - '* HW 5 out - GPT-2 Training'
-   - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
+   - '* HW 4 slot A Due'
+   - '* HW 5 Out - GPT-2 Pretraining'
+   - '* Miniproject released'
+   - '* Structured miniproject details released; teams formed; declaration form due'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
   pptx_link: https://docs.google.com/presentation/d/1xd31ZNQOGyoobxslUORib2qgS4v9p8p3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/17kVEtqGU40wtrMmqwfnqnM3VbW3a0qpq/view?usp=drive_link
-  hw_link: https://piazza.com/class_profile/get_resource/mduh9or2tg140/mgzw3tr0aj378h
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
-    - '* Miniproject: structured miniproject survey due'
+    - '* HW4 slot A grading deadline'
+    - '* Structured miniproject survey due'
 
 - title: Recitation - Structured miniproject
   type: recitation
@@ -275,6 +284,7 @@
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
    - kv-cache-recent-2025.pptx
+   - '* HW4 slot B deadline'
 
 - title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
   summary: Overvier of contrastive learning, neural retrieval, and RAG
@@ -301,6 +311,7 @@
     - rag-genllm.pptx
     - michiel-guest-lecture.pptx #fake file
     - fido-etc.pptx
+    - '* HW 5 slot A Due'
 
 - title: Wrapup of recent topics
   slide_link: https://drive.google.com/file/d/1mWEEldxfPMxyItgKqv3juOeTGT2ppSGp/view?usp=drive_link
@@ -309,10 +320,11 @@
    - rag-fid-recap.pptx
    - rag-genllm.pptx
    - fid-genllm.pptx
-   - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
+   - '* HW5 slot A grading deadline'
+   - '* Project check-in due (written report or oral check-in)'
   
 
-- title: <s>HW5 Writing Session</s> No Recitation 
+- title: HW5 Writing Session
   type: recitation
 
 - title: Network Effects and Scalable Evaluation
@@ -320,7 +332,7 @@
   pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - ppi.pptx
-    - '* Previous HW due'
+    - '* HW5 slot B deadline'
 
 ########## Exam
 
@@ -329,6 +341,5 @@
   slide_link: https://drive.google.com/file/d/17stAkgMmAyCLGUpMoj0JkhwDBXcabPA5/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1X_Omjw-bNofrmqc2hQbpsofFV9RMJG7J/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
-  - '* Miniprojects due'
-  - '* No quiz for today!'
+  - '* Miniproject Due'
 - title: Exam 2
