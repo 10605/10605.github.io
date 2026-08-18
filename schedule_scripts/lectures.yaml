@@ -103,7 +103,7 @@
 - title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
   pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1ATVOyDt9Sb9PEkn0quMKeBIknENwBYm_/view?usp=drive_link
-  summary: Bloom Filters and Count-Min -Sketchs
+  summary: Bloom Filters and Count-Min Sketches
   content:
   - tree-allreduce.pptx
   - hash-trick-to-bloom-filter.pptx
@@ -287,7 +287,7 @@
    - '* HW4 slot B deadline'
 
 - title: Contrastive learning and retrieval - Guest Lecture, John Wieting, Google DeepMind
-  summary: Overvier of contrastive learning, neural retrieval, and RAG
+  summary: Overview of contrastive learning, neural retrieval, and RAG
   pptx_link: https://docs.google.com/presentation/d/1xz6SA5fmllg8gBip0tugn-u00k57e9_E/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1Lt0Mnw49TjR4GmYajLrZ5FRu9YTDHy0X/view?usp=drive_link
   content:
