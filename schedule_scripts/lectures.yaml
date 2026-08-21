@@ -2,35 +2,39 @@
 
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
+  pptx_link: https://docs.google.com/presentation/d/1GK3GPVxBXY5JYcSaeqqh_xR2iIekVCLQ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1yf7khe8C-NWvtWkmshosr4PoAfDVA2rR/view?usp=drive_link
   content:
-  - 605-administrivia.pptx   #todo: TA slides
+  - 605-administrivia.pptx
   - bigdata-history.pptx
-  - chinchilla-scaling.pptx
+  - density-vs-naive-bayes.pptx
+  - chincilla-scaling.pptx
   - complexity.pptx
-  - '* HW 1 Out - Entity Resolution and Naive Bayes'
+  - cost-of-operations.pptx
+  - '* HW 1 out - Scalable Entity Resolution and Naive Bayes'
 
 - title: 'Map-Reduce and Spark'
-  summary: 'Stream and sort paradigm, map-reduce'
-  content: #ER and HW1 task
-  - cost-of-operations.pptx
-  - short-stream-sort-to-mr.pptx # keys and values
-  - map-reduce-frameworks.pptx
-  - map-reduce-abstractions.pptx #can simplify - (w, {y: n(w,y)}) join (w, docid) 
-  - spark-overview.pptx
-  - density-vs-naive-bayes.pptx
+  summary: 'Development of Map-Reduce, Spark, and Polars'
+  pptx_link: https://docs.google.com/presentation/d/1D7GrpfH2ciFQtF14x6MImid4dy9m4FgB/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1kltRZbfpyb4-EBOJ-Fd2znao4KAFxarI/view?usp=drive_link
+  content: 
+    - cost-of-operations-recap.pptx
+    - mr-origins.pptx
+    - spark-overview-short.pptx
+    - polars-overview.pptx
 
-- title: 'Recitation 1: Python Polars'
-  summary: 'An introduction to using Python Polars, with a coding demo.'
+- title: 'Recitation: Python Polars'
+  summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
 
-########## Map/Reduce Workflows
-
-## Labor day
+########## Map/Reduce Workflows #TODO: update/rework
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
+  pptx_link: https://docs.google.com/presentation/d/1VBUBbove1Y1PAMcRKwBc4WuLMScMoiAq/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1pV8xIVsdK8flc1l4A87rEJkcwWFSODEO/view?usp=drive_link
   content: #add motivation for entity resolution
-  - mr-origins-hazsoup.py
+  - mr-origins-hazsoup.pptx
   - spark-details.pptx
   - spork.pptx
   - comparing-corpora.pptx
@@ -38,40 +42,50 @@
   - iterative-pagerank-in-spark.pptx
   - k-means-in-spark-example.pptx
 
-########## Learning as (Parallel) Optimization
-
-- title: Learning as Optimization 1
+- title: Learning as Optimization 1 - Linear and logistic regression, coordinate Descent
+  pptx_link: https://docs.google.com/presentation/d/130ZVQB3ukw45Vo7JQrxiccMw1bqNAepW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1M1fxuQU8G4nwwijmRZBLkDi60IByVp8y/view?usp=drive_link
   summary: Linear Regression, Logistic Regression
   content:
   - matmul-in-spark.pptx
   - learning-linreg-as-optimization.pptx 
   - k-means-in-spark-example.pptx
 
-- title: 'Recitation 2: Linear Algebra Review'
+- title: 'Recitation: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
+  slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
+  notebook_link: https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
 
-- title: Learning as Optimization 2
+########## Learning as (Parallel) Optimization
+
+# Labor Day
+
+- title: Learning as Optimization 2 - Distributed learning, parameter mixing, kernels, all-reduce
   summary: Parameter Mixing, All-Reduce
+  pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
   content: 
   - batch-gradient-linear-regression.pptx
   - sgd-and-parallel-linear-regression.pptx
   - linreg-to-logreg-sgd.pptx
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
-  - '* HW 1 Slot A Due'
-  - '* HW 2 Out - Logistic Regression'
+  - '* HW 1 Slot A due'
+  - '* HW 2 out - Parallel Linear Regression'
 
 - title: 'HW1 Writing Session'
   type: recitation
   summary: ''
   content:
-  - '* HW1 Slot A Grading Deadline'
+  -  '* HW 1 Slot A Grading deadline: Sat Sept 12'
 
 ########## Optimization, Randomized Algs
 
-- title: Learning as Optimization 3
+- title: Learning as Optimization 3 - sparsity, hash kernels, matrix factorization
   summary: Matrix Factorization and Other Tasks
+  pptx_link: https://docs.google.com/presentation/d/1ZQNwjbCLYiDJLdG851B8JZzzbROEMAsm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/15GwrI7Ky35G0i7fUDbTyL9yLzNTGYcnr/view?usp=drive_link
   content:
   - sparsity-linreg-and-sgd.pptx
   - hash-kernels-linreg.pptx
@@ -80,10 +94,13 @@
   - k-means-recap.pptx
   - matrix-factorization-vs-clustering.pptx
   - short-matrix-factorization-via-distributed-sgd.pptx
-  - '* HW1 Slot B Due'
+  - 'HW1 Slot B due'
 
-- title: Randomized Algorithms 1 - Bloom Filters and Count-Min Sketches
-  summary: Bloom Filters and Count-Min Sketches
+
+- title: Randomized Algorithms 1 - Bloom filters and Count-Min sketches
+  pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1ATVOyDt9Sb9PEkn0quMKeBIknENwBYm_/view?usp=drive_link
+  summary: Bloom Filters and Count-Min -Sketchs
   content:
   - tree-allreduce.pptx
   - hash-trick-to-bloom-filter.pptx
@@ -92,60 +109,70 @@
   - count-min-sketch.pptx
   - uses-of-count-min-sketch.pptx
   - bloom-filter-countmin-recap.pptx
+  - '* HW1 Slot B due' 
 
 - title: 'Recitation 3: Probability, Evaluation Metrics and Minhashing'
   type: recitation
   summary: Review of topics for Homework 3
+  content:
+   - recitation-3.pptx
 
-########## Randomized Algs, Autodiff
+########## Randomized Algs
 
-- title: 'Randomized Algorithms 2 - Locality Sensitive Hashing'
+- title: 'Randomized Algorithms 2 - Locality Sensitive Hashing, Minhash and Simhash'
   summary: Locality-Sensitive Hashing
   content: LSH for Minhash and SimHash
+  pptx_link: https://docs.google.com/presentation/d/1Iug_RuHS0S19V-DyHvMUSOCnSdz7kSvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1GJs5tX9AhRbF1jbb_qGlBqw9stohRjOM/view?usp=drive_link
   content:
   - lsh.pptx
   - minhash-and-index.pptx
   - online-lsh.pptx
   - lsh-knn-pq.pptx
-
-- title: 'Autodiff'
-  summary: ''
-  content:
-  - autodiff.pptx
-  - '* HW 2 Slot A Due'
-  - '* HW 3 Out - Locality sensitive hashing'
+  - '* HW 2 slot A due'
+  - '* HW 3 out - Locality-Sensitive Hashing' #TODO: polars?
 
 - title: 'HW2 Writing Session'
   type: recitation
+  pptx_link: 
+  slide_link: 
   content:
-  - '* HW 2 Slot A Grading Deadline'
+  - '* HW 2 slot A grading deadline: Sept 26'
 
-########## Week GPUs1
+########## Week Autodiff and GPUs
 
-- title: 'Parallel Optimization with GPUs 1'
+- title: ' AutoDiff'
+  pptx_link: https://docs.google.com/presentation/d/1CoGtIeLsWo08CEy8QXT-OjnjSauKRFnj/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1j6TS05vFMF9TImherMlcfXpR7oqCWbTi/view?usp=drive_link
+  content:
+  - autodiff.pptx
+
+
+- title: 'Parallel Optimization with GPUs'  #TODO: way too long as is, need to cut down
   summary: ''
+  pptx_link: https://docs.google.com/presentation/d/1W-vLRtHi7NC9glhYlL7Jsp9dVLlG5Whi/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1r-iiUsjfhOrIjInB078siaO0r6rvnizS/view?usp=drive_link
   content:
   - gpu-intro.pptx
-  - gpu-programming-short.pptx
-
-- title: 'Parallel Optimization with GPUs 2'
-  summary: Non-convexity, Distributed ML for GPUs and Large Models, Ring All-Reduce 
-  content: 
+  - gpu-programming-intro-short.pptx
   - distributed_dl.pptx
   - dl_finetuning.pptx
-  - '* HW 3 Slot A Due'
+  - '* HW 3 Slot A due'
+
 
 - title: 'HW3 Writing Session'
   type: recitation
   summary: ''
   content: 
-  - '* HW3 Slot A Grading Deadline'
+  - '* HW 3 Slot A grading deadline: Oct 4'
 
 ########## Exam 1
 
 - title: Exam Review and QA
+  pptx_link: https://docs.google.com/presentation/d/1TIJoHupSDdyfvm9hINmT0umBeeT1JaAV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1hFRV-8LUdr4d8dIIIWvz5acpEOCm5mHm/view?usp=drive_link
   content:
-  - '* HW3 Slot B Due'
+  - '* HW 3 Slot B due' 
 
 
 - title: Exam 1
@@ -154,42 +181,51 @@
   type: recitation
   summary: ''
   content:
-  - '* 10-605 students apply to lead an open-ended miniproject'
+  - '* Miniproject: 10-605 students apply to lead a miniproject'
 
 
 ########## Transformers
 
 - title: 'Deep Learning: Background and Architectures'
+  pptx_link: https://docs.google.com/presentation/d/1I0PthhFUlurZtJqzKJ6Izj3xZniIrtxl/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1U1zRW8irQWJTROy17rYaf5KWRSc2hC94/view?usp=drive_link
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW 4 Out - LoRA'
+    - '* HW 4 out - LoRA'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
+  pptx_link: https://docs.google.com/presentation/d/1_8eblsK_ieS9zsGiqNlowKmqgbZ_vX6G/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1H4Ia8d0k3wYweOJS83Q16TNM8cE1RnTp/view?usp=drive_link
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
     - lora-recap.pptx
     - transformer-discussion.pptx
     - transformer-bpe.pptx
-    - '* Open-ended miniproject proposals due Thu Oct 22'
-    - '* Mid-Semester Grades Due'
+  content:
+    - '* Miniproject: open-ended miniproject proposals due'
 
-- title: 'PyTorch / HW4'
+- title: 'Recitation: PyTorch / HW4'
   type: recitation
   summary: 'Introduction to using PyTorch with a coding demo'
+  notebook_link: https://drive.google.com/file/d/1i52B4KkcU2CUA0Km4bAmXufwcaFRGkyp/view?usp=sharing
 
 ########## Hyperparams, KV, BPE
 
 - title: Hyperparameter Search 
+  pptx_link: https://docs.google.com/presentation/d/1ZS2S-5xvnqcEmI86PoQ8ynRbqctWQ2kb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1FpHW6MpZHlwfKQzrusxzItHVD519O2MO/view?usp=drive_link
   summary: Vizier, Hyperband
   content:
    - vizier.pdf
    - hyperparam.pptx 
-   - '* Feedback on proposals; proposals posted for class'
+   - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
 - title: Model compression
+  pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1B5nLCqT3DBh5UnmNVfsvNaD20sEAQe_y/view?usp=drive_link
   summary: 'Quantization, Pruning, and Distillation'
   content:
    - quantize-distill.pptx
@@ -204,45 +240,52 @@
 ########## Caching and Pruning
 
 - title: Embarrassingly Parallel Training
+  pptx_link: https://docs.google.com/presentation/d/167TcvMTMtt9RbHuYenmyckaa-eHFHJmL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1jFbpVzatVfmBa2P5z37p4m9jW9HCGk6J/view?usp=drive_link
   summary: BTM, BTX, FlexOLMO, and Task Vectors
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
-   - '* HW 4 slot A Due'
-   - '* HW 5 Out - GPT-2 Pretraining'
-   - '* Miniproject released'
-   - '* Structured miniproject details released; teams formed; declaration form due'
+   - '* HW 4 Slot A due'
+   - '* HW 5 out - GPT-2 Training'
+   - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
+  pptx_link: https://docs.google.com/presentation/d/1xd31ZNQOGyoobxslUORib2qgS4v9p8p3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/17kVEtqGU40wtrMmqwfnqnM3VbW3a0qpq/view?usp=drive_link
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
-    - '* HW4 slot A grading deadline'
-    - '* Structured miniproject survey due'
+    - '* Miniproject: structured miniproject survey due'
 
 - title: Recitation - Structured miniproject
   type: recitation
+  slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
+  content:
+   - '* HW 4 Grading deadline: Nov 5' 
 
 
 ########## Caching and RAG
 
 - title: KV Caching and Model Compression Recap
   summary: recap of KV caching, SnapKV and FastGen, big recap of model compression
+  pptx_link: https://docs.google.com/presentation/d/1WV7ccG23e6JD97W6HoGEj2FOAL0GtGvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1M7CGCWes9ln5r1qlV7-ggc-pUOsi2HYF/view?usp=drive_link
   content: 
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
    - kv-cache-recent-2025.pptx
-   - '* HW4 slot B deadline'
+   - '* HW4 Slot B Deadline'
 
 - title: Contrastive learning and retrieval
-  summary: Overview of contrastive learning, neural retrieval, and RAG
+  summary: Overvier of contrastive learning, neural retrieval, and RAG
   content:
     - rag-overview.pptx
     - contrastive-overview.pptx
     - contrastive-dpr.pptx
     - contrastive-tricks.pptx
-    - contriever.pptx
+    - contreiver.pptx
 
 - title: HW4 Writing Session
   type: recitation
@@ -256,21 +299,21 @@
     - rag-genllm.pptx
     - michiel-guest-lecture.pptx #fake file
     - fido-etc.pptx
-    - '* HW 5 slot A Due'
+    - '* HW5 Slot A Due'
 
-- title: Wrapup of recent topics
+- title: Guest Lecture - Leo Boytsov - Robustness, Generalization, and Practical Limits of Deep Learning, A Practitioner’s Perspective
   content:
-   - rag-fid-recap.pptx
-   - rag-genllm.pptx
-   - fid-genllm.pptx
-   - '* HW5 slot A grading deadline'
-   - '* Project check-in due (written report or oral check-in)'
+   - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
   
 
 - title: HW5 Writing Session
   type: recitation
+  content:
+    - '* HW5 Slot A grading deadline'
 
 - title: Network Effects and Scalable Evaluation
+  slide_link: https://drive.google.com/file/d/1oz0ZGlq6z6Bvmte7PrXfXScglJCjVBTB/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - ppi.pptx
     - '* HW5 slot B deadline'
@@ -279,6 +322,9 @@
 
 # week 16: review and final
 - title: Exam Review and QA
+  slide_link: https://drive.google.com/file/d/17stAkgMmAyCLGUpMoj0JkhwDBXcabPA5/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1X_Omjw-bNofrmqc2hQbpsofFV9RMJG7J/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
-  - '* Miniproject Due'
+  - '* Miniprojects due'
+
 - title: Exam 2
