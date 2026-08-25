@@ -3,13 +3,12 @@
 - title: 'Overview'
   summary: 'Course Overview, History, Review of Complexity'
   slide_link: https://drive.google.com/file/d/1yf7khe8C-NWvtWkmshosr4PoAfDVA2rR/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1GK3GPVxBXY5JYcSaeqqh_xR2iIekVCLQ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
   - 605-administrivia.pptx
   - bigdata-history.pptx
   - density-vs-naive-bayes.pptx
   - chincilla-scaling.pptx
-  - complexity.pptx
-  - cost-of-operations.pptx
   - '* HW 1 out - Scalable Entity Resolution and Naive Bayes'
 
 - title: 'Map-Reduce and Spark'
@@ -17,7 +16,8 @@
   pptx_link: https://docs.google.com/presentation/d/1D7GrpfH2ciFQtF14x6MImid4dy9m4FgB/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1kltRZbfpyb4-EBOJ-Fd2znao4KAFxarI/view?usp=drive_link
   content: 
-    - cost-of-operations-recap.pptx
+    - complexity.pptx
+    - cost-of-operations.pptx
     - mr-origins.pptx
     - spark-overview-short.pptx
     - polars-overview.pptx
