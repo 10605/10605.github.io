@@ -3,6 +3,8 @@
 polars-overview.pptx:
   num_slides: 18
   summary: Polars walkthrough
+  links:
+  - https://docs.pola.rs/user-guide/getting-started: Polars Getting Started Tutorial
 
 605-administrivia.pptx:
   num_slides: 18
