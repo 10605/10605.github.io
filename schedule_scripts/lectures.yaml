@@ -25,6 +25,8 @@
 - title: 'Recitation: Python Polars'
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
+  content:
+  - polars-recitation-resources
 
 ########## Map/Reduce Workflows #TODO: update/rework
 
