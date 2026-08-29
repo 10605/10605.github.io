@@ -6,6 +6,14 @@ polars-overview.pptx:
   links:
   - https://docs.pola.rs/user-guide/getting-started: Polars Getting Started Tutorial
 
+polars-recitation-resources:
+  num_slides: 0
+  summary: Polars recitation resources
+  links:
+  - https://drive.google.com/file/d/14nkg3EnnYxNbca15NpZcxDpftajr-Rnk/view?usp=sharing: Polars Essentials (part 2)
+  - https://colab.research.google.com/drive/1zZi9C-Pyr_0Ib5SbWLyhKysSkkvkgvyQ?usp=sharing: Colab Notebook
+  - https://docs.google.com/presentation/d/1bsa8uggmpDp4w6h2pbhiZj8_NQv2cq4W/edit?usp=sharing&ouid=112869297892034233698&rtpof=true&sd=true: Slides
+
 605-administrivia.pptx:
   num_slides: 18
   summary: 'overview of 10-605: grading policies, projects, 605 vs 805 | Grading policies
