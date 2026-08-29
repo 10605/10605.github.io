@@ -1,5 +1,9 @@
 # utilities for planning lectures
 #
+# This half only reads the yaml -- config.yaml, lectures.yaml, slides.yaml --
+# so it can be copied into the 10605.github.io repo and run by the TAs to
+# update the schedule.  Anything that needs the slide decks themselves lives
+# in lecture.py, which is private to the slide-db repo and imports this file.
 
 import argparse
 import calendar
@@ -8,6 +12,7 @@ import json
 import pprint
 import re
 import os
+import sys
 import yaml
 
 ########## i/o
@@ -21,6 +26,65 @@ def load_any(any_file):
             return yaml.full_load(fp)
     else:
         raise ValueError(f'unknown file format for {any_file}')
+
+def load_slide_data(slide_files, module_dirs=None):
+    """Merge the --slides files left to right, later files shadowing earlier ones.
+    Shadowing is whole-entry: a delta entry replaces the base entry outright, so
+    dropping a stale `links` list is just a matter of omitting it.
+
+    With module_dirs (lecture.py passes them), a delta entry that shadows nothing
+    and names no deck on disk is flagged as a probable typo.  Without them there
+    is nothing to check against, so the check is skipped.
+    """
+    slide_data = {}
+    for slide_file in slide_files:
+        delta = load_any(slide_file)
+        for name, slide_d in delta.items():
+            if module_dirs and slide_file != slide_files[0] and name not in slide_data \
+               and not any(os.path.exists(os.path.join(d, name)) for d in module_dirs):
+                print(f'WARNING: {slide_file}: {name} shadows nothing and is not '
+                      f'in {", ".join(module_dirs)} -- typo?', file=sys.stderr)
+            slide_data[name] = slide_d
+    return slide_data
+
+def add_course_args(parser):
+    """The flags naming the three yaml files, shared with lecture.py."""
+    parser.add_argument(
+        '--config',
+        default='config.yaml',
+        help='basic info on dates for the course + html generation')
+    parser.add_argument(
+        '--lectures',
+        default='lectures.yaml',
+        help='database of info on each lecture')
+    parser.add_argument(
+        '--slides',
+        action='append',
+        metavar='SLIDES.yaml',
+        help='database of info on decks for individual "modules"; repeatable, '
+             'with later files shadowing earlier ones entry by entry '
+             '(default: slides.yaml)')
+    parser.add_argument(
+        '--show_cancelled',
+        action='store_true',
+        help='show dates of cancelled clsses')
+    parser.add_argument(
+        '--n',
+        type=int,
+        default=1,
+        help='how many lectures to show')
+
+def load_course(args, module_dirs=None):
+    """Load and cross-join the three yaml files into (config, lecture_data)."""
+    config = load_any(args.config)
+    lecture_data = load_any(args.lectures)
+    add_default_values(lecture_data)
+    slide_data = load_slide_data(args.slides or ['slides.yaml'], module_dirs)
+    join_lecture_dates(lecture_data, config)
+    if args.show_cancelled:
+        add_cancelled_dates(lecture_data, config)
+    join_slide_content(lecture_data, slide_data)
+    return config, lecture_data
 
 def add_default_values(lecture_data):
     for lec_d in lecture_data:
@@ -88,9 +152,10 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
     
     meeting_type = dict(
         recitation='<strong class="label label-red">Recitation</strong>',
-        lecture='<strong class="label label-pink">Lecture</strong>')
+        lecture='<strong class="label label-pink">Lecture</strong>',
+        no_class='<strong class="label label-default">No Class</strong>')
     assignments = get_assignments(content=content) or ['']
-    rsrc_links = dict([it for c in lec_d['content'] for link in c.get('links',[]) for it in link.items()]).items()
+    rsrc_links = dict([it for c in content for link in c.get('links',[]) for it in link.items()]).items()
     def make_href(link, text):
         if link:
             return f'<a href="{link}">{text}</a>'
@@ -111,7 +176,10 @@ def lecture_row_as_str(title, summary, printable_date, content, **kw):
     lines.append(f'{" "*20}<tr>')
     lines.append(f'{tab}<td>{printable_date}</td>')
     lines.append(f'{tab}<td>{meeting_type[kw.get("type", "lecture")]}</td>')
-    lines.append(f'{tab}<td>{title} {slide_href} {pptx_href} {notebook_href} {movie_href}</td>')
+    if kw.get('type') == 'no_class':
+        lines.append(f'{tab}<td>{kw.get("cancellation_reason", "")}</td>')
+    else:
+        lines.append(f'{tab}<td>{title} {slide_href} {pptx_href} {notebook_href} {movie_href}</td>')
     if not rsrc_links:
         lines.append(f'{tab}<td></td>')
     else:
@@ -163,7 +231,10 @@ def as_content_d(content_line, slide_data):
             value=content_line)
     else:
         slide_d = slide_data.get(content_line, dict(num_slides=0.1, summary=' | NOT IN DB'))
-        summary = slide_d['summary']
+        # a half-written entry (num_slides but no summary yet, or vice versa) is
+        # normal while a deck is being revised -- show what there is rather than
+        # blowing up, which used to blank out the whole lecture
+        summary = slide_d.get('summary') or f' | {content_line} - NO SUMMARY'
         if " | " in summary:
             summary,  title = summary.split(" | ")
             concepts = re.findall(r'[!+]\w+', summary)
@@ -176,7 +247,7 @@ def as_content_d(content_line, slide_data):
             kind='deck',
             filename=content_line,
             title=title,
-            num_slides=slide_d['num_slides'],
+            num_slides=slide_d.get('num_slides') or 0,
             summary=summary,
             concepts=concepts,
             prereqs=prereqs,
@@ -185,12 +256,9 @@ def as_content_d(content_line, slide_data):
 
 def join_slide_content(lecture_data, slide_data):
     for lec_d in lecture_data:
-        try:
-            lec_d['content'] = [as_content_d(line, slide_data) for line in lec_d['content']]
-        except KeyError:
-            lec_d['content'] = []
-        except TypeError:
-            lec_d['content'] = []
+        # a lecture with no content, or with `content:` and nothing under it
+        content = lec_d.get('content') or []
+        lec_d['content'] = [as_content_d(line, slide_data) for line in content]
 
 ########## calendar stuff
 
@@ -203,11 +271,19 @@ def join_lecture_dates(lecture_data, config):
 def class_is_cancelled(month, day, config):
     """Is this class cancelled according to the config file?
     """
+    return cancellation_reason(month, day, config) is not None
+
+def cancellation_reason(month, day, config):
+    """Return the optional reason string for a cancelled date, or ''
+    if cancelled with no reason given, or None if not cancelled.
+
+    Entries in DATES_WITH_NO_CLASS are [month, day] or [month, day, "reason"].
+    """
     month_day_tup = (month, day)
-    for month_day_list in config['DATES_WITH_NO_CLASS']:
-        if month_day_tup == tuple(month_day_list):
-            return True
-    return False
+    for entry in config['DATES_WITH_NO_CLASS']:
+        if tuple(entry[:2]) == month_day_tup:
+            return entry[2] if len(entry) > 2 else ''
+    return None
 
 def gen_all_dates(config, cancelled):
     c = calendar.Calendar(0)   #monday = day index 0
@@ -215,14 +291,19 @@ def gen_all_dates(config, cancelled):
     month_names = "xx Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
     (start_month, start_day) = config['START_DATE']
     (end_month, end_day) = config['END_DATE']
-    meeting_days = {(config['LECTURE_DAY_OF_WEEK'] + k) for k in [0,2,4]}
+    if config.get('LECTURES_PER_WEEK') == 2:
+        offsets = [0,2]
+    else:
+        offsets = [0,2,4]
+    meeting_days = {(config['LECTURE_DAY_OF_WEEK'] + k) for k in offsets}
     for month in range(start_month, end_month + 1):
         for (day, day_of_week) in c.itermonthdays2(config['YEAR'], month):
             if day > 0 and (month > start_month or day >= start_day) and (month < end_month or day <= end_day):
-                if class_is_cancelled(month, day, config) == cancelled:
+                reason = cancellation_reason(month, day, config)
+                if (reason is not None) == cancelled:
                     if (day_of_week in meeting_days):
                         printable_date = "%s %s %d, %d" % (day_names[day_of_week], month_names[month], day, config['YEAR'])
-                        yield dict(numeric_date=(month, day, day_of_week), printable_date=printable_date)
+                        yield dict(numeric_date=(month, day, day_of_week), printable_date=printable_date, cancellation_reason=reason)
 
 
 def new_week(last_lec_d, lec_d):
@@ -245,11 +326,30 @@ def lecture_dates(lecture_data, config):
 
 def add_cancelled_dates(lecture_data, config):
     for date_d in gen_all_dates(config, cancelled=True):
-        lecture_data.append(dict(title='NO CLASS', content=[], summary='', **date_d))
+        reason = date_d.get('cancellation_reason', '')
+        title = f'NO CLASS ({reason})' if reason else 'NO CLASS'
+        lecture_data.append(dict(title=title, content=[], summary='', type='no_class', **date_d))
     lecture_data.sort(key=lambda lec_d: lec_d['numeric_date'])
 
+########## picking lectures out of the schedule
+
+def lectures_from_today(lecture_data, n):
+    """The next n lectures on or after today, in schedule order."""
+    today = datetime.date.today()
+    upcoming = []
+    for lec_d in lecture_data:
+        if not lec_d.get('numeric_date'):
+            continue
+        lmon, lday, _ = lec_d['numeric_date']
+        if (lmon, lday) >= (today.month, today.day):
+            upcoming.append(lec_d)
+            if len(upcoming) >= n:
+                break
+    return upcoming
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='schedule tooling: reads the course yaml, writes schedule.html')
     parser.add_argument(
         'action',
         choices=['html', 'syllabus', 'check', 'calendar', 'next'],
@@ -257,60 +357,25 @@ if __name__ == '__main__':
             'html: generate schedule.html;',
             'syllabus: summary of planned lectures;',
             'calendar: shorter summary of planned lectures;',
-            'next: syllabus output for next --n lectures'])
+            'next: syllabus output for next --n lectures;',
+            'check: prerequisite ordering check'])
     )
-    parser.add_argument(
-        '--config',
-        default='config.yaml',
-        help='basic info on dates for the course + html generation')
-    parser.add_argument(
-        '--lectures',
-        default='lectures.yaml',
-        help='database of info on each lecture')
-    parser.add_argument(
-        '--slides',
-        default='slides.yaml',
-        help='database of info on decks for individual "modules"')
-    parser.add_argument(
-        '--show_cancelled',
-        action='store_true',
-        help='show dates of cancelled clsses')
+    add_course_args(parser)
     parser.add_argument(
         '--show_weeks',
         action='store_true',
         help='show dividing lines between weeks')
-    parser.add_argument(
-        '--n',
-        type=int,
-        default=1,
-        help='with action "next", show next n lectures')
     args = parser.parse_args()
 
-    config = load_any(args.config)
-    lecture_data = load_any(args.lectures)
-    add_default_values(lecture_data)
-    slide_data = load_any(args.slides)
-    join_lecture_dates(lecture_data, config)
-    if args.show_cancelled:
-        add_cancelled_dates(lecture_data, config)
-    join_slide_content(lecture_data, slide_data)
+    config, lecture_data = load_course(args)
 
     if args.action == 'syllabus':
         for lec_d in lecture_data:
             show_lecture(**lec_d)
 
     elif args.action == 'next':
-        today = datetime.date.today()
-        mon, day = today.month, today.day
-        k = 0
-        for lec_d in lecture_data:
-            lmon, lday, _ = lec_d['numeric_date']
-            if lmon > mon or (lmon==mon and lday >= day):
-                show_lecture(**lec_d)
-                k += 1
-                if k >= args.n:
-                    break
-            
+        for lec_d in lectures_from_today(lecture_data, args.n):
+            show_lecture(**lec_d)
 
     elif args.action == 'check':
         check_constraints(lecture_data)

@@ -1,18 +1,19 @@
 # for getting the dates of each lecture
-CLASS_NUM: 10-405/10-605/10-805
+CLASS_NUM: 10-605
 DATES_WITH_NO_CLASS:
-- [9, 7]
-- [10, 12]
-- [10, 14]
-- [10, 16]
-- [11, 25]
-- [11, 27]
+- [9, 7, "Labor Day"]
+- [10, 12, "Fall Break"]
+- [10, 14, "Fall Break"]
+- [10, 16, "Fall Break"]
+- [9, 21, "Yom Kippur"]
+- [11, 25, "Thanksgiving"]
+- [11, 27, "Thanksgiving"]
 END_DATE: [12, 2]
 LECTURE_DAY_OF_WEEK: 0
 START_DATE: [8, 24]
 YEAR: 2026
 # for generating HTML version of schedule
-BASEDIR: ..
-SCHEDULE_FILE: schedule.html
-HEADER: schedule_scripts/schedule_head.html
-FOOTER: schedule_scripts/schedule_foot.html
+BASEDIR: .
+SCHEDULE_FILE: ../schedule.html
+HEADER: schedule_head.html
+FOOTER: schedule_foot.html

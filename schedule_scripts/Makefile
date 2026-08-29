@@ -1,5 +1,5 @@
 schedule:
-	python3 util.py html
+	python3 util.py html --show_cancelled
 
 next:
 	python3 util.py next
