@@ -31,17 +31,14 @@
 ########## Map/Reduce Workflows #TODO: update/rework
 
 - title: 'Workflows for Map-Reduce Systems'
-  summary: Motivating Spark/Hadoop; PageRank, K-Means, and Iterative Map-Reduce
-  pptx_link: https://docs.google.com/presentation/d/1VBUBbove1Y1PAMcRKwBc4WuLMScMoiAq/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1pV8xIVsdK8flc1l4A87rEJkcwWFSODEO/view?usp=drive_link
-  content: #add motivation for entity resolution
-  - mr-origins-hazsoup.pptx
-  - spark-details.pptx
-  - spork.pptx
-  - comparing-corpora.pptx
-  - pagerank-intro.pptx
-  - iterative-pagerank-in-spark.pptx
-  - k-means-in-spark-example.pptx
+  summary: Review and Sample Workflows 
+  pptx_link: https://docs.google.com/presentation/d/1yk0LLc-7ueqPwU6Flk4777m2qE4sTyxj/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1x9XCmMR-UrU2cC2XHcqqd3uqtANilygP/view?usp=drive_link
+  content: #add motivation for entity resolution?
+  - map-reduce-codesamples-review.pptx
+  - comparing-corpora-polars.pptx
+  - motivate-tfidf-for-entity-matching.pptx 
+  - k-means-in-polars-example.pptx
 
 - title: Learning as Optimization 1 - Linear and logistic regression, coordinate Descent
   pptx_link: https://docs.google.com/presentation/d/130ZVQB3ukw45Vo7JQrxiccMw1bqNAepW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true

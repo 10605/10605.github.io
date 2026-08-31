@@ -1,5 +1,31 @@
 # Updates to database of info on slide decks for individual "modules"
 
+motivate-tfidf-for-entity-matching.pptx:
+  num_slides: 3
+  summary: short motivation for using TFIDF for entities
+
+k-means-in-polars-example.pptx:
+  num_slides: 27
+  summary: EM background, k-means in Polars, parallel k-means
+  links:
+   - https://github.com/10605/LectureSampleCode/blob/main/polars_workflows/kmeans.py: k-means polars code
+
+map-reduce-codesamples-review.pptx:
+  num_slides: 25
+  summary: review of Map-Reduce, Spark, and Polars
+
+
+comparing-corpora-polars.pptx:
+  num_slides: 19
+  summary: Generating and scoring phrases in two corpora
+  links:
+   - https://aclanthology.org/W03-1805.pdf: A Language Model Approach to Keyphrase Extraction, Tomokiyo and Hurst, 2003
+   - https://github.com/10605/LectureSampleCode/blob/main/polars_workflows/phrases.py: Phrase extraction polars code 
+
+bigdata-and-naive-bayes.pptx:
+  num_slides: 12
+  summary: Multinomial Naive Bayes
+
 polars-overview.pptx:
   num_slides: 18
   summary: Polars walkthrough
