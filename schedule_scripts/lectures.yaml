@@ -9,6 +9,7 @@
   - bigdata-history.pptx
   - density-vs-naive-bayes.pptx
   - chincilla-scaling.pptx
+  - bigdata-and-naive-bayes.pptx
   - '* HW 1 out - Scalable Entity Resolution and Naive Bayes'
 
 - title: 'Map-Reduce and Spark'
@@ -16,7 +17,7 @@
   pptx_link: https://docs.google.com/presentation/d/1D7GrpfH2ciFQtF14x6MImid4dy9m4FgB/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1kltRZbfpyb4-EBOJ-Fd2znao4KAFxarI/view?usp=drive_link
   content: 
-    - complexity.pptx
+    - complexity-short.pptx
     - cost-of-operations.pptx
     - mr-origins.pptx
     - spark-overview-short.pptx
@@ -28,7 +29,7 @@
   content:
   - polars-recitation-resources
 
-########## Map/Reduce Workflows #TODO: update/rework
+########## Map/Reduce Workflows
 
 - title: 'Workflows for Map-Reduce Systems'
   summary: Review and Sample Workflows 
@@ -45,9 +46,9 @@
   slide_link: https://drive.google.com/file/d/1M1fxuQU8G4nwwijmRZBLkDi60IByVp8y/view?usp=drive_link
   summary: Linear Regression, Logistic Regression
   content:
-  - matmul-in-spark.pptx
+  - pagerank-intro.pptx
+  - iterative-pagerank-in-spark.pptx
   - learning-linreg-as-optimization.pptx 
-  - k-means-in-spark-example.pptx
 
 - title: 'Recitation: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
