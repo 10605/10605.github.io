@@ -1,5 +1,15 @@
 # Updates to database of info on slide decks for individual "modules"
 
+map-reduce-workflows-review.pptx:
+  num_slides: 10
+  summary: quick review of map-reduce and workflows
+
+iterative-pagerank-in-polars.pptx:
+  num_slides: 14
+  summary: pagerank in polars, bars, tardigrade and analysis
+  links:
+  - https://github.com/10605/LectureSampleCode/blob/main/polars_workflows/pagerank.py: pagerank polars code
+
 motivate-tfidf-for-entity-matching.pptx:
   num_slides: 3
   summary: short motivation for using TFIDF for entities

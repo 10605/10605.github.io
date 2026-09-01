@@ -46,9 +46,13 @@
   slide_link: https://drive.google.com/file/d/1M1fxuQU8G4nwwijmRZBLkDi60IByVp8y/view?usp=drive_link
   summary: Linear Regression, Logistic Regression
   content:
-  - pagerank-intro.pptx
-  - iterative-pagerank-in-spark.pptx
+  - map-reduce-workflows-review.pptx
   - learning-linreg-as-optimization.pptx 
+  - batch-gradient-linear-regression.pptx
+  - spark-regression.pptx
+  - pagerank-intro.pptx
+  - iterative-pagerank-in-polars.pptx
+
 
 - title: 'Recitation: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
@@ -65,7 +69,6 @@
   pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
   content: 
-  - batch-gradient-linear-regression.pptx
   - sgd-and-parallel-linear-regression.pptx
   - linreg-to-logreg-sgd.pptx
   - ridge-reg-and-basis-vecs.pptx
