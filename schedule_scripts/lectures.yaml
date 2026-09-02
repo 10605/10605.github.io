@@ -41,9 +41,9 @@
   - motivate-tfidf-for-entity-matching.pptx 
   - k-means-in-polars-example.pptx
 
-- title: Learning as Optimization 1 - Linear and logistic regression, coordinate Descent
-  pptx_link: https://docs.google.com/presentation/d/130ZVQB3ukw45Vo7JQrxiccMw1bqNAepW/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1M1fxuQU8G4nwwijmRZBLkDi60IByVp8y/view?usp=drive_link
+- title: Learning as Optimization 1
+  pptx_link: https://docs.google.com/presentation/d/1ach_Na9ZwMGFZT-4kcU1XD5PaMSmLe-c/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1djpR2ljulJjlX5uUOtVq-2qq4oL64Xun/view?usp=drive_link
   summary: Linear Regression, Logistic Regression
   content:
   - map-reduce-workflows-review.pptx
