@@ -57,8 +57,8 @@
 - title: 'Recitation: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
-  slide_link: https://drive.google.com/file/d/1oxBLDhs2fHpswLKJfdBxZkWPOymNtXaW/view?usp=sharing
-  notebook_link: https://colab.research.google.com/drive/1bqWFlsoNi9teYq86Lwbesl-2MSu4AyOM
+  content:
+  - linear-algebra-recitation-resources
 
 ########## Learning as (Parallel) Optimization
 

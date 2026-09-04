@@ -51,6 +51,13 @@ polars-recitation-resources:
   - https://colab.research.google.com/drive/1YPBin0bqKKr9ZTX4rFDFOufKdSKGPq60?usp=sharing: Colab Notebook Solutions
   - https://docs.google.com/presentation/d/1bsa8uggmpDp4w6h2pbhiZj8_NQv2cq4W/edit?usp=sharing&ouid=112869297892034233698&rtpof=true&sd=true: Slides
 
+linear-algebra-recitation-resources:
+  num_slides: 0
+  summary: Linear algebra recitation resources
+  links:
+  - https://drive.google.com/drive/u/0/folders/1bgS5YTNHPZI_7N2D-OEpxzp_0F-syg3z: Slides
+  - https://drive.google.com/file/d/1kSzc7ErlP_oy35s4nolSR4_VWS4g0tg7/view?usp=sharing: Notebook
+
 605-administrivia.pptx:
   num_slides: 17
   summary: 'overview of 10-605: grading policies, projects, 605 vs 805 | Grading policies
