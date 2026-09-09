@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>psgd.py — parameter mixing, visualized</title>
+<style>
+  :root {
+    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
+    --line:#3a4568; --accent:#7cc4ff; --shared:#ffd166;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding:20px 24px 6px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  h1 code { color:var(--accent); font-size:20px; }
+  .sub { color:var(--muted); max-width:920px; }
+  .wrap { display:flex; flex-wrap:wrap; gap:18px; padding:12px 24px 28px; }
+  .stage { flex:1 1 660px; min-width:340px; }
+  canvas { width:100%; height:auto; background:var(--panel);
+           border:1px solid var(--line); border-radius:12px; }
+  .side { flex:0 1 300px; min-width:260px; }
+  .card { background:var(--panel); border:1px solid var(--line);
+          border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { margin:0 0 10px; font-size:14px; letter-spacing:.04em;
+             text-transform:uppercase; color:var(--muted); }
+  .row { display:flex; align-items:center; justify-content:space-between;
+         gap:8px; margin:8px 0; font-size:13px; }
+  .row label { color:var(--muted); }
+  input[type=range] { width:116px; accent-color:var(--accent); }
+  .val { font-variant-numeric:tabular-nums; min-width:30px; text-align:right; }
+  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+           border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
+  button:hover { background:#303c60; }
+  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+                   font-weight:600; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .chk { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--muted); }
+  .chk input { accent-color:var(--accent); width:16px; height:16px; }
+  .metric { display:flex; justify-content:space-between; margin:6px 0;
+            font-variant-numeric:tabular-nums; }
+  .metric b { color:var(--accent); font-weight:600; }
+  ol.steps { margin:6px 0 0; padding-left:20px; color:var(--muted); font-size:13px; }
+  ol.steps li { margin:3px 0; }
+  ol.steps li.on { color:var(--ink); font-weight:600; }
+  ol.steps li.on::marker { color:var(--shared); }
+  .legend { color:var(--muted); font-size:13px; }
+  .legend b { color:var(--ink); }
+  footer { color:var(--muted); padding:0 24px 30px; max-width:980px; font-size:13px; }
+  footer code { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1><code>psgd.py</code> — parallel SGD by iterative parameter mixing</h1>
+  <div class="sub">
+    A training <b>superbatch</b> of documents is handed out at random to K
+    workers. Each worker starts from the same model, runs SGD on its share of
+    the data, and the workers' parameters are then <b>averaged</b> at a central
+    node and sent back out. The small colored strips are the model parameters
+    (weights); the dots are documents.
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1000" height="600"></canvas>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>Controls</h2>
+      <div class="row">
+        <label>Workers&nbsp;K</label>
+        <input id="workers" type="range" min="1" max="6" step="1" value="4">
+        <span class="val" id="workersV">4</span>
+      </div>
+      <div class="row">
+        <label>Minibatches&nbsp;&tau;</label>
+        <input id="tau" type="range" min="1" max="5" step="1" value="3">
+        <span class="val" id="tauV">3</span>
+      </div>
+      <div class="row">
+        <label>Superbatches</label>
+        <input id="nsb" type="range" min="1" max="12" step="1" value="6">
+        <span class="val" id="nsbV">6</span>
+      </div>
+      <div class="row">
+        <label>Speed</label>
+        <input id="speed" type="range" min="0.3" max="3" step="0.1" value="1">
+        <span class="val" id="speedV">1.0×</span>
+      </div>
+      <div class="btns">
+        <button id="play" class="primary">Pause</button>
+        <button id="step">Step ▸</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label class="chk"><input id="pauseEach" type="checkbox" checked>
+        pause after each substep &amp; minibatch</label>
+    </div>
+
+    <div class="card">
+      <h2>One cycle</h2>
+      <ol class="steps" id="steps">
+        <li data-p="sync">start every worker from the same parameters</li>
+        <li data-p="scatter">randomly distribute the next superbatch</li>
+        <li data-p="train">each worker processes its &tau; minibatches</li>
+        <li data-p="gather">workers send parameters to the central node</li>
+        <li data-p="redistribute">the mean parameters are distributed back</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>State</h2>
+      <div class="metric"><span>Superbatches done</span><span id="mCycle"><b>0</b></span></div>
+      <div class="metric"><span>Documents seen</span><span id="mSeen"><b>0</b></span></div>
+      <div class="metric"><span>Simulated time</span><span id="mSim"><b>0.00 s</b></span></div>
+      <div class="metric"><span>vs. 1 worker</span><span id="mSpeed"><b>—</b></span></div>
+      <div class="metric"><span>Test log loss</span><span id="mLoss"><b>—</b></span></div>
+    </div>
+
+    <div class="card legend">
+      <h2>Limiting cases</h2>
+      <div>· <b>K = 1</b> → exactly <code>sgd.py</code>.</div>
+      <div>· <b>1 superbatch</b> → each worker trains its whole shard; average once at the very end.</div>
+      <div>· <b>more superbatches</b> → mix more often: closer to sequential SGD, more communication.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Parameters start at all zeros — logistic regression is convex, so every worker
+  begins from the same point each cycle. Simulated time is what a real parallel
+  run would cost: the workers run <b>at once</b>, so a cycle is
+  <code>max(worker compute) + averaging</code>, not the sum. More workers shrink
+  each worker's share of the data but add averaging noise — the tension the
+  <code>plot_psgd.py</code> curves measure. Weights and loss here are an
+  illustrative stand-in, not a real RCV1 run.
+</footer>
+
+<script>
+"use strict";
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+const W = 1000, H = 600;
+function fitDPI(){
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.aspectRatio = W+' / '+H;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+fitDPI(); window.addEventListener('resize', fitDPI);
+
+// ---- palette --------------------------------------------------------------
+const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', box:'#222a44',
+              boxEdge:'#3b466b', accent:'#7cc4ff', shared:'#ffd166' };
+const WORKER = ['#7cc4ff','#8ce99a','#ffa3c9','#b197fc','#ffb27a','#66d9e8'];
+
+// ---- constants / state ----------------------------------------------------
+const NW = 14;          // number of weights
+const BVIZ = 3;         // documents drawn per minibatch
+const TOTAL = 723988;   // documents in the (fixed) training set — full RCV1
+const PERDOC = 1.6e-5;  // simulated compute per document, per worker
+const NOISE = 0.22;     // per-worker SGD noise revealed before averaging
+let K = 4, TAU = 3, totalSB = 6, speed = 1, playing = true;
+let pauseEach = true, stepToStop = false, pendingAdvance = false;
+
+let target = [], shared = [];      // target = where SGD is heading; shared = the model
+let workerClean = [], workerNoise = [];   // each worker's clean update and its noise
+let workerEnd = [];                // clean + noise: the state that gets averaged
+let docs = [];                     // scattered documents for the current superbatch
+let docsSeen = 0, simTime = 0, simTime1w = 0, cycle = 0, loss = null;
+let lossHist = [];
+
+const PHASES = [
+  {name:'sync',         label:'① Every worker starts from the same parameters — the shared model (all zeros to begin: logistic regression is convex)', dur:0.9},
+  {name:'scatter',      label:'② Read the next superbatch and hand its documents out at random to the K workers', dur:1.5},
+  {name:'train',        label:'③ Each worker runs SGD on its τ minibatches — watch its parameters change', dur:1.7},
+  {name:'gather',       label:'④ Workers send their parameters to the central node to be averaged', dur:1.1},
+  {name:'redistribute', label:'⑤ The mean parameters are distributed back to every worker', dur:1.1},
+];
+let phase = 0, elapsed = 0, readPos = 0;
+
+// ---- helpers --------------------------------------------------------------
+const ease = t => t*t*(3-2*t);
+const clamp = (v,a,b) => Math.max(a, Math.min(b,v));
+const lerp = (a,b,t) => a+(b-a)*t;
+const rnd = (a,b) => a+Math.random()*(b-a);
+function gauss(s){ let x=0; for(let i=0;i<6;i++) x+=Math.random(); return (x-3)/3*3*s; }
+
+function resetModel(){
+  target = Array.from({length:NW}, () => rnd(-0.85,0.85));
+  shared = new Array(NW).fill(0);
+  workerClean = []; workerNoise = []; workerEnd = []; docs = [];
+  docsSeen = 0; simTime = 0; simTime1w = 0; cycle = 0; loss = null;
+  lossHist = []; readPos = 0; phase = 0; elapsed = 0;
+  stepToStop = false; pendingAdvance = false;
+}
+function softRestart(){    // after K/τ change: keep the model, restart the cycle
+  phase = 0; elapsed = 0; workerClean = []; workerNoise = []; workerEnd = []; docs = [];
+  stepToStop = false; pendingAdvance = false;
+}
+function rms(a,b){ let s=0; for(let i=0;i<NW;i++){const d=a[i]-b[i]; s+=d*d;} return Math.sqrt(s/NW); }
+function lossOf(w){ return 0.09 + 0.72*rms(w, target); }
+
+// each worker moves toward the target from `shared` (clean), then gets its own
+// SGD noise on top; the noisy `workerEnd` is what the averaging sees.
+function planCycle(){
+  const f = 1 - Math.pow(0.5, TAU);   // more local steps -> move further
+  workerClean = []; workerNoise = []; workerEnd = [];
+  for(let k=0;k<K;k++){
+    const clean=new Array(NW), noise=new Array(NW), we=new Array(NW);
+    for(let i=0;i<NW;i++){
+      clean[i] = shared[i] + f*(target[i]-shared[i]);
+      noise[i] = gauss(NOISE);
+      we[i] = clamp(clean[i] + noise[i], -1.3, 1.3);
+    }
+    workerClean.push(clean); workerNoise.push(noise); workerEnd.push(we);
+  }
+}
+function generateDocs(){
+  docs = [];
+  for(let k=0;k<K;k++) for(let s=0;s<TAU;s++) for(let d=0;d<BVIZ;d++)
+    docs.push({k, slot:s, d, delay: Math.random()*0.55});
+}
+function commitCycle(){
+  const mean = new Array(NW).fill(0);
+  for(let k=0;k<K;k++) for(let i=0;i<NW;i++) mean[i] += workerEnd[k][i]/K;
+  shared = mean;
+  cycle += 1;
+  const sbSize = TOTAL/totalSB;          // documents in one superbatch
+  docsSeen = Math.round(cycle*sbSize);   // whole set is covered after totalSB cycles
+  const workerTime = 0.05 + PERDOC*(sbSize/K);  // one worker's shard (they run in parallel)
+  const mixTime = 0.02 + 0.03*K;
+  simTime   += workerTime + mixTime;
+  simTime1w += K*workerTime + mixTime;
+  loss = lossOf(shared);
+  lossHist.push({t:simTime, loss});
+  if(lossHist.length > 400) lossHist.shift();
+  readPos += 1;
+}
+
+// ---- geometry -------------------------------------------------------------
+const STREAM = {x:116, y:44, w:430, h:26, cells:26};
+const NODE = {x:762, y:150, w:150, h:150};
+function rows(){
+  const x0=60, top=104, bot=548, gap=10;
+  const rowH = Math.min(74, (bot-top-(K-1)*gap)/K);
+  const y0 = top + ((bot-top) - (K*rowH+(K-1)*gap))/2;
+  const r=[];
+  for(let k=0;k<K;k++){
+    const y=y0+k*(rowH+gap);
+    r.push({ y, h:rowH, cy:y+rowH/2, labelX:x0+6,
+             laneX:x0+76, laneW:412, paramX:x0+76+412+18, paramW:150 });
+  }
+  return r;
+}
+function streamWin(){
+  const {x,y,w,h,cells}=STREAM, cw=w/cells;
+  // one superbatch = 1/totalSB of the stream; it marches across over the run
+  const winCells=Math.max(1, Math.round(cells/totalSB));
+  const idx=clamp(cycle,0,totalSB-1);            // current superbatch (0-based)
+  const start=Math.min(cells-winCells, Math.round(idx*cells/totalSB));
+  return { start, winCells, idx, cw, cx:x+(start+winCells/2)*cw, cyBottom:y+h };
+}
+
+// ---- drawing primitives ---------------------------------------------------
+function roundRect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function wcolor(v){
+  const t=clamp((v+1.2)/2.4,0,1), lo=[70,120,220], mid=[38,46,78], hi=[255,209,102];
+  let c; if(t<0.5){const u=t/0.5; c=lo.map((x,i)=>lerp(x,mid[i],u));}
+  else {const u=(t-0.5)/0.5; c=mid.map((x,i)=>lerp(x,hi[i],u));}
+  return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+}
+function paramStrip(x,y,w,h,weights,edge,glow){
+  ctx.save();
+  if(glow){ ctx.shadowColor=edge; ctx.shadowBlur=14; }
+  ctx.fillStyle=COL.box; roundRect(x,y,w,h,6); ctx.fill();
+  ctx.shadowBlur=0;
+  const cw=(w-6)/NW;
+  for(let i=0;i<NW;i++){ ctx.fillStyle=wcolor(weights[i]);
+    ctx.fillRect(x+3+i*cw+0.5, y+3, cw-1, h-6); }
+  ctx.lineWidth=1.5; ctx.strokeStyle=edge; roundRect(x,y,w,h,6); ctx.stroke();
+  ctx.restore();
+}
+function arrow(x1,y1,x2,y2,prog,col,dash){
+  const hx=lerp(x1,x2,prog), hy=lerp(y1,y2,prog);
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash(dash?[6,5]:[]);
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(hx,hy); ctx.stroke(); ctx.setLineDash([]);
+  const a=Math.atan2(y2-y1,x2-x1); ctx.fillStyle=col; ctx.beginPath();
+  ctx.moveTo(hx,hy); ctx.lineTo(hx-8*Math.cos(a-0.4),hy-8*Math.sin(a-0.4));
+  ctx.lineTo(hx-8*Math.cos(a+0.4),hy-8*Math.sin(a+0.4)); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function doc(x,y,col,alpha){ ctx.globalAlpha=alpha; ctx.fillStyle=col;
+  ctx.beginPath(); ctx.arc(x,y,3.4,0,7); ctx.fill(); ctx.globalAlpha=1; }
+
+// ---- scene ----------------------------------------------------------------
+function docTarget(r, slot, d){
+  const slotW=r.laneW/TAU, cx=r.laneX+(slot+0.5)*slotW;
+  const cy=r.cy + (d-(BVIZ-1)/2)*8.5;
+  return {x:cx, y:cy};
+}
+function workerParams(k, name, tp, raw){
+  if(name==='train' && workerClean.length===K){
+    const done=Math.floor(tp*TAU+1e-9)/TAU;        // discrete per minibatch
+    return shared.map((v,i)=>lerp(v, workerClean[k][i], done));
+  }
+  if(name==='gather' && workerEnd.length===K){
+    const reveal=ease(raw);                         // noise appears as they finish
+    return workerClean[k].map((v,i)=>clamp(v + workerNoise[k][i]*reveal, -1.3, 1.3));
+  }
+  return shared;   // sync, scatter, redistribute -> everyone equals shared
+}
+
+function drawStream(name, raw){
+  const {x,y,w,h,cells}=STREAM, cw=w/cells;
+  ctx.fillStyle=COL.muted; ctx.font='600 12px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('training stream  (full dataset, '+fmt(TOTAL)+' documents)', x, y-8);
+  const sw=streamWin();
+  for(let i=0;i<cells;i++){
+    const inWin=i>=sw.start && i<sw.start+sw.winCells;
+    ctx.globalAlpha = inWin ? (name==='scatter'?0.85:0.9) : 0.4;
+    ctx.fillStyle = inWin ? COL.accent : '#39456e';
+    ctx.fillRect(x+i*cw+0.5, y, cw-1.5, h);
+  }
+  ctx.globalAlpha=1;
+  ctx.strokeStyle=COL.accent; ctx.lineWidth=2;
+  ctx.strokeRect(x+sw.start*cw, y-3, sw.winCells*cw, h+6);
+  ctx.fillStyle=COL.accent; ctx.font='600 11px sans-serif';
+  ctx.fillText('superbatch '+(sw.idx+1)+' / '+totalSB, x+sw.start*cw, y+h+15);
+}
+
+function drawWorkers(name, raw, tp, R){
+  for(let k=0;k<K;k++){
+    const r=R[k], col=WORKER[k%WORKER.length];
+    ctx.fillStyle=COL.ink; ctx.font='600 12px sans-serif'; ctx.textAlign='left';
+    ctx.fillText('worker '+(k+1), r.labelX, r.cy+4);
+
+    // data lane: τ minibatch slots
+    const slotW=r.laneW/TAU, active=(name==='train');
+    const consumed = active ? Math.floor(tp*TAU+1e-9) : (name==='gather'||name==='redistribute'?TAU:0);
+    for(let s=0;s<TAU;s++){
+      ctx.strokeStyle=COL.boxEdge; ctx.lineWidth=1;
+      roundRect(r.laneX+s*slotW+2, r.y+4, slotW-4, r.h-8, 5); ctx.stroke();
+      if(active && s===consumed){   // slot being processed now
+        ctx.strokeStyle=col; ctx.lineWidth=2;
+        roundRect(r.laneX+s*slotW+2, r.y+4, slotW-4, r.h-8, 5); ctx.stroke();
+      }
+    }
+    // documents (rest in their slots; consumed ones fade)
+    if(name==='train' || name==='scatter'){
+      for(const dc of docs){
+        if(dc.k!==k) continue;
+        const t=docTarget(r, dc.slot, dc.d);
+        if(name==='scatter'){
+          const sw=streamWin();
+          const p=ease(clamp((raw-dc.delay)/0.42,0,1));
+          doc(lerp(sw.cx,t.x,p), lerp(sw.cyBottom,t.y,p), col, 1);
+        } else {
+          doc(t.x, t.y, col, dc.slot<consumed?0.22:1);
+        }
+      }
+    }
+    // read head sweeping the lane during training
+    if(active){
+      const hx=r.laneX+tp*r.laneW;
+      ctx.strokeStyle=col; ctx.globalAlpha=0.5; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(hx,r.y+2); ctx.lineTo(hx,r.y+r.h-2); ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    // small parameter strip (the model), to the right of the data
+    const ph=Math.min(22, r.h-8);
+    paramStrip(r.paramX, r.cy-ph/2, r.paramW, ph, workerParams(k,name,tp,raw), col, active);
+    ctx.fillStyle=COL.muted; ctx.font='10px sans-serif'; ctx.textAlign='left';
+    ctx.fillText('w', r.paramX-12, r.cy+4);
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // train advances linearly so minibatch boundaries land at raw = s/τ
+  const p=PHASES[phase], raw=clamp(elapsed/p.dur,0,1), tp=(p.name==='train')?raw:ease(raw);
+  const R=rows();
+  drawStream(p.name, raw);
+
+  // central node (holds the averaged model)
+  const glow=(p.name==='redistribute');
+  ctx.fillStyle=COL.muted; ctx.font='600 12px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('central node — average', NODE.x, NODE.y-8);
+  paramStrip(NODE.x, NODE.y, NODE.w, NODE.h*0.34, shared, COL.shared, glow);
+  ctx.fillStyle=COL.muted; ctx.font='11px sans-serif';
+  ctx.fillText('shared model  w = mean(w₁…w_K)', NODE.x, NODE.y+NODE.h*0.34+16);
+
+  drawWorkers(p.name, raw, tp, R);
+
+  // parameter arrows between workers and the node
+  const nodeCX=NODE.x+NODE.w/2, nodeCY=NODE.y+NODE.h*0.17;
+  if(p.name==='redistribute'){
+    for(let k=0;k<K;k++) arrow(nodeCX, nodeCY, R[k].paramX+R[k].paramW, R[k].cy,
+                               clamp(raw*1.2,0,1), COL.shared, false);
+  }
+  if(p.name==='gather'){
+    for(let k=0;k<K;k++) arrow(R[k].paramX+R[k].paramW, R[k].cy, nodeCX, nodeCY,
+                               clamp(raw*1.2,0,1), WORKER[k%WORKER.length], false);
+  }
+
+  drawLoss();
+
+  const done = (p.name==='sync' && cycle>=totalSB);
+  ctx.fillStyle=COL.shared; ctx.font='600 15px sans-serif'; ctx.textAlign='left';
+  wrapText(done ? '✓ Run complete — '+totalSB+' superbatches processed ('+fmt(docsSeen)+' documents).'
+                : p.label, 30, H-30, 940, 19);
+
+  updateReadout(p.name);
+}
+
+function wrapText(t,x,y,maxw,lh){
+  const words=t.split(' '); let line='', yy=y;
+  for(const w of words){
+    if(ctx.measureText(line+w+' ').width>maxw){ ctx.fillText(line,x,yy); line=w+' '; yy+=lh; }
+    else line+=w+' ';
+  }
+  ctx.fillText(line,x,yy);
+}
+
+function drawLoss(){
+  const x=NODE.x, y=390, w=210, h=150;
+  ctx.fillStyle=COL.muted; ctx.font='600 12px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('test log loss  vs.  sim time', x, y-8);
+  ctx.strokeStyle=COL.boxEdge; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,w,h);
+  if(!lossHist.length) return;
+  const maxT=Math.max(simTime,1), loMin=0.09, loMax=0.85;
+  ctx.strokeStyle=COL.accent; ctx.lineWidth=2; ctx.beginPath();
+  lossHist.forEach((pt,i)=>{ const px=x+(pt.t/maxT)*w,
+    py=clamp(y+h-((pt.loss-loMin)/(loMax-loMin))*h,y,y+h);
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py); });
+  ctx.stroke();
+  const L=lossHist[lossHist.length-1], px=x+(L.t/maxT)*w,
+        py=clamp(y+h-((L.loss-loMin)/(loMax-loMin))*h,y,y+h);
+  ctx.fillStyle=COL.shared; ctx.beginPath(); ctx.arc(px,py,4,0,7); ctx.fill();
+}
+
+// ---- readout --------------------------------------------------------------
+const $=id=>document.getElementById(id);
+const fmt=n=>n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(0)+'k':''+n;
+function updateReadout(name){
+  $('mCycle').innerHTML='<b>'+cycle+'</b> / '+totalSB;
+  $('mSeen').innerHTML='<b>'+fmt(docsSeen)+'</b>';
+  $('mSim').innerHTML='<b>'+simTime.toFixed(2)+' s</b>';
+  $('mSpeed').innerHTML='<b>'+(simTime>0?(simTime1w/simTime).toFixed(1):'1.0')+'× faster</b>';
+  $('mLoss').innerHTML='<b>'+(loss==null?'—':loss.toFixed(4))+'</b>';
+  for(const li of document.querySelectorAll('#steps li'))
+    li.classList.toggle('on', li.dataset.p===name);
+}
+
+// ---- loop -----------------------------------------------------------------
+let lastTs=null;
+function setPlay(on){ playing=on; $('play').textContent=on?'Pause':'Play'; }
+// next elapsed value to pause at: each minibatch boundary in train, else phase end
+function nextStop(){
+  const dur=PHASES[phase].dur;
+  if(PHASES[phase].name==='train'){
+    const prog=elapsed/dur;
+    for(let s=1;s<=TAU;s++){ const b=s/TAU; if(b>prog+1e-6) return b*dur; }
+  }
+  return dur;
+}
+function tick(ts){
+  if(lastTs==null) lastTs=ts;
+  const dt=(ts-lastTs)/1000; lastTs=ts;
+  if(playing){
+    if(pendingAdvance){ advance(); elapsed=0; pendingAdvance=false; }
+    elapsed += dt*speed;
+    if(pauseEach || stepToStop){
+      const dur=PHASES[phase].dur, stop=nextStop();
+      if(elapsed>=stop){
+        elapsed=stop; setPlay(false); stepToStop=false;
+        if(stop>=dur-1e-9) pendingAdvance=true;   // whole substep done; advance on resume
+      }
+    } else {
+      while(playing && elapsed>=PHASES[phase].dur){ elapsed-=PHASES[phase].dur; advance(); }
+    }
+  }
+  draw(); requestAnimationFrame(tick);
+}
+function advance(){
+  // halt at the final synced model once the requested superbatches are done
+  if(PHASES[phase].name==='sync' && cycle>=totalSB){
+    elapsed=PHASES[phase].dur; setPlay(false); return;
+  }
+  phase=(phase+1)%PHASES.length;
+  const name=PHASES[phase].name;
+  if(name==='scatter'){ planCycle(); generateDocs(); }
+  if(name==='redistribute'){ commitCycle(); }
+}
+
+// ---- controls -------------------------------------------------------------
+$('workers').addEventListener('input',e=>{ K=+e.target.value; $('workersV').textContent=K; softRestart(); });
+$('tau').addEventListener('input',e=>{ TAU=+e.target.value; $('tauV').textContent=TAU; softRestart(); });
+$('nsb').addEventListener('input',e=>{ totalSB=+e.target.value; $('nsbV').textContent=totalSB; });
+$('speed').addEventListener('input',e=>{ speed=+e.target.value; $('speedV').textContent=speed.toFixed(1)+'×'; });
+$('play').addEventListener('click',()=>setPlay(!playing));
+$('step').addEventListener('click',()=>{ stepToStop=true; setPlay(true); });
+$('pauseEach').addEventListener('change',e=>{ pauseEach=e.target.checked; });
+$('reset').addEventListener('click',()=>{ resetModel(); });
+
+resetModel();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
