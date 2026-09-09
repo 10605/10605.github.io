@@ -27,3 +27,19 @@ gitpull:
 	mv lectures.yaml lectures-upd.yaml
 	git pull
 	diff lectures.yaml lectures-upd.yaml
+
+# bring in data from William's working directory
+
+WORKINGDIR=~/Dropbox/slide-db/working
+
+diff-working:
+	git pull
+	ls -al lectures.yaml $(WORKINGDIR)/lectures.yaml
+	ls -al slides.yaml $(WORKINGDIR)/delta-slides.yaml
+	diff lectures.yaml $(WORKINGDIR)/lectures.yaml || true
+	diff slides.yaml $(WORKINGDIR)/delta-slides.yaml || true
+
+import-working:
+	cp $(WORKINGDIR)/lectures.yaml .
+	cp $(WORKINGDIR)/delta-slides.yaml slides.yaml
+
