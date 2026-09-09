@@ -69,10 +69,12 @@
   pptx_link: https://docs.google.com/presentation/d/1WtFKKnUCbSZ8QWPZ4yzVhqFwgzwv5GuP/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1itBcbq5q1KCxY1iYXm4yFgWhmNwNTmWK/view?usp=drive_link
   content: 
+  - learning-as-optimization-1-recap.pptx
   - sgd-and-parallel-linear-regression.pptx
   - linreg-to-logreg-sgd.pptx
   - ridge-reg-and-basis-vecs.pptx
   - linreg-kernels.pptx
+  - tree-allreduce.pptx
   - '* HW 1 Slot A due'
   - '* HW 2 out - Parallel Linear Regression'
 
