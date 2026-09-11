@@ -23,7 +23,7 @@
     - spark-overview-short.pptx
     - polars-overview.pptx
 
-- title: 'Recitation: Python Polars'
+- title: 'Recitation 1: Python Polars'
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
   content:
@@ -54,7 +54,7 @@
   - iterative-pagerank-in-polars.pptx
 
 
-- title: 'Recitation: Linear Algebra Review' #TODO: Torch?
+- title: 'Recitation 2: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
   content:
@@ -78,11 +78,12 @@
   - '* HW 1 Slot A due'
   - '* HW 2 out - Parallel Linear Regression'
 
-- title: 'HW1 Writing Session'
+- title: 'Recitation 3: PyTorch<br/>HW1 Writing Session'
   type: recitation
   summary: ''
   content:
   -  '* HW 1 Slot A Grading deadline: Sat Sept 12'
+  - hw1-writing-session-resources
 
 ########## Optimization, Randomized Algs
 
@@ -116,7 +117,7 @@
   - bloom-filter-countmin-recap.pptx
   - '* HW1 Slot B due' 
 
-- title: 'Recitation 3: Probability, Evaluation Metrics and Minhashing'
+- title: 'Recitation 4: Probability, Evaluation Metrics and Minhashing'
   type: recitation
   summary: Review of topics for Homework 3
   content:

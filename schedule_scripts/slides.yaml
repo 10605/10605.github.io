@@ -1099,6 +1099,12 @@ linear-algebra-recitation-resources:
   - https://drive.google.com/file/d/1pm3WcWC0BQjA9xBRboYhl6ACZWl66bOq/view?usp=sharing: Slides
   - https://drive.google.com/file/d/1kSzc7ErlP_oy35s4nolSR4_VWS4g0tg7/view?usp=sharing: Notebook
 
+hw1-writing-session-resources:
+  num_slides: 0
+  summary: HW1 writing session resources
+  links:
+  - https://drive.google.com/file/d/1tG6njfD0vf59esz7x4y03efFUzpS0XTl/view?usp=sharing: Notebook
+
 chincilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
