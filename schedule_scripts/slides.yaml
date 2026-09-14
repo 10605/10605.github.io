@@ -510,8 +510,6 @@ cost-of-operations.pptx:
       Visualizing the cost of operations
   - https://ourworldindata.org/grapher/historical-cost-of-computer-memory-and-storage?time=1990..latest:
       Historical cost of storage
-  - https://github.com/erikfrey/bashreduce:
-      code for Bash Reduce - a minimal implementation of Map-Reduce
   - https://github.com/10605/LectureSampleCode/tree/main/hazsoup:
       code for Hazsoup - a more readable minimal implementation of Map-Reduce
 construct-wengert-list.pptx:
@@ -1038,7 +1036,7 @@ linear-regression.pptx:
 # --- Fall 2026 additions (merged back after slides.yaml was clobbered) ---
 
 learning-as-optimization-1-recap.pptx:
-  num_slides: 10
+  num_slides: 8
   summary: quick review of ERM, least squares as gradient descent
 
 map-reduce-workflows-review.pptx:
