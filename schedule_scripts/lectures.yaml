@@ -104,8 +104,8 @@
 
 
 - title: Randomized Algorithms 1 - Bloom filters and Count-Min sketches
-  pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1ATVOyDt9Sb9PEkn0quMKeBIknENwBYm_/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1VUsWoc2opSe-ZMow_azMntWqnxumF2rT/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1ZzyZL0yL5cLf1TfFSh1PagWqdkZN8-hd/view?usp=drive_link
   summary: Bloom Filters and Count-Min -Sketchs
   content:
   - tree-allreduce.pptx
