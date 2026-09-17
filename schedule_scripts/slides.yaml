@@ -1,6 +1,18 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+countmin-bf-review.pptx:
+  num_slides: 13
+  summary: fairly complete discussion of bloom filters and countmin 
+
+mf-images-and-text-kmeans.pptx:
+  num_slides: 6
+  summary: relating mf to k-means, and how to use it for images
+
+recitation-3.pptx:
+  num_slides: 0
+  summary: recitation slides, probably an error
+
 michiel-guest-lecture.pptx:
   num_slides: 30
   summary: FiD, FiDO, etc
