@@ -12,6 +12,9 @@ mf-images-and-text-kmeans.pptx:
 recitation-3.pptx:
   num_slides: 0
   summary: recitation slides, probably an error
+  links:
+  - https://docs.google.com/presentation/d/1vh5VvrEiPhgjTbBkch8pDVfEQQLXnflWe4WOhdJ9s44/edit: Slides
+  - https://drive.google.com/file/d/1xxJQgFe1EcsD-2OvDIRp647URBeCRn4p/view?usp=sharing: PDF Handout
 
 michiel-guest-lecture.pptx:
   num_slides: 30
