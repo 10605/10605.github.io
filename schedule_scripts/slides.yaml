@@ -708,10 +708,13 @@ local-partitioning-paper+assignment.pptx:
   num_slides: 33
   summary: pagerank-nibble paper + breakdown of the assignment; follows graph-sampling
     paper | Local partitioning
+
 lsh.pptx:
   num_slides: 13
-  summary: includes one slide of "applications" which are sort of vague really | Locality
-    sensitive hashing
+  summary: includes one slide of "applications" which are sort of vague really | Locality sensitive hashing
+  links: 
+  - https://aclanthology.org/P10-2043.pdf: Online generation of locality sensitive hash signatures, van Durme and Lall, 2010
+
 mad-discussion.pptx:
   num_slides: 16
   summary: MAD and SSL as optimization +mad | Modified Adsorption SSL method
