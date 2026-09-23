@@ -23,7 +23,7 @@
     - spark-overview-short.pptx
     - polars-overview.pptx
 
-- title: 'Recitation: Python Polars'
+- title: 'Recitation 1: Python Polars'
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
   content:
@@ -54,7 +54,7 @@
   - iterative-pagerank-in-polars.pptx
 
 
-- title: 'Recitation: Linear Algebra Review' #TODO: Torch?
+- title: 'Recitation 2: Linear Algebra Review' #TODO: Torch?
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
   content:
@@ -78,18 +78,19 @@
   - '* HW 1 Slot A due'
   - '* HW 2 out - Parallel Linear Regression'
 
-- title: 'HW1 Writing Session'
+- title: 'Recitation 3: PyTorch<br/>HW1 Writing Session'
   type: recitation
   summary: ''
   content:
   -  '* HW 1 Slot A Grading deadline: Sat Sept 12'
+  - hw1-writing-session-resources
 
 ########## Optimization, Randomized Algs
 
 - title: Learning as Optimization 3 - sparsity, hash kernels, matrix factorization
   summary: Matrix Factorization and Other Tasks
-  pptx_link: https://docs.google.com/presentation/d/1ZQNwjbCLYiDJLdG851B8JZzzbROEMAsm/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/15GwrI7Ky35G0i7fUDbTyL9yLzNTGYcnr/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1Tql-i89bHKrsr_oB5oKLIHpygsFmNIH8/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1oNOPdh-hRiEnOOzFiOAfVj6d__oC2aue/view?usp=drive_link
   content:
   - tree-allreduce.pptx
   - sparsity-linreg-and-sgd.pptx
@@ -103,8 +104,8 @@
 
 
 - title: Randomized Algorithms 1 - Bloom filters and Count-Min sketches
-  pptx_link: https://docs.google.com/presentation/d/1qglAAnK0lIgNayc9tUCrd0ZvKlauDdbL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1ATVOyDt9Sb9PEkn0quMKeBIknENwBYm_/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1VUsWoc2opSe-ZMow_azMntWqnxumF2rT/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1ZzyZL0yL5cLf1TfFSh1PagWqdkZN8-hd/view?usp=drive_link
   summary: Bloom Filters and Count-Min -Sketchs
   content:
   - tree-allreduce.pptx
@@ -116,7 +117,7 @@
   - bloom-filter-countmin-recap.pptx
   - '* HW1 Slot B due' 
 
-- title: 'Recitation 3: Probability, Evaluation Metrics and Minhashing'
+- title: 'Recitation 4: Probability, Evaluation Metrics and Minhashing'
   type: recitation
   summary: Review of topics for Homework 3
   content:
@@ -127,9 +128,11 @@
 - title: 'Randomized Algorithms 2 - Locality Sensitive Hashing, Minhash and Simhash'
   summary: Locality-Sensitive Hashing
   content: LSH for Minhash and SimHash
-  pptx_link: https://docs.google.com/presentation/d/1Iug_RuHS0S19V-DyHvMUSOCnSdz7kSvZ/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1GJs5tX9AhRbF1jbb_qGlBqw9stohRjOM/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1KHCLVoYd9TO3A2dfMz604zPtVEt9pcGX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/194VXI3X6cHMLhgvEn9veAZ7d54mF9gbV/view?usp=drive_link
   content:
+  - mf-images-and-text-kmeans.pptx
+  - countmin-bf-review.pptx
   - lsh.pptx
   - minhash-and-index.pptx
   - online-lsh.pptx
@@ -146,7 +149,7 @@
 
 ########## Week Autodiff and GPUs
 
-- title: ' AutoDiff'
+- title: 'Guest Lecture - Jay Yoon Lee - Reasoning over Sets: Toward Consistent LLM Systems / William lecture on Autodiff'
   pptx_link: https://docs.google.com/presentation/d/1CoGtIeLsWo08CEy8QXT-OjnjSauKRFnj/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1j6TS05vFMF9TImherMlcfXpR7oqCWbTi/view?usp=drive_link
   content:

@@ -1,6 +1,21 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+countmin-bf-review.pptx:
+  num_slides: 13
+  summary: fairly complete discussion of bloom filters and countmin 
+
+mf-images-and-text-kmeans.pptx:
+  num_slides: 6
+  summary: relating mf to k-means, and how to use it for images
+
+recitation-3.pptx:
+  num_slides: 0
+  summary: recitation slides, probably an error
+  links:
+  - https://docs.google.com/presentation/d/1vh5VvrEiPhgjTbBkch8pDVfEQQLXnflWe4WOhdJ9s44/edit: Slides
+  - https://drive.google.com/file/d/1xxJQgFe1EcsD-2OvDIRp647URBeCRn4p/view?usp=sharing: PDF Handout
+
 michiel-guest-lecture.pptx:
   num_slides: 30
   summary: FiD, FiDO, etc
@@ -478,8 +493,7 @@ bloom-filter.pptx:
         "William's Notes on Randomized Algorithms"
     - https://github.com/10605/LectureSampleCode/blob/main/randomized/bloomfilter.py:
         code for Bloom Filter 
-    - https://openreview.net/pdf?id=S1hsDCNFx:
-        'Short and Deep: Sketching and Neural Networks, Daniely et al'
+    - https://arxiv.org/abs/1604.05753: 'Short and Deep: Sketching and Neural Networks, Daniely et al'
 chinchilla-scaling.pptx:
   num_slides: 7
   summary: Data and Compute Scaling for LLMs
@@ -510,8 +524,6 @@ cost-of-operations.pptx:
       Visualizing the cost of operations
   - https://ourworldindata.org/grapher/historical-cost-of-computer-memory-and-storage?time=1990..latest:
       Historical cost of storage
-  - https://github.com/erikfrey/bashreduce:
-      code for Bash Reduce - a minimal implementation of Map-Reduce
   - https://github.com/10605/LectureSampleCode/tree/main/hazsoup:
       code for Hazsoup - a more readable minimal implementation of Map-Reduce
 construct-wengert-list.pptx:
@@ -1038,7 +1050,7 @@ linear-regression.pptx:
 # --- Fall 2026 additions (merged back after slides.yaml was clobbered) ---
 
 learning-as-optimization-1-recap.pptx:
-  num_slides: 10
+  num_slides: 8
   summary: quick review of ERM, least squares as gradient descent
 
 map-reduce-workflows-review.pptx:
@@ -1098,6 +1110,12 @@ linear-algebra-recitation-resources:
   links:
   - https://drive.google.com/file/d/1pm3WcWC0BQjA9xBRboYhl6ACZWl66bOq/view?usp=sharing: Slides
   - https://drive.google.com/file/d/1kSzc7ErlP_oy35s4nolSR4_VWS4g0tg7/view?usp=sharing: Notebook
+
+hw1-writing-session-resources:
+  num_slides: 0
+  summary: HW1 writing session resources
+  links:
+  - https://drive.google.com/file/d/1tG6njfD0vf59esz7x4y03efFUzpS0XTl/view?usp=sharing: Notebook
 
 chincilla-scaling.pptx:
   num_slides: 7

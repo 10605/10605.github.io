@@ -35,9 +35,9 @@ WORKINGDIR=~/Dropbox/slide-db/working
 diff-working:
 	git pull
 	ls -al lectures.yaml $(WORKINGDIR)/lectures.yaml
-	ls -al slides.yaml $(WORKINGDIR)/delta-slides.yaml
+	ls -al slides.yaml $(WORKINGDIR)/slides.yaml
 	diff lectures.yaml $(WORKINGDIR)/lectures.yaml || true
-	diff slides.yaml $(WORKINGDIR)/delta-slides.yaml || true
+	diff slides.yaml $(WORKINGDIR)/slides.yaml || true
 
 import-working:
 	cp $(WORKINGDIR)/lectures.yaml .
