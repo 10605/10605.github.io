@@ -82,7 +82,6 @@
   type: recitation
   summary: ''
   content:
-  -  '* HW 1 Slot A Grading deadline: Sat Sept 12'
   - hw1-writing-session-resources
 
 ########## Optimization, Randomized Algs
@@ -115,7 +114,7 @@
   - count-min-sketch.pptx
   - uses-of-count-min-sketch.pptx
   - bloom-filter-countmin-recap.pptx
-  - '* HW1 Slot B due' 
+  - '* HW1 Slot B due'
 
 - title: 'Recitation 4: Probability, Evaluation Metrics and Minhashing'
   type: recitation
@@ -138,14 +137,13 @@
   - online-lsh.pptx
   - lsh-knn-pq.pptx
   - '* HW 2 slot A due'
-  - '* HW 3 out - Locality-Sensitive Hashing' #TODO: polars?
 
 - title: 'HW2 Writing Session'
   type: recitation
   pptx_link: 
   slide_link: 
   content:
-  - '* HW 2 slot A grading deadline: Sept 26'
+  - '* HW 3 out - Locality-Sensitive Hashing'
 
 ########## Week Autodiff and GPUs
 
@@ -165,14 +163,13 @@
   - gpu-programming-intro-short.pptx
   - distributed_dl.pptx
   - dl_finetuning.pptx
-  - '* HW 3 Slot A due'
+  - '* HW2 Slot B deadline (tentative)'
+  - '* HW 3 Slot A due Thu Oct 1'
 
 
 - title: 'HW3 Writing Session'
   type: recitation
   summary: ''
-  content: 
-  - '* HW 3 Slot A grading deadline: Oct 4'
 
 ########## Exam 1
 
@@ -180,7 +177,7 @@
   pptx_link: https://docs.google.com/presentation/d/1TIJoHupSDdyfvm9hINmT0umBeeT1JaAV/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1hFRV-8LUdr4d8dIIIWvz5acpEOCm5mHm/view?usp=drive_link
   content:
-  - '* HW 3 Slot B due' 
+  - '* HW 3 Slot B due (tentative)'
 
 
 - title: Exam 1
@@ -284,7 +281,7 @@
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
    - kv-cache-recent-2025.pptx
-   - '* HW4 Slot B Deadline'
+   - '* HW4 Slot B Deadline (tentative)'
 
 - title: Contrastive learning and retrieval
   summary: Overvier of contrastive learning, neural retrieval, and RAG
@@ -316,15 +313,13 @@
 
 - title: HW5 Writing Session
   type: recitation
-  content:
-    - '* HW5 Slot A grading deadline'
 
 - title: Network Effects and Scalable Evaluation
   slide_link: https://drive.google.com/file/d/1oz0ZGlq6z6Bvmte7PrXfXScglJCjVBTB/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - ppi.pptx
-    - '* HW5 slot B deadline'
+    - '* HW5 slot B deadline (tentative)'
 
 ########## Exam
 
