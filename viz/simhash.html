@@ -19,6 +19,7 @@
     --bit0:        #c3cdd5;   /* a 0 bit */
     --mem:         #0086a3;   /* MIH candidate */
     --near:        #1d6b2c;   /* substring distance < r/m */
+    --band:        #ffd84d;   /* substring within the chosen distance D */
     --mem-soft:    #d3e9ef;
     --hit:         #a4530c;   /* bit differs from q */
     --hit-soft:    #f0dfc9;
@@ -41,6 +42,7 @@
       --bit0:        #2e404b;
       --mem:         #1d97b3;
       --near:        #7fcf8a;
+      --band:        #8a7300;
       --mem-soft:    #10333c;
       --hit:         #c47a2e;
       --hit-soft:    #3a2a15;
@@ -63,6 +65,7 @@
     --bit0:        #2e404b;
     --mem:         #1d97b3;
     --near:        #7fcf8a;
+    --band:        #8a7300;
     --mem-soft:    #10333c;
     --hit:         #c47a2e;
     --hit-soft:    #3a2a15;
@@ -172,7 +175,12 @@
   table.codes td.name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
   table.codes td.name .num { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-right: 6px; }
   table.codes td.name:hover { text-decoration: underline; }
-  table.codes td.bits { padding: 0 4px; line-height: 0; border-bottom: 0; }
+  table.codes td.bits { padding: 0 4px; line-height: 0; border-bottom: 0; position: relative; }
+  select.bandD {
+    position: absolute; top: 1px; width: 30px; height: 18px; padding: 0 1px;
+    font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--ink-soft); border-radius: 3px; color: var(--ink);
+  }
   .subhead { position: relative; height: 14px; }
   .subhead span { position: absolute; top: 0; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
   table.codes td.bits canvas { display: block; cursor: crosshair; }
@@ -204,6 +212,8 @@
   .plot circle.dot.cand { fill: var(--mem); }
   .plot circle.dot.no { fill: var(--surface); stroke: var(--ink-faint); stroke-width: 1.5; }
   .plot circle.hitbox { fill: transparent; cursor: pointer; }
+  .plot .star { fill: var(--probe); stroke: var(--surface); stroke-width: 1.5; pointer-events: none; }
+  .sw.star { width: auto; height: auto; background: none; color: var(--probe); font-size: 14px; line-height: 1; }
   .tip {
     position: absolute; pointer-events: none; z-index: 5; display: none;
     background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
@@ -214,6 +224,7 @@
   .sw { width: 10px; height: 10px; display: inline-block; border-radius: 2px; }
   .sw.b1 { background: var(--bit1); } .sw.b0 { background: var(--bit0); border: 1px solid var(--line); }
   .sw.diff { background: var(--hit); }
+  .sw.band { background: var(--band); }
   .sw.cand { background: var(--mem); border-radius: 50%; }
   .sw.no { border: 1.5px solid var(--ink-faint); background: var(--surface); border-radius: 50%; }
   .sw.curve { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--ink-soft); }
@@ -312,6 +323,7 @@
     <span><i class="sw b1"></i>1</span><span><i class="sw b0"></i>0</span>
     <span><i class="sw diff"></i>bit differs from q</span>
     <span>number after h⁽ᶻ⁾ = Hamming(q⁽ᶻ⁾, h⁽ᶻ⁾), <b style="color:var(--near)">bold green</b> if &lt; r/m, gray otherwise</span>
+    <span><i class="sw band"></i>Hamming(q⁽ᶻ⁾, h⁽ᶻ⁾) ≤ D, for the D picked in q's row under h⁽ᶻ⁾</span>
   </div>
   <p class="note">Click a title to make it q · click a bit to see how it was computed ·
     click the Ham or cos column to plot Hamming distance against cosine.</p>
@@ -355,6 +367,7 @@
     <span><i class="sw cand"></i>MIH candidate</span>
     <span><i class="sw no"></i>not a candidate</span>
     <span><i class="sw line"></i>r/n</span>
+    <span><i class="sw star">★</i>the row you clicked</span>
   </div>
   <p class="note">Each dot is one course h. A course is a multi-index-hashing candidate if some
     substring has Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m. Every dot below the
@@ -417,6 +430,9 @@ const STOP = new Set(["a", "an", "and", "the", "of", "in", "for", "with", "to", 
 
 let n = 64, m = 4, rad = 16, pool = 0, dropStop = true, seed = 1;
 let query = COURSES.find(c => c.num === "10-605");   // a course, or {title} for typed text
+let bandD = [];                                        // per substring z: D, or null for off
+let shown = [];                                        // rows as displayed in the table
+let plotRow = null;                                    // {num, title} of the row whose Ham/cos was clicked
 let bitSel = null;                                     // {row: course or query, i}
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -484,24 +500,34 @@ function render() {
 
   // barcode rows
   const cw = n <= 32 ? 12 : n <= 64 ? 9 : n <= 96 ? 6 : 5, rh = 20;
-  const isQuery = c => query.num && c.num === query.num && c.title === query.title;
-  $("codes").innerHTML = C.rows.map((c, k) =>
+  const isQuery = c => c.typed || (query.num && c.num === query.num && c.title === query.title);
+  shown = C.rows.some(isQuery) ? C.rows
+    : [{ ...C.q, num: "q", typed: true, H: 0, hz: C.subs.map(() => 0), cos: 1 }, ...C.rows];
+  // each substring is [bits][Hamming(q^(z), h^(z))], then a divider before the next one
+  const dpr = window.devicePixelRatio || 1, gap = 8, lw = 32, W = n * cw + m * lw + (m - 1) * gap;
+  const xOf = i => i * cw + C.subs.findIndex(([lo, hi]) => i >= lo && i < hi) * (lw + gap);
+  const pulldowns = C.subs.map(([lo, hi], z) =>   // in q's row: pick D for substring z
+    `<select class="bandD" data-z="${z}" style="left:${4 + xOf(hi - 1) + cw}px" title="highlight h^(${z + 1}) with Hamming ≤ D">` +
+    `<option value="">–</option>` + Array.from({ length: Math.min(8, hi - lo) + 1 }, (_, d) =>
+      `<option value="${d}"${bandD[z] === d ? " selected" : ""}>${d}</option>`).join("") + `</select>`).join("");
+  $("codes").innerHTML = shown.map((c, k) =>
     `<tr class="${isQuery(c) ? "query" : ""} ${c.cand ? "cand" : ""} ${c.within ? "within" : ""}" data-k="${k}">` +
-    `<td class="name" title="${esc(c.num + " " + c.title)}"><span class="num">${c.num}</span>${esc(c.title)}</td>` +
-    `<td class="bits"><canvas></canvas></td>` +
+    `<td class="name" title="${esc(c.num + " " + c.title)}"><span class="num">${c.num}</span>${esc(c.title) || "<i>(empty)</i>"}</td>` +
+    `<td class="bits"><canvas></canvas>${isQuery(c) ? pulldowns : ""}</td>` +
     `<td class="n ham">${c.H}</td><td class="n">${c.cos.toFixed(2)}</td></tr>`
   ).join("");
   const col = { b1: css("--bit1"), b0: css("--bit0"), diff: css("--hit"), sel: css("--probe"), sep: css("--ink"),
-                txt: css("--ink-faint"), near: css("--near"), mono: css("--mono") };
-  // each substring is [bits][Hamming(q^(z), h^(z))], then a divider before the next one
-  const dpr = window.devicePixelRatio || 1, gap = 8, lw = 17, W = n * cw + m * lw + (m - 1) * gap;
-  const xOf = i => i * cw + C.subs.findIndex(([lo, hi]) => i >= lo && i < hi) * (lw + gap);
+                txt: css("--ink-faint"), near: css("--near"), band: css("--band"), mono: css("--mono") };
   $("bitsHead").innerHTML = `<div class="subhead" style="width:${W}px">` +
     C.subs.map(([lo], z) => `<span style="left:${xOf(lo)}px">h<sup>(${z + 1})</sup></span>`).join("") + `</div>`;
   document.querySelectorAll("#codes canvas").forEach((cv, k) => {
-    const c = C.rows[k];
+    const c = shown[k];
     cv.width = W * dpr; cv.height = rh * dpr; cv.style.width = W + "px"; cv.style.height = rh + "px";
     const g = cv.getContext("2d"); g.scale(dpr, dpr);
+    g.fillStyle = col.band;   // yellow behind substrings within the chosen D
+    C.subs.forEach(([lo, hi], z) => {
+      if (bandD[z] != null && c.hz[z] <= bandD[z]) g.fillRect(xOf(lo) - 2, 0, xOf(hi - 1) + cw + lw - xOf(lo), rh);
+    });
     for (let i = 0; i < n; i++) {
       const diff = c.code[i] !== C.q.code[i];
       g.fillStyle = c.code[i] ? col.b1 : col.b0;
@@ -512,7 +538,7 @@ function render() {
     g.fillStyle = col.sep;
     for (const [lo] of C.subs.slice(1)) g.fillRect(xOf(lo) - Math.ceil(gap / 2) - 1.5, 0, 3, rh);
     g.textAlign = "center"; g.textBaseline = "middle";
-    C.subs.forEach(([lo, hi], z) => {
+    if (!isQuery(c)) C.subs.forEach(([lo, hi], z) => {
       const near = c.hz[z] < rad / m;
       g.font = `${near ? "700 " : ""}11px ${col.mono}`; g.fillStyle = near ? col.near : col.txt;
       g.fillText(c.hz[z], xOf(hi - 1) + cw + lw / 2, rh / 2);
@@ -526,7 +552,7 @@ function render() {
   $("nRows").textContent = `— ${C.rows.length} courses`;
 
   // bit explainer (re-resolve the selected row against this render's rows)
-  if (bitSel) bitSel.row = C.rows.find(c => c.num === bitSel.row.num && c.title === bitSel.row.title) || null;
+  if (bitSel) bitSel.row = shown.find(c => c.num === bitSel.row.num && c.title === bitSel.row.title) || null;
   if (bitSel && bitSel.row && bitSel.i < n) {
     const c = bitSel.row, i = bitSel.i, terms = [...c.x].map(([f, v]) => [f, v, r(i, f)]);
     $("bitLab").innerHTML = `— LSH[${i + 1}] for ${esc(c.num)}`;
@@ -561,7 +587,9 @@ function render() {
 }
 
 function renderPlot(C) {
-  $("plotLab").textContent = `— q = ${query.title || "(empty)"}`;
+  const star = plotRow && shown.find(c => c.num === plotRow.num && c.title === plotRow.title);
+  $("plotLab").innerHTML = `— q = ${esc(query.title || "(empty)")}` +
+    (star ? ` · <span style="color:var(--probe)">★</span> ${esc(star.num)} ${esc(star.title)}` : "");
   const W = 400, H = 270, L = 40, R = 12, T = 12, B = 38;
   const X = s => L + s * (W - L - R), Y = p => T + (1 - p) * (H - T - B);
   let g = `<g class="grid">` + [0, .25, .5, .75, 1].map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("") + `</g>`;
@@ -576,6 +604,14 @@ function renderPlot(C) {
   g += `<line class="rline" x1="${L}" x2="${W - R}" y1="${Y(ry)}" y2="${Y(ry)}"/><text class="rlab" x="${W - R - 4}" y="${Y(ry) - 4}" text-anchor="end">r/n</text>`;
   const order = C.rows.slice().sort((a, b) => a.cand - b.cand);
   for (const c of order) g += `<circle class="dot ${c.cand ? "cand" : "no"}" cx="${X(c.cos)}" cy="${Y(c.H / n)}" r="${c.cand ? 5 : 4.5}"/>`;
+  if (star) {   // five-pointed star at the clicked row's point
+    const cx = X(star.cos), cy = Y(star.H / n);
+    const pts = Array.from({ length: 10 }, (_, j) => {
+      const a = -Math.PI / 2 + j * Math.PI / 5, rr = j % 2 ? 4.5 : 11;
+      return `${(cx + rr * Math.cos(a)).toFixed(1)},${(cy + rr * Math.sin(a)).toFixed(1)}`;
+    });
+    g += `<polygon class="star" points="${pts.join(" ")}"/>`;
+  }
   C.rows.forEach((c, k) => { g += `<circle class="hitbox" data-k="${k}" cx="${X(c.cos)}" cy="${Y(c.H / n)}" r="10"/>`; });
 
   const plot = $("plot"), tip = $("tip");
@@ -599,7 +635,12 @@ function renderPlot(C) {
 // ---- actions ------------------------------------------------------------------------------
 function setQuery(c) { query = c; $("q").value = c.title; render(); }
 function openPlot() { if (!$("plotDlg").open) $("plotDlg").showModal(); render(); }
-document.querySelector("table.codes").addEventListener("click", e => { if (e.target.closest("td.n, th.n")) openPlot(); });
+document.querySelector("table.codes").addEventListener("click", e => {
+  if (!e.target.closest("td.n, th.n")) return;
+  const tr = e.target.closest("#codes tr"), c = tr && shown[+tr.dataset.k];
+  plotRow = c ? { num: c.num, title: c.title } : null;   // the header marks no row
+  openPlot();
+});
 for (const dlg of document.querySelectorAll("dialog.pop")) {
   dlg.querySelector("button.close").onclick = () => dlg.close();
   dlg.onclick = e => {   // a click outside the dialog's box is a click on the backdrop
@@ -609,7 +650,11 @@ for (const dlg of document.querySelectorAll("dialog.pop")) {
 }
 $("bitDlg").addEventListener("close", () => { bitSel = null; render(); });
 $("codes").onclick = e => { const td = e.target.closest("td.name"); if (!td) return;
-  const tr = td.parentElement, k = +tr.dataset.k; setQuery(compute().rows[k]); };
+  const c = shown[+td.parentElement.dataset.k]; if (!c.typed) setQuery(c); };
+$("codes").addEventListener("change", e => {
+  if (!e.target.matches("select.bandD")) return;
+  bandD[+e.target.dataset.z] = e.target.value === "" ? null : +e.target.value; render();
+});
 $("q").oninput = e => {
   const t = e.target.value;
   query = COURSES.find(c => c.title.toLowerCase() === t.trim().toLowerCase()) || { num: "", title: t };
