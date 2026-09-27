@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countmin Sketch</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;   /* sketch / heat hue */
+    --mem-soft:    #d3e7ec;
+    --hit:         #a4530c;   /* Increment */
+    --hit-soft:    #f0dfc9;
+    --probe:       #6a3d8f;   /* Retrieve */
+    --probe-soft:  #e6dcef;
+    --bad:         #b3261e;
+    --good:        #3d6b3a;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --hit:         #e09a4d;
+      --hit-soft:    #3a2a15;
+      --probe:       #b98ae0;
+      --probe-soft:  #2c2038;
+      --bad:         #ff7a6e;
+      --good:        #86c07e;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --hit:         #e09a4d;
+    --hit-soft:    #3a2a15;
+    --probe:       #b98ae0;
+    --probe-soft:  #2c2038;
+    --bad:         #ff7a6e;
+    --good:        #86c07e;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 75ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px;
+  }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 130px; }
+  select, input[type=text], input[type=number] {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line);
+    border-radius: 3px; padding: 5px 8px;
+  }
+  input[type=number] { width: 4.5em; }
+  input[type=text] { width: 10em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 8px 13px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover:not(:disabled) { background: var(--mem-soft); border-color: var(--mem); }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary { background: var(--mem); border-color: var(--mem); color: var(--surface); font-weight: 600; }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--mem); }
+  button.inc { border-color: var(--hit); color: var(--hit); }
+  button.inc:hover:not(:disabled) { background: var(--hit-soft); border-color: var(--hit); }
+  button.ret { border-color: var(--probe); color: var(--probe); }
+  button.ret:hover:not(:disabled) { background: var(--probe-soft); border-color: var(--probe); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+
+  /* ---- stream ---- */
+  .stream { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip {
+    font-family: var(--mono); font-size: 11.5px; padding: 2px 7px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface-sunk);
+    color: var(--ink); white-space: nowrap;
+  }
+  .chip.done { opacity: .38; }
+  .chip.last { opacity: 1; background: var(--hit-soft); border-color: var(--hit); color: var(--hit); }
+  .chip.next { border-color: var(--ink-soft); border-style: dashed; }
+  .chip.custom { border-style: dotted; }
+
+  /* ---- layout ---- */
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: minmax(0,1fr); } }
+
+  /* ---- sketch grid ---- */
+  .gridwrap { overflow-x: auto; padding-bottom: 4px; }
+  table.sketch { border-collapse: separate; border-spacing: 3px; font-family: var(--mono); }
+  table.sketch th { font-weight: 500; font-size: 11px; color: var(--ink-faint); padding: 0 4px; }
+  table.sketch th.rowh { text-align: right; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+  table.sketch td.hx { font-size: 11.5px; color: var(--ink-faint); white-space: nowrap; padding-left: 8px; text-align: left; }
+  td.cell {
+    --p: 0;
+    width: 38px; height: 38px; min-width: 30px; text-align: center; font-size: 13px;
+    border: 1px solid var(--line-soft); border-radius: 3px; cursor: default; position: relative;
+    background: color-mix(in srgb, var(--mem) calc(var(--p) * 55%), var(--surface));
+    color: var(--ink);
+  }
+  td.cell.zero { color: var(--ink-faint); }
+  td.cell.hot { color: var(--surface); }
+  td.cell.hit { box-shadow: inset 0 0 0 2px var(--hit); animation: flash .9s ease-out; }
+  td.cell.probe { box-shadow: inset 0 0 0 2px var(--probe); }
+  td.cell.hit.probe { box-shadow: inset 0 0 0 2px var(--hit), 0 0 0 2px var(--probe); }
+  td.cell.min::after {
+    content: "min"; position: absolute; top: -7px; right: -5px; font-size: 9px; line-height: 1;
+    padding: 1px 3px; border-radius: 3px; background: var(--probe); color: var(--surface);
+  }
+  td.cell:hover { outline: 2px solid var(--ink-soft); outline-offset: 1px; }
+  td.cell .plus {
+    position: absolute; left: 50%; top: 0; transform: translate(-50%, -60%);
+    font-size: 11px; font-weight: 700; color: var(--hit); pointer-events: none;
+    animation: rise 1s ease-out forwards;
+  }
+  @keyframes flash { 0% { background: var(--hit); } 100% { } }
+  @keyframes rise { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -140%); } }
+
+  .say {
+    margin: 14px 0 0; padding: 10px 12px; min-height: 2.8em;
+    background: var(--surface-sunk); border-left: 3px solid var(--line); border-radius: 2px;
+    font-size: 14px;
+  }
+  .say.inc { border-left-color: var(--hit); }
+  .say.ret { border-left-color: var(--probe); }
+  .say b.x { font-family: var(--mono); }
+  .inspect { margin-top: 8px; font-size: 13px; color: var(--ink-soft); min-height: 1.5em; }
+
+  /* ---- pseudocode ---- */
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 0; overflow-x: auto;
+  }
+  pre.code span { display: block; padding: 0 12px; border-left: 3px solid transparent; }
+  pre.code span.fn { color: var(--ink-soft); font-weight: 600; }
+  pre.code span.on-inc { background: var(--hit-soft); border-left-color: var(--hit); }
+  pre.code span.on-ret { background: var(--probe-soft); border-left-color: var(--probe); }
+
+  /* ---- counts table ---- */
+  table.counts { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.counts th {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; font-weight: 500;
+    text-transform: none; color: var(--ink-faint); text-align: right; padding: 4px 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.counts th:first-child, table.counts td:first-child { text-align: left; }
+  table.counts td { padding: 3px 6px; text-align: right; font-family: var(--mono); border-bottom: 1px solid var(--line-soft); }
+  table.counts td:first-child { font-family: var(--sans); }
+  table.counts tr { cursor: pointer; }
+  table.counts tr:hover td { background: var(--surface-sunk); }
+  table.counts tr.sel td { background: var(--probe-soft); }
+  table.counts tr.unseen td { color: var(--ink-faint); }
+  table.counts td.err { color: var(--bad); font-weight: 600; }
+  table.counts td.ok { color: var(--good); }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+
+  .stats { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 13px; }
+  .stats div:nth-child(odd) { color: var(--ink-soft); }
+  .stats div:nth-child(even) { font-family: var(--mono); text-align: right; }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  @media (max-width: 520px) {
+    .wrap { padding: 20px 16px 48px; }
+    td.cell { width: 30px; height: 32px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms</p>
+  <h1>The countmin sketch</h1>
+  <p class="standfirst">
+    A countmin sketch keeps <i>t</i> real vectors <i>r</i><sub>1</sub>,…,<i>r</i><sub><i>t</i></sub>
+    of length <i>m</i>, one per hash function <i>h<sub>i</sub></i>.
+    <code>Increment(x,v)</code> adds <i>v</i> to <i>r<sub>i</sub></i>[<i>h<sub>i</sub></i>(<i>x</i>)] in every row;
+    <code>Retrieve(x)</code> returns the minimum of those <i>t</i> cells. Collisions can only
+    <em>add</em> to a cell, so the estimate is never too small — and it is wrong only if
+    <i>x</i> collides in <em>every</em> row. Step through a stream of cartoon characters below,
+    and click any name to <code>Retrieve</code> it.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="m">width m</label>
+    <input id="m" type="range" min="2" max="24" value="8">
+    <span class="val" id="mV"></span>
+  </div>
+  <div class="field">
+    <label for="t">rows t</label>
+    <input id="t" type="range" min="1" max="6" value="3">
+    <span class="val" id="tV"></span>
+  </div>
+  <div class="field">
+    <label for="roster">characters</label>
+    <select id="roster">
+      <option value="both">Flintstones + Simpsons</option>
+      <option value="flintstones">Flintstones</option>
+      <option value="simpsons">Simpsons</option>
+    </select>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label for="speed">speed</label>
+    <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2">
+    <span class="val" id="speedV"></span>
+  </div>
+  <div class="field">
+    <label>stream</label>
+    <div class="btns">
+      <button id="step" class="primary">Step ▸</button>
+      <button id="play">Play</button>
+      <button id="all">Run all</button>
+      <button id="reset">Reset</button>
+    </div>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>randomness</label>
+    <div class="btns">
+      <button id="rehash" title="draw new hash functions h_1..h_t">New hashes</button>
+      <button id="restream" title="draw a new random stream">New stream</button>
+    </div>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Stream of <code>Increment(x, v)</code> calls <span class="show" id="streamPos"></span></h2>
+  <div class="stream" id="stream"></div>
+  <div class="btns" style="margin-top:12px; align-items:center">
+    <input id="xIn" type="text" placeholder="any name, e.g. Moe" aria-label="element x">
+    <input id="vIn" type="number" value="1" min="0" step="any" aria-label="increment v">
+    <button id="incBtn" class="inc">Increment(x, v)</button>
+    <button id="retBtn" class="ret">Retrieve(x)</button>
+  </div>
+</div>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <h2>The sketch: rows r<sub>i</sub>, columns 0…m−1</h2>
+      <div class="gridwrap"><table class="sketch" id="grid"></table></div>
+      <div class="say" id="say">Press <b>Step</b> to process the first <code>Increment</code>.</div>
+      <div class="inspect" id="inspect">Hover a cell to see which characters were added into it.</div>
+    </div>
+    <div class="card">
+      <h2>Pseudo-code</h2>
+<pre class="code" id="code"><span class="fn">Initialize(ε, δ):</span><span>  m = ⌈e/ε⌉;  t = ⌈ln(1/δ)⌉</span><span>  r<sub>1</sub> = … = r<sub>t</sub> = 0<sup>m</sup></span><span class="fn" data-k="inc">Increment(x, v):</span><span data-k="inc">  for i = 1, …, t:</span><span data-k="inc">    r<sub>i</sub>[h<sub>i</sub>(x)] = r<sub>i</sub>[h<sub>i</sub>(x)] + v</span><span class="fn" data-k="ret">Retrieve(x):</span><span data-k="ret">  return min(r<sub>1</sub>[h<sub>1</sub>(x)], …, r<sub>t</sub>[h<sub>t</sub>(x)])</span></pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>True a[x] vs. Retrieve(x)</h2>
+      <table class="counts">
+        <thead><tr><th>x</th><th>a[x]</th><th>Retrieve</th><th>error</th></tr></thead>
+        <tbody id="counts"></tbody>
+      </table>
+      <p class="note">Click a row to <code>Retrieve</code> it. Grey rows were never incremented
+        (a[x] = 0); a nonzero Retrieve for them is a Bloom-filter-style false positive.</p>
+    </div>
+    <div class="card">
+      <h2>Parameters &amp; bounds</h2>
+      <div class="stats" id="stats"></div>
+      <p class="note">
+        Cormode–Muthukrishnan: with <i>m</i> = ⌈e/ε⌉ and <i>t</i> = ⌈ln 1/δ⌉,
+        Retrieve(<i>x</i>) ≥ a[<i>x</i>] always, and Retrieve(<i>x</i>) ≤ a[<i>x</i>] + ε‖a‖<sub>1</sub>
+        with probability ≥ 1 − δ.
+      </p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Hash functions are seeded FNV-1a + a murmur-style mixer, reduced mod <i>m</i>; the stream is
+  Zipf-distributed (a few characters are very common, most are rare), so heavy hitters are
+  estimated well while rare names absorb most of the relative error. Changing <i>m</i> or
+  <i>t</i> rebuilds the sketch from the calls processed so far.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const ROSTERS = {
+  flintstones: ["Fred", "Wilma", "Barney", "Betty", "Pebbles", "Bamm-Bamm", "Dino",
+                "Mr. Slate", "The Great Gazoo", "Hoppy", "Arnold", "Joe Rockhead"],
+  simpsons:    ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Mr. Burns", "Smithers",
+                "Ned Flanders", "Apu", "Moe", "Krusty", "Milhouse", "Ralph", "Barney Gumble"],
+};
+ROSTERS.both = [...ROSTERS.flintstones, ...ROSTERS.simpsons];
+const STREAM_LEN = 60;
+
+let m = 8, t = 3, roster = "both", hashSeed = 1, streamSeed = 1;
+let stream = [], pos = 0;   // pos = number of stream calls processed
+let custom = [];            // custom calls, as {x, v, at} with at = stream position when added
+let lastOp = null, selected = null, playTimer = null;
+
+const $ = id => document.getElementById(id);
+
+// ---- randomness -----------------------------------------------------------
+function mulberry32(a) {
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let z = Math.imul(a ^ a >>> 15, 1 | a);
+    z = z + Math.imul(z ^ z >>> 7, 61 | z) ^ z; return ((z ^ z >>> 14) >>> 0) / 4294967296; };
+}
+function h(i, x) {           // h_i(x), i = 0..t-1
+  let z = 2166136261 ^ Math.imul(hashSeed, 0x9e3779b1) ^ Math.imul(i + 1, 0x85ebca6b);
+  for (const c of x) { z ^= c.charCodeAt(0); z = Math.imul(z, 16777619); }
+  z ^= z >>> 16; z = Math.imul(z, 0x85ebca6b); z ^= z >>> 13; z = Math.imul(z, 0xc2b2ae35); z ^= z >>> 16;
+  return (z >>> 0) % m;
+}
+function makeStream() {      // Zipf(1.1) over a seeded shuffle of the roster
+  const rnd = mulberry32(streamSeed * 7919), names = ROSTERS[roster].slice();
+  for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
+  const w = names.map((_, r) => 1 / Math.pow(r + 1, 1.1)), W = w.reduce((a, b) => a + b);
+  stream = Array.from({ length: STREAM_LEN }, () => {
+    let u = rnd() * W, k = 0; while (u > w[k] && k < w.length - 1) u -= w[k++];
+    return { x: names[k], v: 1 };
+  });
+}
+
+// ---- the sketch (rebuilt from all processed calls) --------------------------
+function processed() {
+  const ops = stream.slice(0, pos).map((o, i) => ({ ...o, at: i + 1 }));
+  return ops.concat(custom.filter(c => c.at <= pos)).sort((a, b) => a.at - b.at);
+}
+function build() {
+  const r = Array.from({ length: t }, () => new Array(m).fill(0));
+  const who = Array.from({ length: t }, () => Array.from({ length: m }, () => new Map()));
+  const a = new Map();
+  for (const { x, v } of processed()) {
+    a.set(x, (a.get(x) || 0) + v);
+    for (let i = 0; i < t; i++) { const j = h(i, x); r[i][j] += v; who[i][j].set(x, (who[i][j].get(x) || 0) + v); }
+  }
+  return { r, who, a };
+}
+const retrieve = (S, x) => Math.min(...S.r.map((row, i) => row[h(i, x)]));
+const fmt = v => Number.isInteger(v) ? String(v) : v.toFixed(2);
+const sub = i => `<sub>${i}</sub>`;
+
+// ---- rendering --------------------------------------------------------------
+function render() {
+  const S = build();
+  const maxv = Math.max(1, ...S.r.flat());
+  const hitCols = lastOp ? S.r.map((_, i) => h(i, lastOp.x)) : null;
+  const selCols = selected ? S.r.map((_, i) => h(i, selected)) : null;
+  const selMin = selected ? retrieve(S, selected) : null;
+  const minRow = selCols ? S.r.findIndex((row, i) => row[selCols[i]] === selMin) : -1;
+
+  let html = "<tr><th></th>" + Array.from({ length: m }, (_, j) => `<th>${j}</th>`).join("") + "<th></th></tr>";
+  for (let i = 0; i < t; i++) {
+    html += `<tr><th class="rowh">r${sub(i + 1)}</th>`;
+    for (let j = 0; j < m; j++) {
+      const v = S.r[i][j], p = v / maxv, cls = ["cell"];
+      if (v === 0) cls.push("zero");
+      if (p > 0.62) cls.push("hot");
+      if (hitCols && hitCols[i] === j) cls.push("hit");
+      if (selCols && selCols[i] === j) cls.push("probe");
+      if (i === minRow && selCols[i] === j) cls.push("min");
+      const plus = hitCols && hitCols[i] === j ? `<span class="plus">+${fmt(lastOp.v)}</span>` : "";
+      html += `<td class="${cls.join(" ")}" style="--p:${p.toFixed(3)}" data-i="${i}" data-j="${j}">${fmt(v)}${plus}</td>`;
+    }
+    const lab = [];
+    if (lastOp) lab.push(`<span style="color:var(--hit)">h${sub(i + 1)}(${esc(lastOp.x)})=${hitCols[i]}</span>`);
+    if (selected && selected !== lastOp?.x) lab.push(`<span style="color:var(--probe)">h${sub(i + 1)}(${esc(selected)})=${selCols[i]}</span>`);
+    html += `<td class="hx">${lab.join(" &nbsp;")}</td></tr>`;
+  }
+  $("grid").innerHTML = html;
+  $("grid").onmouseover = e => {
+    const c = e.target.closest("td.cell"); if (!c) return;
+    const i = +c.dataset.i, j = +c.dataset.j, parts = [...S.who[i][j]].sort((a, b) => b[1] - a[1]);
+    $("inspect").innerHTML = `r${sub(i + 1)}[${j}] = ${fmt(S.r[i][j])}` +
+      (parts.length ? " = " + parts.map(([x, v]) => `${esc(x)} ${fmt(v)}`).join(" + ") : " (nothing hashed here yet)");
+  };
+
+  // explanation
+  const say = $("say");
+  if (selected) {
+    const vals = selCols.map((j, i) => S.r[i][j]), truth = S.a.get(selected) || 0, err = selMin - truth;
+    say.className = "say ret";
+    say.innerHTML = `<code>Retrieve(<b class="x">${esc(selected)}</b>)</code> = min(` +
+      vals.map((v, i) => `r${sub(i + 1)}[${selCols[i]}]=${fmt(v)}`).join(", ") + `) = <b>${fmt(selMin)}</b>. ` +
+      `True a[${esc(selected)}] = ${fmt(truth)} — ` +
+      (err > 1e-9 ? `<span style="color:var(--bad)">overestimate by ${fmt(err)}: ${esc(selected)} collided with someone in every row.</span>`
+                  : `<span style="color:var(--good)">exact: at least one row had no collision.</span>`);
+  } else if (lastOp) {
+    say.className = "say inc";
+    say.innerHTML = `<code>Increment(<b class="x">${esc(lastOp.x)}</b>, ${fmt(lastOp.v)})</code>: add ${fmt(lastOp.v)} to ` +
+      hitCols.map((j, i) => `r${sub(i + 1)}[${j}]`).join(", ") + ".";
+  } else {
+    say.className = "say";
+    say.innerHTML = "Press <b>Step</b> to process the first <code>Increment</code>.";
+  }
+  for (const s of $("code").children) {
+    s.classList.toggle("on-inc", s.dataset.k === "inc" && !!lastOp);
+    s.classList.toggle("on-ret", s.dataset.k === "ret" && !!selected);
+  }
+
+  // stream chips
+  const chips = stream.map((o, k) => {
+    const cls = k < pos ? (k === pos - 1 && lastOp?.at === pos && !lastOp.custom ? "chip last" : "chip done") : k === pos ? "chip next" : "chip";
+    return `<span class="${cls}">${esc(o.x)}</span>`;
+  });
+  $("stream").innerHTML = chips.join("");
+  $("streamPos").textContent = `— ${pos} of ${stream.length} processed` + (custom.length ? `, plus ${custom.filter(c => c.at <= pos).length} typed in` : "");
+
+  // counts table: every roster name plus anything typed in
+  const names = [...new Set([...ROSTERS[roster], ...S.a.keys(), ...(selected ? [selected] : [])])];
+  const rows = names.map(x => ({ x, a: S.a.get(x) || 0, est: retrieve(S, x) }))
+    .sort((p, q) => q.a - p.a || q.est - p.est || p.x.localeCompare(q.x));
+  $("counts").innerHTML = rows.map(({ x, a, est }) => {
+    const err = est - a, cls = [a === 0 ? "unseen" : "", x === selected ? "sel" : ""].join(" ");
+    return `<tr class="${cls}" data-x="${esc(x)}"><td>${esc(x)}</td><td>${fmt(a)}</td><td>${fmt(est)}</td>` +
+      `<td class="${err > 1e-9 ? "err" : "ok"}">${err > 1e-9 ? "+" + fmt(err) : "0"}</td></tr>`;
+  }).join("");
+
+  // stats
+  const L1 = [...S.a.values()].reduce((p, q) => p + q, 0), k = S.a.size;
+  const eps = Math.E / m, delta = Math.exp(-t);
+  const seen = rows.filter(r => r.a > 0);
+  const wrong = seen.filter(r => r.est - r.a > 1e-9).length;
+  const beyond = seen.filter(r => r.est - r.a > eps * L1 + 1e-9).length;
+  $("stats").innerHTML = [
+    ["ε = e/m", eps.toFixed(3)], ["δ = e<sup>−t</sup>", delta.toFixed(3)],
+    ["‖a‖<sub>1</sub> = Σ a[x]", fmt(L1)], ["error bound ε‖a‖<sub>1</sub>", (eps * L1).toFixed(2)],
+    ["distinct x seen, k", k], ["Cor. 2 wants m ≥ e·k", Math.ceil(Math.E * k)],
+    ["seen x with any error", `${wrong} / ${k}`],
+    ["seen x with error > ε‖a‖<sub>1</sub>", `${beyond} / ${k}`],
+    ["sketch size m·t", m * t], ["exact table size", k],
+  ].map(([a, b]) => `<div>${a}</div><div>${b}</div>`).join("");
+
+  $("mV").textContent = `m = ${m}`; $("tV").textContent = `t = ${t}`;
+  $("speedV").textContent = `${$("speed").value} calls/s`;
+  $("seedV").textContent = `hash #${hashSeed} · stream #${streamSeed}`;
+  $("step").disabled = $("all").disabled = pos >= stream.length;
+  if (pos >= stream.length) stop();
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
+
+// ---- actions ----------------------------------------------------------------
+function step() {
+  if (pos >= stream.length) return;
+  lastOp = { ...stream[pos], at: pos + 1 }; pos++; selected = null; render();
+}
+function stop() { clearInterval(playTimer); playTimer = null; $("play").textContent = "Play"; }
+function play() {
+  if (playTimer) return stop();
+  $("play").textContent = "Pause";
+  playTimer = setInterval(step, 1000 / +$("speed").value);
+}
+function resetAll(keepStream) {
+  stop(); if (!keepStream) makeStream();
+  pos = 0; custom = []; lastOp = null; selected = null; render();
+}
+
+$("step").onclick = () => { stop(); step(); };
+$("play").onclick = play;
+$("all").onclick = () => { stop(); pos = stream.length; lastOp = null; render(); };
+$("reset").onclick = () => resetAll(true);
+$("rehash").onclick = () => { hashSeed++; render(); };
+$("restream").onclick = () => { streamSeed++; resetAll(false); };
+$("roster").onchange = e => { roster = e.target.value; resetAll(false); };
+$("m").oninput = e => { m = +e.target.value; render(); };
+$("t").oninput = e => { t = +e.target.value; render(); };
+$("speed").oninput = () => { $("speedV").textContent = `${$("speed").value} calls/s`; if (playTimer) { stop(); play(); } };
+$("counts").onclick = e => {
+  const tr = e.target.closest("tr[data-x]"); if (!tr) return;
+  const x = tr.dataset.x;
+  selected = selected === x ? null : x; render();
+};
+$("incBtn").onclick = () => {
+  const x = $("xIn").value.trim(), v = +$("vIn").value;
+  if (!x || !(v >= 0)) return;
+  stop(); lastOp = { x, v, at: pos, custom: true }; custom.push(lastOp); selected = null; render();
+};
+$("retBtn").onclick = () => { const x = $("xIn").value.trim(); if (x) { selected = x; render(); } };
+$("xIn").onkeydown = e => { if (e.key === "Enter") $("incBtn").click(); };
+
+makeStream(); render();
+</script>
+</body>
+</html>
