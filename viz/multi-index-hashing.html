@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Index Hashing</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0086a3;   /* candidate / band match */
+    --mem-soft:    #d3e9ef;
+    --hit:         #a4530c;   /* threshold s0 / missed */
+    --hit-soft:    #f0dfc9;
+    --probe:       #6a3d8f;   /* selected q' */
+    --probe-soft:  #e6dcef;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #1d97b3;
+      --mem-soft:    #10333c;
+      --hit:         #c47a2e;
+      --hit-soft:    #3a2a15;
+      --probe:       #9a70cc;
+      --probe-soft:  #2c2038;
+      --focus:       #c47a2e;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #1d97b3;
+    --mem-soft:    #10333c;
+    --hit:         #c47a2e;
+    --hit-soft:    #3a2a15;
+    --probe:       #9a70cc;
+    --probe-soft:  #2c2038;
+    --focus:       #c47a2e;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 78ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px;
+  }
+  h2 .show { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 130px; }
+  input[type=text] {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line);
+    border-radius: 3px; padding: 6px 8px; width: 15em;
+  }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 8px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: var(--mem-soft); border-color: var(--mem); }
+  button.on { border-color: var(--mem); color: var(--mem); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+
+  /* ---- layout ---- */
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) 440px; gap: 22px; align-items: start; }
+  @media (max-width: 980px) { .cols { grid-template-columns: minmax(0,1fr); } }
+
+  /* ---- shingles ---- */
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; padding: 1px 6px; white-space: pre;
+    border: 1px solid var(--line); border-radius: 3px; background: var(--surface-sunk);
+  }
+
+  /* ---- signature grid ---- */
+  .sigwrap { overflow-x: auto; }
+  table.sig { border-collapse: separate; border-spacing: 3px 2px; font-family: var(--mono); }
+  table.sig th { font-weight: 500; font-size: 11px; color: var(--ink-faint); text-align: right; padding: 0 6px 0 0; white-space: nowrap; }
+  table.sig tr.gap td, table.sig tr.gap th { height: 6px; }
+  table.sig td.k {
+    min-width: 40px; height: 26px; text-align: center; font-size: 12.5px; white-space: pre;
+    background: var(--surface-sunk); border: 1px solid var(--line-soft); border-radius: 3px;
+  }
+  table.sig td.k.eq { background: var(--mem-soft); border-color: var(--mem); }
+  table.sig tr.q2 td.k { border-style: dashed; }
+  table.sig tr.bandhit td.k { box-shadow: 0 0 0 1px var(--mem); }
+  table.sig td.res { font-size: 12px; padding-left: 8px; white-space: nowrap; color: var(--ink-faint); }
+  table.sig td.res.yes { color: var(--mem); font-weight: 600; }
+  table.sig th.who { font-size: 11px; max-width: 9em; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---- band index ---- */
+  .buckets { font-size: 13.5px; }
+  .bucket { display: grid; grid-template-columns: 5.5em minmax(0,1fr); gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line-soft); }
+  .bucket:last-child { border-bottom: 0; }
+  .bucket .bz { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+  .bucket .key { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); white-space: pre; }
+  .bucket .mem { color: var(--ink); }
+  .bucket .empty { color: var(--ink-faint); font-style: italic; }
+
+  /* ---- pseudocode ---- */
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 12px; overflow-x: auto;
+  }
+  pre.code .fn { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---- plot ---- */
+  .plot { position: relative; }
+  .plot svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .plot .grid line { stroke: var(--line-soft); stroke-width: 1; }
+  .plot .axis text { fill: var(--ink-faint); font-family: var(--mono); font-size: 11px; }
+  .plot .axis .title { fill: var(--ink-soft); font-family: var(--sans); font-size: 12px; }
+  .plot .curve { fill: none; stroke: var(--ink-soft); stroke-width: 2; }
+  .plot .s0 { stroke: var(--hit); stroke-width: 2; stroke-dasharray: 4 3; }
+  .plot .s0lab { fill: var(--hit); font-family: var(--mono); font-size: 11px; }
+  .plot .near { fill: var(--hit-soft); opacity: .45; }
+  .plot circle.dot { stroke: var(--surface); stroke-width: 2; cursor: pointer; }
+  .plot circle.dot.cand { fill: var(--mem); }
+  .plot circle.dot.no { fill: var(--surface); stroke: var(--ink-faint); stroke-width: 1.5; }
+  .plot circle.ring { fill: none; stroke: var(--probe); stroke-width: 2.5; pointer-events: none; }
+  .plot circle.hitbox { fill: transparent; cursor: pointer; }
+  .tip {
+    position: absolute; pointer-events: none; z-index: 5; display: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 6px 9px; font-size: 12.5px; white-space: nowrap;
+  }
+  .tip b { font-weight: 600; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .sw.cand { background: var(--mem); }
+  .sw.no { border: 1.5px solid var(--ink-faint); background: var(--surface); }
+  .sw.line { width: 16px; height: 0; border-radius: 0; border-top: 2px dashed var(--hit); }
+  .sw.curve { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--ink-soft); }
+
+  /* ---- stats + table ---- */
+  .stats { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 13px; }
+  .stats div:nth-child(odd) { color: var(--ink-soft); }
+  .stats div:nth-child(even) { font-family: var(--mono); text-align: right; }
+  table.docs { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.docs th {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint);
+    text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line);
+  }
+  table.docs th:first-child, table.docs td:first-child { text-align: left; }
+  table.docs td { padding: 3px 6px; text-align: right; font-family: var(--mono); border-bottom: 1px solid var(--line-soft); }
+  table.docs td:first-child { font-family: var(--sans); }
+  table.docs tr { cursor: pointer; }
+  table.docs tr:hover td { background: var(--surface-sunk); }
+  table.docs tr.sel td { background: var(--probe-soft); }
+  table.docs td.st { font-family: var(--sans); font-size: 12px; text-align: left; white-space: nowrap; }
+  .st-found { color: var(--mem); font-weight: 600; }
+  .st-missed { color: var(--hit); font-weight: 600; }
+  .st-extra { color: var(--ink-soft); }
+  .mark { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  .mark.cand { background: var(--mem); }
+  .mark.no { border: 1.5px solid var(--ink-faint); }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  @media (max-width: 520px) {
+    .wrap { padding: 20px 16px 48px; }
+    input[type=text] { width: 12em; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms 2 · LSH</p>
+  <h1>Multi-index hashing with MinHash bands</h1>
+  <p class="standfirst">
+    Goal: given <i>q</i>, find all <i>q′</i> with sim(<i>q</i>,<i>q′</i>) &gt; <i>s</i><sub>0</sub>.
+    Every string gets <i>M</i> MinHashes <i>k<sub>i</sub></i>(<i>q</i>) = min(<i>h<sub>i</sub></i>(<i>w</i>) for <i>w</i> in <i>q</i>),
+    grouped into <i>b</i> bands of <i>r</i> rows (<i>M</i> = <i>b</i>·<i>r</i>), with one inverted index per band.
+    <i>q′</i> is a candidate if it matches <i>q</i> on <em>all r</em> hashes of <em>any</em> band, so
+    Pr(<i>q′</i> is missed) = (1 − sim(<i>q</i>,<i>q′</i>)<sup><i>r</i></sup>)<sup><i>b</i></sup>.
+    Here each <i>q</i> is a cartoon character's name, and its words <i>w</i> are character 3-grams.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="q">query q</label>
+    <input id="q" type="text" list="names" value="Homer Simson" spellcheck="false">
+    <datalist id="names"></datalist>
+    <span class="val">pick a name or type anything</span>
+  </div>
+  <div class="field">
+    <label for="b">bands b</label>
+    <input id="b" type="range" min="1" max="16" value="6">
+    <span class="val" id="bV"></span>
+  </div>
+  <div class="field">
+    <label for="r">rows per band r</label>
+    <input id="r" type="range" min="1" max="8" value="3">
+    <span class="val" id="rV"></span>
+  </div>
+  <div class="field">
+    <label for="s0">threshold s₀</label>
+    <input id="s0" type="range" min="0.05" max="0.95" step="0.05" value="0.5">
+    <span class="val" id="s0V"></span>
+  </div>
+  <div class="field">
+    <label>presets (slide 50)</label>
+    <div class="btns">
+      <button id="pK1" title="b=1, r=1: use k1(q')=k1(q) only">k₁ only</button>
+      <button id="pKall" title="b=1, r=M: require all of k(q')=k(q)">all of k</button>
+      <button id="pBand" title="b=6, r=3">banded</button>
+      <button id="rehash" title="draw new hash functions h_1..h_M">New hashes</button>
+    </div>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+</div>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <h2>Words w in q <span class="show" id="nW"></span></h2>
+      <div class="chips" id="shingles"></div>
+    </div>
+
+    <div class="card">
+      <h2>Signatures k(q) <span id="vsLab"></span>, grouped into bands
+        <span class="show">— cells show the w achieving the min; hover for the value</span></h2>
+      <div class="sigwrap"><table class="sig" id="sig"></table></div>
+      <p class="note" id="sigNote"></p>
+    </div>
+
+    <div class="card">
+      <h2>Following the b inverted indices <span class="show" id="nCand"></span></h2>
+      <div class="buckets" id="buckets"></div>
+    </div>
+
+    <div class="card">
+      <h2>Algorithm</h2>
+<pre class="code"><span class="fn">Build:</span>
+  for each q′ in the collection:
+    k(q′) = (k<sub>1</sub>(q′), …, k<sub>M</sub>(q′)),  k<sub>i</sub>(q′) = min(h<sub>i</sub>(w) for w in q′)
+    for z = 1, …, b:
+      index<sub>z</sub>[ k<sub>(z−1)r+1</sub>(q′), …, k<sub>zr</sub>(q′) ] += q′
+<span class="fn">Query q:</span>
+  recompute k(q)
+  candidates = ∪<sub>z</sub> index<sub>z</sub>[ k<sub>(z−1)r+1</sub>(q), …, k<sub>zr</sub>(q) ]
+  optionally rescore: keep q′ with sim(q, q′) &gt; s<sub>0</sub></pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Candidate recall vs. sim(q, q′)</h2>
+      <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
+      <div class="legend">
+        <span><i class="sw curve"></i>1 − (1 − s<sup>r</sup>)<sup>b</sup></span>
+        <span><i class="sw cand"></i>q′ is a candidate</span>
+        <span><i class="sw no"></i>not a candidate</span>
+        <span><i class="sw line"></i>s₀</span>
+      </div>
+      <p class="note">Each dot is one q′ in the collection, placed at its true Jaccard similarity on the
+        curve of the probability that it becomes a candidate. Click a dot to compare its signature with q.</p>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>The collection</h2>
+      <table class="docs">
+        <thead><tr><th>q′</th><th>sim</th><th>bands</th><th>Pr(cand)</th><th>status</th></tr></thead>
+        <tbody id="docs"></tbody>
+      </table>
+      <p class="note"><span class="st-found">found</span>: sim &gt; s₀ and a candidate ·
+        <span class="st-missed">missed</span>: sim &gt; s₀ but no band matched ·
+        <span class="st-extra">extra</span>: a candidate with sim ≤ s₀ (discarded by rescoring).</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  sim(q, q′) is the Jaccard similarity of the 3-gram sets (each name is lower-cased and padded with a
+  space at both ends, shown as ␣). Hash functions <i>h<sub>i</sub></i> are seeded 32-bit mixers, so
+  Pr(<i>k<sub>i</sub></i>(q) = <i>k<sub>i</sub></i>(q′)) ≈ sim(q, q′). Increasing <i>b</i> adds bands
+  but keeps the existing hash functions fixed, so you can watch candidates appear.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const COLLECTION = [
+  "Homer Simpson", "Homer J. Simpson", "Homer Jay Simpson", "Marge Simpson", "Marjorie Simpson",
+  "Bart Simpson", "Bartholomew Simpson", "Lisa Simpson", "Maggie Simpson", "Abe Simpson",
+  "Grampa Simpson", "Mr. Burns", "Monty Burns", "Montgomery Burns", "C. Montgomery Burns",
+  "Waylon Smithers", "Mr. Smithers", "Ned Flanders", "Maude Flanders", "Rod Flanders",
+  "Todd Flanders", "Moe Szyslak", "Apu Nahasapeemapetilon", "Krusty the Clown", "Sideshow Bob",
+  "Sideshow Mel", "Milhouse Van Houten", "Kirk Van Houten", "Luann Van Houten", "Chief Wiggum",
+  "Clancy Wiggum", "Ralph Wiggum", "Barney Gumble",
+  "Fred Flintstone", "Fred Flinstone", "Frederick Flintstone", "Wilma Flintstone", "Wilma Slaghoople",
+  "Pearl Slaghoople", "Pebbles Flintstone", "Barney Rubble", "Betty Rubble", "Bamm-Bamm Rubble",
+  "Dino the Dinosaur", "Mr. Slate", "The Great Gazoo", "Hoppy the Hopparoo", "Joe Rockhead",
+];
+
+let b = 6, r = 3, s0 = 0.5, seed = 1, query = "Homer Simson", selected = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const vis = w => w.replace(/ /g, "␣");
+const sub = i => `<sub>${i}</sub>`;
+
+// ---- words, hashes, signatures ---------------------------------------------
+function words(s) {           // the set of padded character 3-grams
+  const p = " " + s.toLowerCase().trim().replace(/\s+/g, " ") + " ", out = new Set();
+  for (let i = 0; i + 3 <= p.length; i++) out.add(p.slice(i, i + 3));
+  return out;
+}
+function h(i, w) {            // h_i(w), i = 1..M, a seeded 32-bit hash
+  let z = 2166136261 ^ Math.imul(seed, 0x9e3779b1) ^ Math.imul(i, 0x85ebca6b);
+  for (const c of w) { z ^= c.charCodeAt(0); z = Math.imul(z, 16777619); }
+  z ^= z >>> 16; z = Math.imul(z, 0x85ebca6b); z ^= z >>> 13; z = Math.imul(z, 0xc2b2ae35); z ^= z >>> 16;
+  return z >>> 0;
+}
+function signature(W, M) {    // k_i = min(h_i(w) for w in q), remembering which w won
+  return Array.from({ length: M }, (_, i) => {
+    let best = { v: Infinity, w: "" };
+    for (const w of W) { const v = h(i + 1, w); if (v < best.v) best = { v, w }; }
+    return best;
+  });
+}
+function jaccard(A, B) { let n = 0; for (const x of A) if (B.has(x)) n++; return n / (A.size + B.size - n); }
+const bandKey = (k, z) => k.slice(z * r, (z + 1) * r).map(e => e.v).join(",");
+const prCand = s => 1 - Math.pow(1 - Math.pow(s, r), b);
+
+function compute() {
+  const M = b * r, qW = words(query), qk = signature(qW, M);
+  const docs = COLLECTION.filter(x => x !== query).map(x => {
+    const W = words(x), k = signature(W, M);
+    const bands = []; for (let z = 0; z < b; z++) if (bandKey(k, z) === bandKey(qk, z)) bands.push(z);
+    const sim = jaccard(qW, W);
+    return { x, W, k, sim, bands, cand: bands.length > 0, near: sim > s0 };
+  });
+  // the b inverted indices, restricted to the bucket q falls into
+  const buckets = Array.from({ length: b }, (_, z) => docs.filter(d => d.bands.includes(z)));
+  return { M, qW, qk, docs, buckets };
+}
+
+// ---- rendering ---------------------------------------------------------------
+function render() {
+  const C = compute(), sel = C.docs.find(d => d.x === selected) || null;
+  if (!sel) selected = null;
+
+  $("bV").textContent = `b = ${b}`; $("rV").textContent = `r = ${r}`;
+  $("s0V").textContent = `s₀ = ${s0.toFixed(2)}`;
+  $("seedV").textContent = `M = b·r = ${C.M} · hashes #${seed}`;
+  for (const [id, on] of [["pK1", b === 1 && r === 1], ["pKall", b === 1 && r > 1], ["pBand", b === 6 && r === 3]])
+    $(id).classList.toggle("on", on);
+
+  // words
+  $("nW").textContent = `— |q| = ${C.qW.size}`;
+  $("shingles").innerHTML = [...C.qW].map(w => `<span class="chip">${esc(vis(w))}</span>`).join("");
+
+  // signatures, one band per group of rows
+  $("vsLab").innerHTML = sel ? `vs. k(q′) for <b style="color:var(--probe)">${esc(sel.x)}</b>` : "";
+  const cols = "<tr><th></th>" + Array.from({ length: r }, (_, j) => `<th style="text-align:center">+${j + 1}</th>`).join("") + "<th></th></tr>";
+  let html = cols;
+  for (let z = 0; z < b; z++) {
+    const lo = z * r, hit = sel && sel.bands.includes(z);
+    const cell = (e, i, eq) => `<td class="k${eq ? " eq" : ""}" title="k${i + 1} = ${e.v.toLocaleString()} = h${i + 1}('${esc(vis(e.w))}')">${esc(vis(e.w))}</td>`;
+    html += `<tr class="${hit ? "bandhit" : ""}"><th>band ${z + 1} · k${sub(lo + 1)}…k${sub(lo + r)} · q</th>` +
+      C.qk.slice(lo, lo + r).map((e, j) => cell(e, lo + j, sel && sel.k[lo + j].v === e.v)).join("") +
+      `<td class="res"></td></tr>`;
+    if (sel) {
+      const n = sel.k.slice(lo, lo + r).filter((e, j) => e.v === C.qk[lo + j].v).length;
+      html += `<tr class="q2 ${hit ? "bandhit" : ""}"><th class="who">q′</th>` +
+        sel.k.slice(lo, lo + r).map((e, j) => cell(e, lo + j, e.v === C.qk[lo + j].v)).join("") +
+        `<td class="res ${hit ? "yes" : ""}">${hit ? "✓ whole band matches" : `${n}/${r} match`}</td></tr>`;
+    }
+    html += `<tr class="gap"><td></td></tr>`;
+  }
+  $("sig").innerHTML = html;
+  if (sel) {
+    const m = sel.k.filter((e, i) => e.v === C.qk[i].v).length;
+    $("sigNote").innerHTML = `${m} of M = ${C.M} MinHashes agree (${(m / C.M).toFixed(2)}), an estimate of
+      sim(q, q′) = ${sel.sim.toFixed(2)}. ${sel.cand ? `It matches on ${sel.bands.length} full band${sel.bands.length > 1 ? "s" : ""}, so it is a candidate.`
+      : "No band matches on all r rows, so it is not a candidate."}`;
+  } else $("sigNote").textContent = "Click a name in the plot or table to line its signature k(q′) up against k(q).";
+
+  // buckets
+  const cand = C.docs.filter(d => d.cand);
+  $("nCand").textContent = `— ${cand.length} candidate${cand.length === 1 ? "" : "s"} out of ${C.docs.length}`;
+  $("buckets").innerHTML = C.buckets.map((B, z) =>
+    `<div class="bucket"><div class="bz">index${sub(z + 1)}</div><div>` +
+    `<span class="key">[${C.qk.slice(z * r, (z + 1) * r).map(e => esc(vis(e.w))).join(", ")}]</span> → ` +
+    (B.length ? B.map(d => `<span class="mem">${esc(d.x)}</span>`).join(", ") : `<span class="empty">no other q′</span>`) +
+    `</div></div>`).join("");
+
+  renderPlot(C, sel);
+
+  // stats
+  const near = C.docs.filter(d => d.near), found = near.filter(d => d.cand);
+  const thresh = Math.pow(1 / b, 1 / r);
+  $("stats").innerHTML = [
+    ["hashes M = b·r", C.M],
+    ["S-curve midpoint ≈ (1/b)<sup>1/r</sup>", thresh.toFixed(2)],
+    ["collection size", C.docs.length],
+    ["q′ with sim &gt; s₀", near.length],
+    ["candidates", `${cand.length}  (${(100 * cand.length / C.docs.length).toFixed(0)}% of collection)`],
+    ["found / missed", `${found.length} / ${near.length - found.length}`],
+    ["recall of q′ with sim &gt; s₀", near.length ? (found.length / near.length).toFixed(2) : "—"],
+    ["extra candidates (rescored away)", cand.length - found.length],
+  ].map(([a, v]) => `<div>${a}</div><div>${v}</div>`).join("");
+
+  // table
+  const rows = C.docs.slice().sort((p, q) => q.sim - p.sim || p.x.localeCompare(q.x));
+  $("docs").innerHTML = rows.map(d => {
+    const st = d.near ? (d.cand ? ["found", "✓ found"] : ["missed", "✗ missed"]) : d.cand ? ["extra", "+ extra"] : ["", ""];
+    return `<tr data-x="${esc(d.x)}" class="${d.x === selected ? "sel" : ""}">` +
+      `<td><i class="mark ${d.cand ? "cand" : "no"}"></i>${esc(d.x)}</td><td>${d.sim.toFixed(2)}</td>` +
+      `<td>${d.bands.length}/${b}</td><td>${prCand(d.sim).toFixed(2)}</td>` +
+      `<td class="st ${st[0] ? "st-" + st[0] : ""}">${st[1]}</td></tr>`;
+  }).join("");
+
+  $("names").innerHTML = COLLECTION.map(x => `<option value="${esc(x)}">`).join("");
+}
+
+function renderPlot(C, sel) {
+  const W = 440, H = 280, L = 40, R = 12, T = 12, B = 38;
+  const X = s => L + s * (W - L - R), Y = p => T + (1 - p) * (H - T - B);
+  let g = "";
+  g += `<rect class="near" x="${X(s0)}" y="${T}" width="${X(1) - X(s0)}" height="${H - T - B}"/>`;
+  g += `<g class="grid">` + [0, .25, .5, .75, 1].map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("") + `</g>`;
+  g += `<g class="axis">` +
+    [0, .2, .4, .6, .8, 1].map(v => `<text x="${X(v)}" y="${H - B + 16}" text-anchor="middle">${v}</text>`).join("") +
+    [0, .5, 1].map(v => `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`).join("") +
+    `<text class="title" x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">sim(q, q′)</text>` +
+    `<text class="title" transform="translate(11 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">Pr(candidate)</text></g>`;
+  const pts = Array.from({ length: 201 }, (_, i) => i / 200).map(s => `${X(s).toFixed(1)},${Y(prCand(s)).toFixed(1)}`);
+  g += `<polyline class="curve" points="${pts.join(" ")}"/>`;
+  g += `<line class="s0" x1="${X(s0)}" x2="${X(s0)}" y1="${T}" y2="${H - B}"/>` +
+       `<text class="s0lab" x="${X(s0) + 4}" y="${T + 11}">s₀</text>`;
+  // dots: non-candidates first so candidates sit on top
+  const order = C.docs.slice().sort((p, q) => p.cand - q.cand);
+  for (const d of order) {
+    const cx = X(d.sim), cy = Y(prCand(d.sim));
+    g += `<circle class="dot ${d.cand ? "cand" : "no"}" cx="${cx}" cy="${cy}" r="${d.cand ? 5 : 4.5}"/>`;
+  }
+  if (sel) g += `<circle class="ring" cx="${X(sel.sim)}" cy="${Y(prCand(sel.sim))}" r="9"/>`;
+  for (const d of C.docs)
+    g += `<circle class="hitbox" data-x="${esc(d.x)}" cx="${X(d.sim)}" cy="${Y(prCand(d.sim))}" r="10"/>`;
+
+  const plot = $("plot"), tip = $("tip");
+  plot.querySelector("svg")?.remove();
+  plot.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="candidate probability versus similarity">${g}</svg>`);
+  const svg = plot.querySelector("svg");
+  svg.onmousemove = e => {
+    const hb = e.target.closest("circle.hitbox");
+    if (!hb) { tip.style.display = "none"; return; }
+    // several q′ can share a similarity; list them all
+    const x0 = +hb.getAttribute("cx"), same = C.docs.filter(d => Math.abs(X(d.sim) - x0) < 1.5);
+    tip.innerHTML = `<div style="color:var(--ink-soft)">sim = ${same[0].sim.toFixed(2)} · Pr(cand) = ${prCand(same[0].sim).toFixed(2)}</div>` +
+      same.map(d => `<div><i class="mark ${d.cand ? "cand" : "no"}"></i><b>${esc(d.x)}</b> — ${d.bands.length}/${b} bands</div>`).join("");
+    const pr = plot.getBoundingClientRect();
+    tip.style.display = "block";
+    const left = Math.min(e.clientX - pr.left + 12, pr.width - tip.offsetWidth - 4);
+    tip.style.left = Math.max(0, left) + "px"; tip.style.top = (e.clientY - pr.top + 12) + "px";
+  };
+  svg.onmouseleave = () => { tip.style.display = "none"; };
+  svg.onclick = e => { const hb = e.target.closest("circle.hitbox"); if (hb) select(hb.dataset.x); };
+}
+
+// ---- actions -----------------------------------------------------------------
+function select(x) { selected = selected === x ? null : x; render(); }
+function set(nb, nr) { b = nb; r = nr; $("b").value = b; $("r").value = r; render(); }
+
+$("q").oninput = e => { query = e.target.value; render(); };
+$("b").oninput = e => { b = +e.target.value; render(); };
+$("r").oninput = e => { r = +e.target.value; render(); };
+$("s0").oninput = e => { s0 = +e.target.value; render(); };
+$("pK1").onclick = () => set(1, 1);
+$("pKall").onclick = () => set(1, 8);
+$("pBand").onclick = () => set(6, 3);
+$("rehash").onclick = () => { seed++; render(); };
+$("docs").onclick = e => { const tr = e.target.closest("tr[data-x]"); if (tr) select(tr.dataset.x); };
+
+render();
+</script>
+</body>
+</html>
