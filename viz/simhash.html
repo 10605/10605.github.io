@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimHash Bitstrings</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --bit1:        #2c3e4a;   /* a 1 bit */
+    --bit0:        #c3cdd5;   /* a 0 bit */
+    --mem:         #0086a3;   /* MIH candidate */
+    --near:        #1d6b2c;   /* substring distance < r/m */
+    --mem-soft:    #d3e9ef;
+    --hit:         #a4530c;   /* bit differs from q */
+    --hit-soft:    #f0dfc9;
+    --probe:       #6a3d8f;   /* selected bit */
+    --probe-soft:  #e6dcef;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --bit1:        #c9d6dd;
+      --bit0:        #2e404b;
+      --mem:         #1d97b3;
+      --near:        #7fcf8a;
+      --mem-soft:    #10333c;
+      --hit:         #c47a2e;
+      --hit-soft:    #3a2a15;
+      --probe:       #9a70cc;
+      --probe-soft:  #2c2038;
+      --focus:       #c47a2e;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --bit1:        #c9d6dd;
+    --bit0:        #2e404b;
+    --mem:         #1d97b3;
+    --near:        #7fcf8a;
+    --mem-soft:    #10333c;
+    --hit:         #c47a2e;
+    --hit-soft:    #3a2a15;
+    --probe:       #9a70cc;
+    --probe-soft:  #2c2038;
+    --focus:       #c47a2e;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 80ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px;
+  }
+  h2 .show { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 120px; }
+  select, input[type=text] {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line);
+    border-radius: 3px; padding: 5px 8px;
+  }
+  input[type=text] { width: 17em; }
+  label.check {
+    display: flex; align-items: center; gap: 7px; cursor: pointer;
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line);
+    border-radius: 3px; padding: 5px 10px 5px 8px;
+  }
+  label.check input { accent-color: var(--mem); margin: 0; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 7px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: var(--mem-soft); border-color: var(--mem); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+
+  /* ---- layout ---- */
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 22px; align-items: start; }
+  @media (max-width: 1060px) { .cols { grid-template-columns: minmax(0,1fr); } }
+
+  /* ---- barcode table ---- */
+  .codes-wrap { overflow-x: auto; max-height: 78vh; overflow-y: auto; }
+  table.codes { border-collapse: collapse; font-size: 12.5px; }
+  table.codes thead th {
+    position: sticky; top: 0; z-index: 2; background: var(--surface);
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint);
+    text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  table.codes thead th.l { text-align: left; }
+  table.codes td { padding: 0 6px; height: 19px; white-space: nowrap; border-bottom: 1px solid var(--line-soft); }
+  table.codes td.name { max-width: 195px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  table.codes td.name .num { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-right: 6px; }
+  table.codes td.name:hover { text-decoration: underline; }
+  table.codes td.bits { padding: 0 4px; line-height: 0; border-bottom: 0; }
+  .subhead { position: relative; height: 14px; }
+  .subhead span { position: absolute; top: 0; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+  table.codes td.bits canvas { display: block; cursor: crosshair; }
+  table.codes td.n { font-family: var(--mono); text-align: right; color: var(--ink-soft); }
+  table.codes tr.query td { background: var(--probe-soft); }
+  table.codes tr.query td.name { font-weight: 600; }
+  table.codes tr.within td.ham { color: var(--ink); font-weight: 600; }
+
+  /* ---- bit explainer ---- */
+  table.bit { border-collapse: collapse; font-size: 13px; width: 100%; }
+  table.bit th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint); text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+  table.bit th:first-child, table.bit td:first-child { text-align: left; }
+  table.bit td { font-family: var(--mono); text-align: right; padding: 2px 6px; border-bottom: 1px solid var(--line-soft); }
+  table.bit tr.sum td { border-top: 1px solid var(--line); font-weight: 600; }
+  .pos { color: var(--ink); } .neg { color: var(--hit); }
+
+  /* ---- plot ---- */
+  .plot { position: relative; }
+  .plot svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .plot .grid line { stroke: var(--line-soft); stroke-width: 1; }
+  .plot .axis text { fill: var(--ink-faint); font-family: var(--mono); font-size: 11px; }
+  .plot .axis .title { fill: var(--ink-soft); font-family: var(--sans); font-size: 12px; }
+  .plot .curve { fill: none; stroke: var(--ink-soft); stroke-width: 2; }
+  .plot .rline { stroke: var(--hit); stroke-width: 2; stroke-dasharray: 4 3; }
+  .plot .rlab { fill: var(--hit); font-family: var(--mono); font-size: 11px; }
+  .plot circle.dot { stroke: var(--surface); stroke-width: 2; }
+  .plot circle.dot.cand { fill: var(--mem); }
+  .plot circle.dot.no { fill: var(--surface); stroke: var(--ink-faint); stroke-width: 1.5; }
+  .plot circle.hitbox { fill: transparent; cursor: pointer; }
+  .tip {
+    position: absolute; pointer-events: none; z-index: 5; display: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 6px 9px; font-size: 12.5px; white-space: nowrap;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 10px; height: 10px; display: inline-block; border-radius: 2px; }
+  .sw.b1 { background: var(--bit1); } .sw.b0 { background: var(--bit0); border: 1px solid var(--line); }
+  .sw.diff { background: var(--hit); }
+  .sw.cand { background: var(--mem); border-radius: 50%; }
+  .sw.no { border: 1.5px solid var(--ink-faint); background: var(--surface); border-radius: 50%; }
+  .sw.curve { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--ink-soft); }
+  .sw.line { width: 16px; height: 0; border-radius: 0; border-top: 2px dashed var(--hit); }
+
+  .stats { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 13px; }
+  .stats div:nth-child(odd) { color: var(--ink-soft); }
+  .stats div:nth-child(even) { font-family: var(--mono); text-align: right; }
+
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 12px; overflow-x: auto;
+  }
+  pre.code .fn { color: var(--ink-soft); font-weight: 600; }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  @media (max-width: 520px) {
+    .wrap { padding: 20px 16px 48px; }
+    table.codes td.name { max-width: 150px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms 2 · LSH</p>
+  <h1>SimHash bitstrings for MSML course titles</h1>
+  <p class="standfirst">
+    Each course title is a sparse vector <b>x</b> whose features <i>f</i> are its tokens.
+    Bit <i>i</i> of its signature is a random hyperplane test,
+    LSH[<i>i</i>] = sum(<b>x</b>[<i>f</i>]·<i>r</i>[<i>i</i>,<i>f</i>] for <i>f</i> in <b>x</b>) &gt; 0 ? 1 : 0,
+    with <i>r</i>[<i>i</i>,<i>f</i>] ~ Normal(0,1). Two vectors at angle θ disagree on a bit with
+    probability θ/π, so similar titles get codes with small Hamming distance.
+    The vertical dividers split each <i>n</i>-bit code <b>h</b> into <i>m</i> substrings
+    <b>h</b><sup>(1)</sup>,…,<b>h</b><sup>(<i>m</i>)</sup> for multi-index hashing.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="q">query q</label>
+    <input id="q" type="text" spellcheck="false" placeholder="click a title, or type words">
+    <span class="val" id="qV">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label for="n">outputBits n</label>
+    <input id="n" type="range" min="8" max="128" step="8" value="64">
+    <span class="val" id="nV"></span>
+  </div>
+  <div class="field">
+    <label for="m">substrings m</label>
+    <input id="m" type="range" min="1" max="8" value="4">
+    <span class="val" id="mV"></span>
+  </div>
+  <div class="field">
+    <label for="rad">radius r</label>
+    <input id="rad" type="range" min="1" max="64" value="16">
+    <span class="val" id="radV"></span>
+  </div>
+  <div class="field">
+    <label for="pool">pool size</label>
+    <select id="pool">
+      <option value="0">no pool</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="100">100</option>
+      <option value="1000">1000</option>
+    </select>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>features</label>
+    <label class="check"><input id="stop" type="checkbox" checked> drop stopwords</label>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button id="rehash" title="draw new random r[i,f]">New hyperplanes</button>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+</div>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <h2>Signatures, sorted by Hamming distance to q <span class="show" id="nRows"></span></h2>
+      <div class="legend" style="margin:0 0 8px">
+        <span><i class="sw b1"></i>1</span><span><i class="sw b0"></i>0</span>
+        <span><i class="sw diff"></i>bit differs from q</span>
+        <span>number after h⁽ᶻ⁾ = Hamming(q⁽ᶻ⁾, h⁽ᶻ⁾), <b style="color:var(--near)">bold green</b> if &lt; r/m, gray otherwise</span>
+        <span class="show">click a title to make it q · click a bit to see how it was computed</span>
+      </div>
+      <div class="codes-wrap">
+        <table class="codes">
+          <thead><tr><th class="l">course</th><th class="l" id="bitsHead">LSH bits</th>
+            <th title="Hamming(q, h)">Ham</th>
+            <th title="cosine similarity of the token vectors">cos</th></tr></thead>
+          <tbody id="codes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>One bit <span class="show" id="bitLab"></span></h2>
+      <div id="bit"></div>
+    </div>
+
+    <div class="card">
+      <h2>Hamming distance vs. cosine</h2>
+      <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
+      <div class="legend">
+        <span><i class="sw curve"></i>E[Ham/n] = θ/π</span>
+        <span><i class="sw cand"></i>MIH candidate</span>
+        <span><i class="sw no"></i>not a candidate</span>
+        <span><i class="sw line"></i>r/n</span>
+      </div>
+      <p class="note">Each dot is one course h. A course is a multi-index-hashing candidate if some
+        substring has Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m. Every dot below the
+        dashed line (Hamming &lt; r) must be one: that is the pigeonhole claim.</p>
+    </div>
+
+    <div class="card">
+      <h2>Multi-index hashing</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Algorithm</h2>
+<pre class="code"><span class="fn">LSH(x):</span>
+  for i = 1 to outputBits:
+    LSH[i] = sum(x[f]*r[i,f] for f in x) &gt; 0 ? 1 : 0
+  <span class="show">pooled: r[i,f] = pool[hash(i,f) % poolSize]</span>
+<span class="fn">MIH candidates for q, radius r:</span>
+  split each code h into h<sup>(1)</sup>,…,h<sup>(m)</sup>
+  return all h with Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m
+         for some z</pre>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Course titles are the core courses, electives and example special-topics courses on the CMU MSML
+  curriculum page (<code>ml.cmu.edu/academics/machine-learning-masters-curriculum</code>, Sept 2026).
+  Features are lower-cased word tokens with x[f] = 1. Each r[i,f] comes from a seeded hash of (i, f)
+  (so nothing needs to be stored); with pooling, it is instead looked up in a shared pool of
+  poolSize Normal(0,1) draws, as in Van Durme &amp; Lall.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const COURSES = [
+  ["10-701", "Introduction to Machine Learning"], ["10-715", "Advanced Introduction to Machine Learning"],
+  ["10-617", "Intermediate Deep Learning"], ["10-703", "Deep Reinforcement Learning"],
+  ["10-707", "Advanced Deep Learning"], ["10-708", "Probabilistic Graphical Models"],
+  ["10-718", "Machine Learning in Practice"], ["10-725", "Optimization for Machine Learning"],
+  ["36-700", "Probability and Mathematical Statistics"], ["36-705", "Intermediate Statistics"],
+  ["10-605", "Machine Learning With Large Datasets"], ["10-623", "Generative AI"],
+  ["10-714", "Deep Learning Systems — Algorithms and Implementation"],
+  ["10-716", "Advanced Machine Learning — Theory and Methods"],
+  ["10-620", "Independent Study"],
+  ["11-611", "Natural Language Processing"], ["11-711", "Advanced Natural Language Processing"],
+  ["11-741", "Machine Learning With Graphs"], ["11-747", "Neural Networks for NLP"],
+  ["11-777", "Multimodal Machine Learning"], ["11-868", "Large Language Model Systems"],
+  ["15-642", "Machine Learning Systems"], ["15-750", "Algorithms in the Real World"],
+  ["15-850", "Advanced Algorithms"],
+  ["15-853", "Theory of Markov Processes: Selected Topics with Applications in ML and GenAI"],
+  ["15-780", "Graduate Artificial Intelligence"], ["15-826", "Multimedia Databases and Data Mining"],
+  ["16-720", "Computer Vision"], ["16-820", "Advanced Computer Vision"],
+  ["16-726", "Learning-based Image Synthesis"], ["16-824", "Visual Learning and Recognition"],
+  ["36-707", "Regression Analysis"], ["36-709", "Advanced Statistical Theory I"],
+  ["36-710", "Advanced Statistical Theory II"],
+  ["10-613", "Machine Learning Ethics and Society"], ["10-624", "Bayesian Methods in Machine Learning"],
+  ["10-643", "Socio-technical Evaluations of Generative AI"], ["10-717", "The Art of the Paper"],
+  ["10-719", "Federated and Collaborative Learning"],
+  ["10-721", "Philosophical Foundations of Machine Intelligence"],
+  ["10-726", "Machine Learning Theory: The Art of Problem Formulation and Theorem Proving"],
+  ["10-730", "Advanced AI and Brain Seminar"], ["10-732", "Robustness and Adaptation in Shifting Environments"],
+  ["10-733", "Representation and Generation in Neuroscience and AI"],
+  ["10-734", "Foundations of Autonomous Decision Making Under Uncertainty"],
+  ["10-735", "Responsible AI"], ["10-736", "Human-AI Decision Complementarity for Decision-Making"],
+  ["10-741", "Representation Learning"], ["10-742", "Machine Learning in Healthcare"],
+  ["10-744", "Machine Learning for Science"], ["10-745", "Scalability in Machine Learning"],
+  ["10-747", "Neuro-Symbolic AI"], ["10-748", "Machine Learning in Epidemiology"],
+  ["10-749", "AI for Scientific Computing"], ["10-753", "Deep Learning and GenAI Theory"],
+  ["10-777", "Historical Advances in Machine Learning"],
+  ["10-799", "Data Privacy, Memorization and Copyright in Generative AI"],
+  ["10-799", "Diffusion Models & Flow Matching"], ["10-813", "Advanced Topics in Machine Learning Theory"],
+  ["10-880", "Game Theoretic Probability, Statistics and Learning"],
+  ["17-716", "AI Governance — Identifying and Mitigating Risks in the Design and Development of AI Solutions"],
+].map(([num, title]) => ({ num, title }));
+const STOP = new Set(["a", "an", "and", "the", "of", "in", "for", "with", "to", "on", "i", "ii"]);
+
+let n = 64, m = 4, rad = 16, pool = 0, dropStop = true, seed = 1;
+let query = COURSES.find(c => c.num === "10-605");   // a course, or {title} for typed text
+let bitSel = null;                                     // {row: course or query, i}
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// ---- features and random hyperplanes -----------------------------------------
+function features(title) {   // token -> x[f]
+  const x = new Map();
+  for (const t of title.toLowerCase().match(/[a-z0-9]+(?:-[a-z0-9]+)*/g) || [])
+    if (!(dropStop && STOP.has(t))) x.set(t, 1);
+  return x;
+}
+function hash(...parts) {    // seeded 32-bit hash of the parts, uniform in [0,1)
+  let z = 2166136261 ^ Math.imul(seed, 0x9e3779b1);
+  for (const c of parts.join("\u0001")) { z ^= c.charCodeAt(0); z = Math.imul(z, 16777619); }
+  z ^= z >>> 16; z = Math.imul(z, 0x85ebca6b); z ^= z >>> 13; z = Math.imul(z, 0xc2b2ae35); z ^= z >>> 16;
+  return (z >>> 0) / 4294967296;
+}
+const normal = (...k) => Math.sqrt(-2 * Math.log(1 - hash(...k, "u"))) * Math.cos(2 * Math.PI * hash(...k, "v"));
+let POOL = [];
+function r(i, f) {           // r[i,f] ~ Normal(0,1), optionally via the pool
+  return pool ? POOL[Math.floor(hash("pool-index", i, f) * pool)] : normal(i, f);
+}
+function lsh(x) {
+  const code = new Uint8Array(n), sums = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    let s = 0; for (const [f, v] of x) s += v * r(i, f);
+    sums[i] = s; code[i] = s > 0 ? 1 : 0;
+  }
+  return { code, sums };
+}
+function cosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (const [f, v] of a) { na += v * v; if (b.has(f)) dot += v * b.get(f); }
+  for (const v of b.values()) nb += v * v;
+  return na && nb ? dot / Math.sqrt(na * nb) : 0;
+}
+function substrings() {      // [start, end) of h^(1..m); sizes differ by at most 1 if m does not divide n
+  return Array.from({ length: m }, (_, z) => [Math.round(z * n / m), Math.round((z + 1) * n / m)]);
+}
+const ham = (a, b, lo = 0, hi = n) => { let d = 0; for (let i = lo; i < hi; i++) d += a[i] !== b[i]; return d; };
+const binom = (N, k) => { let c = 1; for (let j = 1; j <= k; j++) c = c * (N - k + j) / j; return c; };
+
+// ---- compute everything -----------------------------------------------------------
+function compute() {
+  POOL = Array.from({ length: pool }, (_, j) => normal("pool", j));
+  const qx = features(query.title), q = { ...query, x: qx, ...lsh(qx) }, subs = substrings();
+  const rows = COURSES.map(c => {
+    const x = features(c.title), L = lsh(x);
+    const hz = subs.map(([lo, hi]) => ham(q.code, L.code, lo, hi));
+    const H = ham(q.code, L.code), minz = Math.min(...hz);
+    return { ...c, x, ...L, H, hz, minz, cos: cosine(qx, x), cand: hz.some(d => d < rad / m), within: H < rad };
+  });
+  rows.sort((a, b) => a.H - b.H || b.cos - a.cos || a.title.localeCompare(b.title));
+  return { q, rows, subs };
+}
+
+// ---- rendering ----------------------------------------------------------------------
+function render() {
+  const C = compute();
+  $("nV").textContent = `n = ${n}`; $("mV").textContent = `m = ${m} → ~${(n / m).toFixed(1).replace(/\.0$/, "")} bits each`;
+  $("radV").textContent = `r = ${rad} → r/m = ${(rad / m).toFixed(2).replace(/\.?0+$/, "")}`;
+  $("seedV").textContent = `hyperplanes #${seed}`;
+  $("qV").innerHTML = `features: ${[...C.q.x.keys()].map(esc).join(", ") || "<i>none</i>"}`;
+
+  // barcode rows
+  const cw = n <= 32 ? 9 : n <= 64 ? 6 : 4, rh = 20;
+  const isQuery = c => query.num && c.num === query.num && c.title === query.title;
+  $("codes").innerHTML = C.rows.map((c, k) =>
+    `<tr class="${isQuery(c) ? "query" : ""} ${c.cand ? "cand" : ""} ${c.within ? "within" : ""}" data-k="${k}">` +
+    `<td class="name" title="${esc(c.num + " " + c.title)}"><span class="num">${c.num}</span>${esc(c.title)}</td>` +
+    `<td class="bits"><canvas></canvas></td>` +
+    `<td class="n ham">${c.H}</td><td class="n">${c.cos.toFixed(2)}</td></tr>`
+  ).join("");
+  const col = { b1: css("--bit1"), b0: css("--bit0"), diff: css("--hit"), sel: css("--probe"), sep: css("--ink"),
+                txt: css("--ink-faint"), near: css("--near"), mono: css("--mono") };
+  // each substring is [bits][Hamming(q^(z), h^(z))], then a divider before the next one
+  const dpr = window.devicePixelRatio || 1, gap = 8, lw = 17, W = n * cw + m * lw + (m - 1) * gap;
+  const xOf = i => i * cw + C.subs.findIndex(([lo, hi]) => i >= lo && i < hi) * (lw + gap);
+  $("bitsHead").innerHTML = `<div class="subhead" style="width:${W}px">` +
+    C.subs.map(([lo], z) => `<span style="left:${xOf(lo)}px">h<sup>(${z + 1})</sup></span>`).join("") + `</div>`;
+  document.querySelectorAll("#codes canvas").forEach((cv, k) => {
+    const c = C.rows[k];
+    cv.width = W * dpr; cv.height = rh * dpr; cv.style.width = W + "px"; cv.style.height = rh + "px";
+    const g = cv.getContext("2d"); g.scale(dpr, dpr);
+    for (let i = 0; i < n; i++) {
+      const diff = c.code[i] !== C.q.code[i];
+      g.fillStyle = c.code[i] ? col.b1 : col.b0;
+      g.fillRect(xOf(i), 3, cw - 1, rh - 7);
+      if (diff) { g.fillStyle = col.diff; g.fillRect(xOf(i), rh - 7, cw - 1, 3); }
+    }
+    // substring dividers: full row height, so they join into continuous columns
+    g.fillStyle = col.sep;
+    for (const [lo] of C.subs.slice(1)) g.fillRect(xOf(lo) - Math.ceil(gap / 2) - 1.5, 0, 3, rh);
+    g.textAlign = "center"; g.textBaseline = "middle";
+    C.subs.forEach(([lo, hi], z) => {
+      const near = c.hz[z] < rad / m;
+      g.font = `${near ? "700 " : ""}11px ${col.mono}`; g.fillStyle = near ? col.near : col.txt;
+      g.fillText(c.hz[z], xOf(hi - 1) + cw + lw / 2, rh / 2);
+    });
+    if (bitSel && bitSel.row === c) { g.strokeStyle = col.sel; g.lineWidth = 2; g.strokeRect(xOf(bitSel.i) - 0.5, 2, cw, rh - 5); }
+    cv.onclick = e => {
+      const i = Array.from({ length: n }, (_, i) => i).find(i => e.offsetX >= xOf(i) && e.offsetX < xOf(i) + cw);
+      if (i !== undefined) { bitSel = { row: c, i }; render(); }
+    };
+  });
+  $("nRows").textContent = `— ${C.rows.length} courses`;
+
+  // bit explainer (re-resolve the selected row against this render's rows)
+  if (bitSel) bitSel.row = C.rows.find(c => c.num === bitSel.row.num && c.title === bitSel.row.title) || null;
+  if (bitSel && bitSel.row && bitSel.i < n) {
+    const c = bitSel.row, i = bitSel.i, terms = [...c.x].map(([f, v]) => [f, v, r(i, f)]);
+    $("bitLab").innerHTML = `— LSH[${i + 1}] for ${esc(c.num)}`;
+    $("bit").innerHTML = `<table class="bit"><thead><tr><th>f</th><th>x[f]</th><th>r[${i + 1},f]</th><th>x[f]·r</th></tr></thead><tbody>` +
+      terms.map(([f, v, w]) => `<tr><td>${esc(f)}</td><td>${v}</td><td class="${w > 0 ? "pos" : "neg"}">${w.toFixed(3)}</td><td>${(v * w).toFixed(3)}</td></tr>`).join("") +
+      `<tr class="sum"><td>sum</td><td></td><td></td><td class="${c.sums[i] > 0 ? "pos" : "neg"}">${c.sums[i].toFixed(3)}</td></tr></tbody></table>` +
+      `<p class="note">sum ${c.sums[i] > 0 ? "&gt;" : "≤"} 0, so LSH[${i + 1}] = <b>${c.code[i]}</b>. For q it is
+       ${C.q.code[i]}${C.q.code[i] !== c.code[i] ? " — they differ." : " — they agree."}
+       Shared features push both sums the same way; features only one title has push them independently.</p>`;
+  } else {
+    $("bitLab").textContent = "";
+    $("bit").innerHTML = `<p class="note" style="margin:0">Click any bit in the table to see the sum that produced it.</p>`;
+  }
+
+  renderPlot(C);
+
+  // MIH stats
+  const within = C.rows.filter(c => c.within), cand = C.rows.filter(c => c.cand);
+  const broken = within.filter(c => !c.cand).length;
+  const sizes = C.subs.map(([lo, hi]) => hi - lo), rm = Math.ceil(rad / m) - 1;   // substring radius probed: d < r/m
+  let probesMIH = 0; for (const s of sizes) for (let d = 0; d <= Math.min(rm, s); d++) probesMIH += binom(s, d);
+  let probesFull = 0; for (let d = 0; d < Math.min(rad, n + 1); d++) probesFull += binom(n, d);
+  const big = v => v < 1e6 ? Math.round(v).toLocaleString() : v.toExponential(1).replace("e+", "×10^");
+  $("stats").innerHTML = [
+    ["courses with Hamming(q, h) &lt; r", within.length],
+    ["MIH candidates", `${cand.length} of ${C.rows.length}`],
+    ["pigeonhole: Ham &lt; r but not a candidate", broken === 0 ? "0 ✓" : broken],
+    ["buckets probed, one full-code table", big(probesFull)],
+    [`buckets probed, m = ${m} substring tables`, big(probesMIH)],
+    ["2<sup>n</sup> vs. m·2<sup>n/m</sup>", `${big(Math.pow(2, n))} vs. ${big(m * Math.pow(2, n / m))}`],
+  ].map(([a, v]) => `<div>${a}</div><div>${v}</div>`).join("");
+}
+
+function renderPlot(C) {
+  const W = 400, H = 270, L = 40, R = 12, T = 12, B = 38;
+  const X = s => L + s * (W - L - R), Y = p => T + (1 - p) * (H - T - B);
+  let g = `<g class="grid">` + [0, .25, .5, .75, 1].map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("") + `</g>`;
+  g += `<g class="axis">` +
+    [0, .2, .4, .6, .8, 1].map(v => `<text x="${X(v)}" y="${H - B + 16}" text-anchor="middle">${v}</text>`).join("") +
+    [0, .5, 1].map(v => `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`).join("") +
+    `<text class="title" x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">cos(q, h) of token vectors</text>` +
+    `<text class="title" transform="translate(11 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">Hamming(q, h) / n</text></g>`;
+  const pts = Array.from({ length: 201 }, (_, i) => i / 200).map(s => `${X(s).toFixed(1)},${Y(Math.acos(s) / Math.PI).toFixed(1)}`);
+  g += `<polyline class="curve" points="${pts.join(" ")}"/>`;
+  const ry = Math.min(1, rad / n);
+  g += `<line class="rline" x1="${L}" x2="${W - R}" y1="${Y(ry)}" y2="${Y(ry)}"/><text class="rlab" x="${W - R - 4}" y="${Y(ry) - 4}" text-anchor="end">r/n</text>`;
+  const order = C.rows.slice().sort((a, b) => a.cand - b.cand);
+  for (const c of order) g += `<circle class="dot ${c.cand ? "cand" : "no"}" cx="${X(c.cos)}" cy="${Y(c.H / n)}" r="${c.cand ? 5 : 4.5}"/>`;
+  C.rows.forEach((c, k) => { g += `<circle class="hitbox" data-k="${k}" cx="${X(c.cos)}" cy="${Y(c.H / n)}" r="10"/>`; });
+
+  const plot = $("plot"), tip = $("tip");
+  plot.querySelector("svg")?.remove();
+  plot.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Hamming distance versus cosine similarity">${g}</svg>`);
+  const svg = plot.querySelector("svg");
+  svg.onmousemove = e => {
+    const hb = e.target.closest("circle.hitbox"); if (!hb) { tip.style.display = "none"; return; }
+    const c0 = C.rows[+hb.dataset.k];
+    const same = C.rows.filter(c => Math.abs(c.cos - c0.cos) < .005 && c.H === c0.H);
+    tip.innerHTML = `<div style="color:var(--ink-soft)">cos = ${c0.cos.toFixed(2)} · Hamming = ${c0.H}/${n}</div>` +
+      same.slice(0, 8).map(c => `<div><b>${esc(c.num)}</b> ${esc(c.title)}</div>`).join("") + (same.length > 8 ? `<div>… ${same.length - 8} more</div>` : "");
+    const pr = plot.getBoundingClientRect(); tip.style.display = "block";
+    tip.style.left = Math.max(0, Math.min(e.clientX - pr.left + 12, pr.width - tip.offsetWidth - 4)) + "px";
+    tip.style.top = (e.clientY - pr.top + 12) + "px";
+  };
+  svg.onmouseleave = () => { tip.style.display = "none"; };
+  svg.onclick = e => { const hb = e.target.closest("circle.hitbox"); if (hb) setQuery(C.rows[+hb.dataset.k]); };
+}
+
+// ---- actions ------------------------------------------------------------------------------
+function setQuery(c) { query = c; $("q").value = c.title; render(); }
+$("codes").onclick = e => { const td = e.target.closest("td.name"); if (!td) return;
+  const tr = td.parentElement, k = +tr.dataset.k; setQuery(compute().rows[k]); };
+$("q").oninput = e => {
+  const t = e.target.value;
+  query = COURSES.find(c => c.title.toLowerCase() === t.trim().toLowerCase()) || { num: "", title: t };
+  render();
+};
+$("n").oninput = e => { n = +e.target.value; $("rad").max = n; rad = Math.min(rad, n); $("rad").value = rad; render(); };
+$("m").oninput = e => { m = +e.target.value; render(); };
+$("rad").oninput = e => { rad = +e.target.value; render(); };
+$("pool").onchange = e => { pool = +e.target.value; render(); };
+$("stop").onchange = e => { dropStop = e.target.checked; render(); };
+$("rehash").onclick = () => { seed++; render(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", render);
+
+$("q").value = query.title;
+render();
+</script>
+</body>
+</html>
