@@ -147,8 +147,17 @@
   .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
 
   /* ---- layout ---- */
-  .cols { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 22px; align-items: start; }
-  @media (max-width: 1060px) { .cols { grid-template-columns: minmax(0,1fr); } }
+  .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 22px; align-items: start; }
+
+  /* ---- plot pop-up ---- */
+  dialog.pop {
+    width: min(560px, calc(100vw - 32px)); box-sizing: border-box; padding: 16px 18px;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    box-shadow: var(--shadow);
+  }
+  dialog.pop::backdrop { background: rgba(10, 18, 22, .45); }
+  .dlg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .dlg-head button { padding: 2px 10px; font-size: 16px; }
 
   /* ---- barcode table ---- */
   .codes-wrap { overflow-x: auto; max-height: 78vh; overflow-y: auto; }
@@ -160,14 +169,16 @@
   }
   table.codes thead th.l { text-align: left; }
   table.codes td { padding: 0 6px; height: 19px; white-space: nowrap; border-bottom: 1px solid var(--line-soft); }
-  table.codes td.name { max-width: 195px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  table.codes td.name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
   table.codes td.name .num { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-right: 6px; }
   table.codes td.name:hover { text-decoration: underline; }
   table.codes td.bits { padding: 0 4px; line-height: 0; border-bottom: 0; }
   .subhead { position: relative; height: 14px; }
   .subhead span { position: absolute; top: 0; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
   table.codes td.bits canvas { display: block; cursor: crosshair; }
-  table.codes td.n { font-family: var(--mono); text-align: right; color: var(--ink-soft); }
+  table.codes td.n { font-family: var(--mono); text-align: right; color: var(--ink-soft); cursor: zoom-in; }
+  table.codes thead th.n { cursor: zoom-in; }
+  table.codes td.n:hover, table.codes thead th.n:hover { background: var(--mem-soft); }
   table.codes tr.query td { background: var(--probe-soft); }
   table.codes tr.query td.name { font-weight: 600; }
   table.codes tr.within td.ham { color: var(--ink); font-weight: 600; }
@@ -287,54 +298,33 @@
   </div>
 </div>
 
-<div class="cols">
-  <div>
-    <div class="card">
-      <h2>Signatures, sorted by Hamming distance to q <span class="show" id="nRows"></span></h2>
-      <div class="legend" style="margin:0 0 8px">
-        <span><i class="sw b1"></i>1</span><span><i class="sw b0"></i>0</span>
-        <span><i class="sw diff"></i>bit differs from q</span>
-        <span>number after h⁽ᶻ⁾ = Hamming(q⁽ᶻ⁾, h⁽ᶻ⁾), <b style="color:var(--near)">bold green</b> if &lt; r/m, gray otherwise</span>
-        <span class="show">click a title to make it q · click a bit to see how it was computed</span>
-      </div>
-      <div class="codes-wrap">
-        <table class="codes">
-          <thead><tr><th class="l">course</th><th class="l" id="bitsHead">LSH bits</th>
-            <th title="Hamming(q, h)">Ham</th>
-            <th title="cosine similarity of the token vectors">cos</th></tr></thead>
-          <tbody id="codes"></tbody>
-        </table>
-      </div>
-    </div>
+<div class="card">
+  <h2>Signatures, sorted by Hamming distance to q <span class="show" id="nRows"></span></h2>
+  <div class="codes-wrap">
+    <table class="codes">
+      <thead><tr><th class="l">course</th><th class="l" id="bitsHead">LSH bits</th>
+        <th class="n" title="Hamming(q, h) — click for the plot">Ham</th>
+        <th class="n" title="cosine similarity of the token vectors — click for the plot">cos</th></tr></thead>
+      <tbody id="codes"></tbody>
+    </table>
+  </div>
+  <div class="legend" style="margin-top:10px">
+    <span><i class="sw b1"></i>1</span><span><i class="sw b0"></i>0</span>
+    <span><i class="sw diff"></i>bit differs from q</span>
+    <span>number after h⁽ᶻ⁾ = Hamming(q⁽ᶻ⁾, h⁽ᶻ⁾), <b style="color:var(--near)">bold green</b> if &lt; r/m, gray otherwise</span>
+  </div>
+  <p class="note">Click a title to make it q · click a bit to see how it was computed ·
+    click the Ham or cos column to plot Hamming distance against cosine.</p>
+</div>
+
+<div class="below">
+  <div class="card">
+    <h2>Multi-index hashing</h2>
+    <div class="stats" id="stats"></div>
   </div>
 
-  <div>
-    <div class="card">
-      <h2>One bit <span class="show" id="bitLab"></span></h2>
-      <div id="bit"></div>
-    </div>
-
-    <div class="card">
-      <h2>Hamming distance vs. cosine</h2>
-      <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
-      <div class="legend">
-        <span><i class="sw curve"></i>E[Ham/n] = θ/π</span>
-        <span><i class="sw cand"></i>MIH candidate</span>
-        <span><i class="sw no"></i>not a candidate</span>
-        <span><i class="sw line"></i>r/n</span>
-      </div>
-      <p class="note">Each dot is one course h. A course is a multi-index-hashing candidate if some
-        substring has Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m. Every dot below the
-        dashed line (Hamming &lt; r) must be one: that is the pigeonhole claim.</p>
-    </div>
-
-    <div class="card">
-      <h2>Multi-index hashing</h2>
-      <div class="stats" id="stats"></div>
-    </div>
-
-    <div class="card">
-      <h2>Algorithm</h2>
+  <div class="card">
+    <h2>Algorithm</h2>
 <pre class="code"><span class="fn">LSH(x):</span>
   for i = 1 to outputBits:
     LSH[i] = sum(x[f]*r[i,f] for f in x) &gt; 0 ? 1 : 0
@@ -343,9 +333,33 @@
   split each code h into h<sup>(1)</sup>,…,h<sup>(m)</sup>
   return all h with Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m
          for some z</pre>
-    </div>
   </div>
 </div>
+
+<dialog id="bitDlg" class="pop">
+  <div class="dlg-head">
+    <h2>One bit <span class="show" id="bitLab"></span></h2>
+    <button class="close" aria-label="close">×</button>
+  </div>
+  <div id="bit"></div>
+</dialog>
+
+<dialog id="plotDlg" class="pop">
+  <div class="dlg-head">
+    <h2>Hamming distance vs. cosine <span class="show" id="plotLab"></span></h2>
+    <button class="close" aria-label="close">×</button>
+  </div>
+  <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
+  <div class="legend">
+    <span><i class="sw curve"></i>E[Ham/n] = θ/π</span>
+    <span><i class="sw cand"></i>MIH candidate</span>
+    <span><i class="sw no"></i>not a candidate</span>
+    <span><i class="sw line"></i>r/n</span>
+  </div>
+  <p class="note">Each dot is one course h. A course is a multi-index-hashing candidate if some
+    substring has Hamming(q<sup>(z)</sup>, h<sup>(z)</sup>) &lt; r/m. Every dot below the
+    dashed line (Hamming &lt; r) must be one: that is the pigeonhole claim. Click a dot to make it q.</p>
+</dialog>
 
 <footer>
   Course titles are the core courses, electives and example special-topics courses on the CMU MSML
@@ -469,7 +483,7 @@ function render() {
   $("qV").innerHTML = `features: ${[...C.q.x.keys()].map(esc).join(", ") || "<i>none</i>"}`;
 
   // barcode rows
-  const cw = n <= 32 ? 9 : n <= 64 ? 6 : 4, rh = 20;
+  const cw = n <= 32 ? 12 : n <= 64 ? 9 : n <= 96 ? 6 : 5, rh = 20;
   const isQuery = c => query.num && c.num === query.num && c.title === query.title;
   $("codes").innerHTML = C.rows.map((c, k) =>
     `<tr class="${isQuery(c) ? "query" : ""} ${c.cand ? "cand" : ""} ${c.within ? "within" : ""}" data-k="${k}">` +
@@ -506,7 +520,7 @@ function render() {
     if (bitSel && bitSel.row === c) { g.strokeStyle = col.sel; g.lineWidth = 2; g.strokeRect(xOf(bitSel.i) - 0.5, 2, cw, rh - 5); }
     cv.onclick = e => {
       const i = Array.from({ length: n }, (_, i) => i).find(i => e.offsetX >= xOf(i) && e.offsetX < xOf(i) + cw);
-      if (i !== undefined) { bitSel = { row: c, i }; render(); }
+      if (i !== undefined) { bitSel = { row: c, i }; if (!$("bitDlg").open) $("bitDlg").showModal(); render(); }
     };
   });
   $("nRows").textContent = `— ${C.rows.length} courses`;
@@ -527,7 +541,7 @@ function render() {
     $("bit").innerHTML = `<p class="note" style="margin:0">Click any bit in the table to see the sum that produced it.</p>`;
   }
 
-  renderPlot(C);
+  if ($("plotDlg").open) renderPlot(C);
 
   // MIH stats
   const within = C.rows.filter(c => c.within), cand = C.rows.filter(c => c.cand);
@@ -547,6 +561,7 @@ function render() {
 }
 
 function renderPlot(C) {
+  $("plotLab").textContent = `— q = ${query.title || "(empty)"}`;
   const W = 400, H = 270, L = 40, R = 12, T = 12, B = 38;
   const X = s => L + s * (W - L - R), Y = p => T + (1 - p) * (H - T - B);
   let g = `<g class="grid">` + [0, .25, .5, .75, 1].map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("") + `</g>`;
@@ -583,6 +598,16 @@ function renderPlot(C) {
 
 // ---- actions ------------------------------------------------------------------------------
 function setQuery(c) { query = c; $("q").value = c.title; render(); }
+function openPlot() { if (!$("plotDlg").open) $("plotDlg").showModal(); render(); }
+document.querySelector("table.codes").addEventListener("click", e => { if (e.target.closest("td.n, th.n")) openPlot(); });
+for (const dlg of document.querySelectorAll("dialog.pop")) {
+  dlg.querySelector("button.close").onclick = () => dlg.close();
+  dlg.onclick = e => {   // a click outside the dialog's box is a click on the backdrop
+    const b = dlg.getBoundingClientRect();
+    if (e.target === dlg && (e.clientX < b.left || e.clientX > b.right || e.clientY < b.top || e.clientY > b.bottom)) dlg.close();
+  };
+}
+$("bitDlg").addEventListener("close", () => { bitSel = null; render(); });
 $("codes").onclick = e => { const td = e.target.closest("td.name"); if (!td) return;
   const tr = td.parentElement, k = +tr.dataset.k; setQuery(compute().rows[k]); };
 $("q").oninput = e => {
