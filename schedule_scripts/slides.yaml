@@ -1,6 +1,24 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+lsh-multi-index-jmeans.pptx:
+  num_slides: 14
+  summary: review of lsh count countmin
+  links:
+   - https://10605.github.io/viz/countmin-sketch.html: Visualize countmin sketch behavior
+   - https://10605.github.io/viz/multi-index-hashing.html: Visualize LSH with multi-index hashing
+   - https://10605.github.io/viz/multi-index-hashing.html: Visualize approximate kNN with heirarchical k-means
+   - https://10605.github.io/viz/pq-2d.html: Visualize PQ in 2d
+   - https://10605.github.io/viz/pq-papers.html: Visualize PQ on text
+
+jay_yoon_lee_guest_lecture.dummy:
+  num_slides: 100  #thats a lot
+  summary: guest lecture
+  links:
+    - https://drive.google.com/file/d/1WLXJM2Gm3RiyO42J5QLVU9vIBYYLbZhQ/view: "Jay's slides"
+    - https://aclanthology.org/2025.acl-long.1599/: Set-consistency energy models, Song Son & Lee, 2025
+    - https://arxiv.org/abs/2605.28641: Subtraction gets you more ...., O and Lee, 2026
+
 countmin-bf-review.pptx:
   num_slides: 13
   summary: fairly complete discussion of bloom filters and countmin 
@@ -713,6 +731,7 @@ lsh.pptx:
   num_slides: 13
   summary: includes one slide of "applications" which are sort of vague really | Locality sensitive hashing
   links: 
+  - https://10605.github.io/viz/globe.html: Visualize the intuition behind random projection
   - https://aclanthology.org/P10-2043.pdf: Online generation of locality sensitive hash signatures, van Durme and Lall, 2010
 
 mad-discussion.pptx:
