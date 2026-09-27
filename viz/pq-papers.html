@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product Quantization of Papers</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0086a3;   /* PQ reconstruction */
+    --mem-soft:    #d3e9ef;
+    --hit:         #a4530c;   /* best single paper */
+    --hit-soft:    #f0dfc9;
+    --near:        #1d6b2c;   /* word shared with q */
+    --near-soft:   #d8ecd9;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #1d97b3;
+      --mem-soft:    #10333c;
+      --hit:         #c47a2e;
+      --hit-soft:    #3a2a15;
+      --near:        #7fcf8a;
+      --near-soft:   #1b3320;
+      --focus:       #c47a2e;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #1d97b3;
+    --mem-soft:    #10333c;
+    --hit:         #c47a2e;
+    --hit-soft:    #3a2a15;
+    --near:        #7fcf8a;
+    --near-soft:   #1b3320;
+    --focus:       #c47a2e;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 82ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px;
+  }
+  h2 .show { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 130px; }
+  select {
+    font-family: var(--mono); font-size: 13px; color: var(--ink); max-width: 100%;
+    background: var(--surface-sunk); border: 1px solid var(--line); border-radius: 3px; padding: 5px 8px;
+  }
+  select#qsel { width: 34em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 7px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: var(--mem-soft); border-color: var(--mem); }
+  .seg { display: inline-flex; }
+  .seg button { border-radius: 0; }
+  .seg button:first-child { border-radius: 3px 0 0 3px; }
+  .seg button:last-child { border-radius: 0 3px 3px 0; border-left: 0; }
+  .seg button.on { background: var(--mem); border-color: var(--mem); color: var(--surface); font-weight: 600; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+  .card.recon { border-top: 3px solid var(--mem); }
+  .card.single { border-top: 3px solid var(--hit); }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; align-items: stretch; }
+  @media (max-width: 860px) { .pair { grid-template-columns: 1fr; } }
+
+  /* ---- papers ---- */
+  .ptitle { font-family: var(--serif); font-size: 19px; line-height: 1.3; margin: 0 0 4px; }
+  .pauth { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+  .src { font-size: 12px; color: var(--ink-faint); margin: 2px 0 10px; }
+  .src b { color: var(--ink-soft); font-weight: 500; }
+  .part { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mem); margin: 10px 0 2px; }
+  .sh { background: var(--near-soft); color: var(--ink); border-radius: 2px; box-shadow: 0 0 0 1px var(--near) inset; padding: 0 2px; }
+
+  /* ---- words ---- */
+  .words { display: flex; flex-wrap: wrap; gap: 4px; }
+  .w {
+    font-size: 13px; padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+    border: 1px solid var(--line); background: var(--surface-sunk);
+  }
+  .w.au { font-style: italic; }
+  .w sub { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-left: 3px; vertical-align: 0; }
+  .w.sh { background: var(--near-soft); border-color: var(--near); box-shadow: none; }
+  .w.miss { opacity: .45; }
+
+  .metrics { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--ink-soft); margin-top: 12px;
+    border-top: 1px solid var(--line-soft); padding-top: 8px; }
+  .metrics b { font-family: var(--mono); color: var(--ink); font-weight: 600; }
+
+  /* ---- subspace table ---- */
+  table.subs { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.subs th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint);
+    text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  table.subs td { padding: 6px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  table.subs td.z { font-family: var(--mono); color: var(--ink-soft); white-space: nowrap; }
+  table.subs td.n { font-family: var(--mono); text-align: right; white-space: nowrap; color: var(--ink-soft); }
+  table.subs .donor { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+  table.subs .empty { color: var(--ink-faint); font-style: italic; }
+
+  /* ---- chart ---- */
+  .plot { position: relative; }
+  .plot svg { width: 100%; max-width: 760px; height: auto; display: block; overflow: visible; }
+  .plot .grid line { stroke: var(--line-soft); stroke-width: 1; }
+  .plot .axis text { fill: var(--ink-faint); font-family: var(--mono); font-size: 11px; }
+  .plot .axis .title { fill: var(--ink-soft); font-family: var(--sans); font-size: 12px; }
+  .plot .series { fill: none; stroke: var(--mem); stroke-width: 2; }
+  .plot circle.dot { fill: var(--mem); stroke: var(--surface); stroke-width: 2; }
+  .plot circle.dot.cur { fill: var(--surface); stroke: var(--mem); stroke-width: 2.5; }
+  .plot .field { stroke: var(--hit); stroke-width: 2; stroke-dasharray: 5 4; }
+  .plot .flab { fill: var(--hit); font-family: var(--mono); font-size: 11px; }
+  .plot circle.hitbox { fill: transparent; cursor: pointer; }
+  .tip {
+    position: absolute; pointer-events: none; z-index: 5; display: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 6px 9px; font-size: 12.5px; white-space: nowrap;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 16px; height: 0; }
+  .sw.s { border-top: 2px solid var(--mem); }
+  .sw.f { border-top: 2px dashed var(--hit); }
+
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 12px; overflow-x: auto;
+  }
+  pre.code .fn { color: var(--ink-soft); font-weight: 600; }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (max-width: 520px) { .wrap { padding: 20px 16px 48px; } select#qsel { width: 100%; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms 2 · product quantization</p>
+  <h1>Reconstructing a paper with product quantization</h1>
+  <p class="standfirst">
+    Each paper is a TF-IDF vector <b>x</b> over its title words and its authors. Product quantization splits
+    <b>x</b> into <i>m</i> subvectors <b>x</b><sup>(1)</sup>,…,<b>x</b><sup>(<i>m</i>)</sup> and encodes each one separately by
+    its nearest match in a codebook. Here the codebook for subspace <i>z</i> is every paper in the dataset <i>D</i>,
+    restricted to subspace <i>z</i>. So a query <b>q</b> is reconstructed as <b>c</b> = <b>c</b><sup>(1)</sup>…<b>c</b><sup>(<i>m</i>)</sup>,
+    stitched together from up to <i>m</i> different papers. Compare that with the best single paper in <i>D</i>.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="qsel">query q (from Q)</label>
+    <select id="qsel"></select>
+    <div class="btns"><button id="prev">◂ Prev</button><button id="next">Next ▸</button><button id="rand">Random</button><button id="best" title="the query where PQ helps most">Showcase</button></div>
+  </div>
+  <div class="field">
+    <label>split into subspaces</label>
+    <div class="seg"><button id="mField" class="on">title | authors</button><button id="mRand">random words</button></div>
+    <span class="val" id="modeV">&nbsp;</span>
+  </div>
+  <div class="field" id="kField">
+    <label for="K">subspaces m</label>
+    <input id="K" type="range" min="1" max="16" value="4">
+    <span class="val" id="KV"></span>
+  </div>
+  <div class="field" id="seedField">
+    <label>&nbsp;</label>
+    <button id="reseed" title="draw a new random split of the vocabulary">New split</button>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>show</label>
+    <div class="seg"><button id="vPaper" class="on">papers</button><button id="vWords">words by TF-IDF</button></div>
+    <span class="val">&nbsp;</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Query q <span class="show" id="qLab"></span></h2>
+  <div id="qView"></div>
+</div>
+
+<div class="pair">
+  <div class="card recon">
+    <h2>PQ reconstruction c <span class="show" id="rLab"></span></h2>
+    <div id="rView"></div>
+  </div>
+  <div class="card single">
+    <h2>Best single paper in D <span class="show">— the nearest whole x, i.e. m = 1</span></h2>
+    <div id="sView"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Subspace by subspace <span class="show" id="subLab"></span></h2>
+  <table class="subs">
+    <thead><tr><th>z</th><th>q<sup>(z)</sup>: q's words in subspace z</th><th>nearest x<sup>(z)</sup> in D, and the paper it comes from</th><th style="text-align:right">‖q<sup>(z)</sup> − c<sup>(z)</sup>‖²</th></tr></thead>
+    <tbody id="subs"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Over all queries in Q <span class="show" id="avgLab"></span></h2>
+  <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
+  <div class="legend">
+    <span><i class="sw s"></i>random split into m subspaces</span>
+    <span><i class="sw f"></i>title | authors split (m = 2)</span>
+  </div>
+  <p class="note">Mean squared reconstruction error ‖q − c‖², the quantity PQ minimizes, over every query (hover a point
+    for the mean cosine too). m = 1 is the best single paper. Each extra subspace lets the reconstruction borrow from
+    one more paper, so it fits q better, but the code grows to m·⌈log₂|D|⌉ bits and there
+    are |D|<sup>m</sup> possible reconstructions. Click a point to switch to that m.</p>
+</div>
+
+<div class="card">
+  <h2>Algorithm</h2>
+<pre class="code"><span class="fn">Index:</span>
+  split the vocabulary into m sets S<sub>1</sub>,…,S<sub>m</sub>         <span class="show">title words | authors, or at random</span>
+  for each paper x in D: x<sup>(z)</sup> = the entries of x for words in S<sub>z</sub>
+<span class="fn">Encode q:</span>
+  for z = 1,…,m:
+    j<sub>z</sub> = argmin<sub>x in D</sub> ‖q<sup>(z)</sup> − x<sup>(z)</sup>‖²              <span class="show">the code is (j<sub>1</sub>,…,j<sub>m</sub>)</span>
+    c<sup>(z)</sup> = D[j<sub>z</sub>]<sup>(z)</sup>
+  c = c<sup>(1)</sup> … c<sup>(m)</sup>                            <span class="show">‖q − c‖² = Σ<sub>z</sub> ‖q<sup>(z)</sup> − c<sup>(z)</sup>‖²</span></pre>
+</div>
+
+<footer id="foot"></footer>
+
+</div>
+
+<script src="pq-papers-data.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+// ---- features: TF-IDF over title words and author names, each field scaled to norm 1/√2 ----------
+const STOP = new Set(("a an the of for and in on with to via from by is are as at or its into using towards toward " +
+  "under over through without we our can do does beyond than between based").split(" "));
+const fold = s => s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+const titleToks = t => (fold(t).match(/[a-z0-9]+/g) || []).filter(w => w.length > 1 && !STOP.has(w));
+const authorToks = a => (fold(a).match(/[a-z]+/g) || []).filter(w => w.length > 1).map(w => "@" + w);   // name words
+const isAuthor = w => w[0] === "@";
+
+function rawFields(p) {
+  const tf = new Map(); for (const w of titleToks(p[0])) tf.set(w, (tf.get(w) || 0) + 1);
+  const af = new Map(); for (const a of p[1]) for (const t of authorToks(a)) af.set(t, (af.get(t) || 0) + 1);
+  return [tf, af];
+}
+const DR = PAPERS.D.map(rawFields), QR = PAPERS.Q.map(rawFields), ND = DR.length;
+const DF = new Map();
+for (const fs of DR) for (const f of fs) for (const w of f.keys()) DF.set(w, (DF.get(w) || 0) + 1);
+const idf = w => Math.log((ND + 1) / ((DF.get(w) || 0) + 1)) + 1;
+function vector([tf, af]) {  // Map word -> weight; ‖title part‖ = ‖author part‖ = 1/√2
+  const v = new Map();
+  for (const f of [tf, af]) {
+    const e = [...f].map(([w, c]) => [w, (1 + Math.log(c)) * idf(w)]);
+    const n = Math.hypot(...e.map(x => x[1]));
+    for (const [w, x] of e) v.set(w, x / n / Math.SQRT2);
+  }
+  return v;
+}
+const DV = DR.map(vector), QV = QR.map(vector);
+const POST = new Map();      // inverted index: word -> [[doc, weight], ...]
+DV.forEach((v, d) => { for (const [w, x] of v) { if (!POST.has(w)) POST.set(w, []); POST.get(w).push([d, x]); } });
+
+// ---- subspaces ---------------------------------------------------------------------------------
+let mode = "field", K = 4, seed = 1, view = "paper", qi = 0;
+function hashZ(w, K, seed) {
+  let z = 2166136261 ^ Math.imul(seed, 0x9e3779b1);
+  for (const c of w) { z ^= c.charCodeAt(0); z = Math.imul(z, 16777619); }
+  z ^= z >>> 16; z = Math.imul(z, 0x85ebca6b); z ^= z >>> 13;
+  return (z >>> 0) % K;
+}
+const SPLITS = new Map();
+function split(kind, K, seed) {  // {K, zOf, normSq[z][d], minNorm[z]}
+  const key = kind === "field" ? "field" : `${K}/${seed}`;
+  if (SPLITS.has(key)) return SPLITS.get(key);
+  const m = kind === "field" ? 2 : K;
+  const zOf = kind === "field" ? (w => isAuthor(w) ? 1 : 0) : (w => hashZ(w, K, seed));
+  const normSq = Array.from({ length: m }, () => new Float64Array(ND));
+  DV.forEach((v, d) => { for (const [w, x] of v) normSq[zOf(w)][d] += x * x; });
+  const minNorm = normSq.map(a => { let b = 0; for (let d = 1; d < ND; d++) if (a[d] < a[b]) b = d; return b; });
+  const S = { kind, K: m, zOf, normSq, minNorm };
+  SPLITS.set(key, S); return S;
+}
+function encode(q, S) {       // per subspace, the paper whose x^(z) is nearest q^(z)
+  const qz = Array.from({ length: S.K }, () => []);
+  for (const [w, x] of q) qz[S.zOf(w)].push([w, x]);
+  return qz.map((ws, z) => {
+    const dots = new Map();
+    for (const [w, x] of ws) for (const [d, y] of POST.get(w) || []) dots.set(d, (dots.get(d) || 0) + x * y);
+    const qn = ws.reduce((a, [, x]) => a + x * x, 0);
+    let best = S.minNorm[z], score = S.normSq[z][best], dot = 0;
+    for (const [d, t] of dots) { const s = S.normSq[z][d] - 2 * t; if (s < score - 1e-12) { best = d; score = s; dot = t; } }
+    // empty: the chosen x^(z) is the zero vector, so c^(z) = 0
+    return { z, words: ws, doc: best, dot, err: Math.max(0, qn + score), empty: S.normSq[z][best] === 0 };
+  });
+}
+function reconstruct(parts, S) {  // c = concatenation of the chosen subvectors
+  const c = new Map();
+  for (const p of parts) for (const [w, x] of DV[p.doc]) if (S.zOf(w) === p.z) c.set(w, x);
+  return c;
+}
+function cosine(a, b) {
+  let dot = 0; for (const [w, x] of a) if (b.has(w)) dot += x * b.get(w);
+  const n = v => Math.hypot(...v.values());
+  return dot / (n(a) * n(b) || 1);
+}
+const sqdist = (a, b) => { let s = 0; for (const [w, x] of a) s += (x - (b.get(w) || 0)) ** 2; for (const [w, y] of b) if (!a.has(w)) s += y * y; return s; };
+const ONE = split("random", 1, 0);
+function nearestPaper(q) { return encode(q, ONE)[0].doc; }
+
+// ---- averages over Q and the showcase query ------------------------------------------------------
+const AVG = new Map();
+function averages(seed) {
+  if (AVG.has(seed)) return AVG.get(seed);
+  const r = Array.from({ length: 16 }, (_, i) => meanFit(split("random", i + 1, seed)));
+  AVG.set(seed, r); return r;
+}
+function meanFit(S) {        // {err: mean ||q - c||^2, cos: mean cos(q, c)} over Q
+  let err = 0, cos = 0;
+  for (const q of QV) { const c = reconstruct(encode(q, S), S); err += sqdist(q, c); cos += cosine(q, c); }
+  return { err: err / QV.length, cos: cos / QV.length };
+}
+const FIELD = split("field");
+const FIELDAVG = meanFit(FIELD);
+const SHOWCASE = (() => {   // the query whose title|authors reconstruction beats its best single paper by the most
+  let best = 0, gain = -Infinity;
+  QV.forEach((q, i) => {
+    const parts = encode(q, FIELD);
+    if (!(parts[1].dot > 0 && parts[0].dot > 0) || parts[0].doc === parts[1].doc) return;
+    const g = cosine(q, reconstruct(parts, FIELD)) - cosine(q, DV[nearestPaper(q)]);
+    if (g > gain) { gain = g; best = i; }
+  });
+  return best;
+})();
+
+// ---- rendering -------------------------------------------------------------------------------------
+const markWords = (s, shared, tok) => s.split(/([A-Za-z0-9\u00C0-\u024F]+)/).map((m, i) =>   // highlight the words of s that are in shared
+  i % 2 && shared && shared.has(tok(m)) ? `<span class="sh">${esc(m)}</span>` : esc(m)).join("");
+const authorsHTML = (list, shared, max = 10) => list.slice(0, max).map(a => markWords(a, shared, m => authorToks(m)[0])).join(", ") +
+  (list.length > max ? ", et al." : "");
+const titleHTML = (t, shared) => markWords(t, shared, m => titleToks(m)[0]);
+const wordLabel = w => isAuthor(w) ? esc(w[1].toUpperCase() + w.slice(2)) : esc(w);
+function wordsHTML(v, shared, limit = 60) {
+  const e = [...v].sort((a, b) => b[1] - a[1]).slice(0, limit);
+  return `<div class="words">` + e.map(([w, x]) =>
+    `<span class="w ${isAuthor(w) ? "au" : ""} ${shared && shared.has(w) ? "sh" : ""}">${wordLabel(w)}<sub>${x.toFixed(2)}</sub></span>`).join("") +
+    (v.size > limit ? `<span class="show">… ${v.size - limit} more</span>` : "") + `</div>`;
+}
+const metricsHTML = (q, c, label) => `<div class="metrics"><span>cos(q, ${label}) = <b>${cosine(q, c).toFixed(3)}</b></span>` +
+  `<span>‖q − ${label}‖² = <b>${sqdist(q, c).toFixed(3)}</b></span></div>`;
+const short = (t, n = 70) => t.length > n ? t.slice(0, n - 1) + "…" : t;
+
+function render() {
+  const q = QV[qi], P = PAPERS.Q[qi];
+  const S = mode === "field" ? FIELD : split("random", K, seed);
+  const parts = encode(q, S), c = reconstruct(parts, S);
+  const sd = nearestPaper(q), sv = DV[sd];
+  const qWords = new Set(q.keys());
+
+  $("modeV").textContent = mode === "field" ? "m = 2: x⁽¹⁾ = title words, x⁽²⁾ = authors" : `m = ${K}: words hashed into ${K} sets`;
+  $("kField").style.display = $("seedField").style.display = mode === "field" ? "none" : "";
+  $("KV").textContent = `m = ${K}`; $("seedV").textContent = `split #${seed}`;
+  for (const [id, on] of [["mField", mode === "field"], ["mRand", mode !== "field"], ["vPaper", view === "paper"], ["vWords", view !== "paper"]])
+    $(id).classList.toggle("on", on);
+  $("qsel").value = qi;
+
+  // query
+  $("qLab").textContent = `— Q #${qi + 1} of ${QV.length}`;
+  $("qView").innerHTML = view === "paper"
+    ? `<p class="ptitle">${esc(P[0])}</p><p class="pauth">${authorsHTML(P[1], null, 30)}</p>`
+    : wordsHTML(q);
+
+  // reconstruction
+  const donors = [...new Set(parts.filter(p => !p.empty).map(p => p.doc))];
+  $("rLab").textContent = `— code (${parts.map(p => p.empty ? "∅" : "#" + (p.doc + 1)).join(", ")}) · stitched from ${donors.length} paper${donors.length === 1 ? "" : "s"}`;
+  const cShared = new Set([...c.keys()].filter(w => qWords.has(w)));
+  if (view === "paper" && mode === "field") {
+    const [t, a] = parts, T = PAPERS.D[t.doc], A = PAPERS.D[a.doc];
+    $("rView").innerHTML =
+      `<div class="part">c⁽¹⁾ · title</div>` +
+      `<p class="ptitle"${t.dot > 0 ? "" : ` style="opacity:.5"`}>${titleHTML(T[0], cShared)}</p>` +
+      `<div class="src">from D #${t.doc + 1}, by <b>${esc(T[1].slice(0, 3).join(", "))}${T[1].length > 3 ? " et al." : ""}</b>` +
+      (t.dot > 0 ? "" : ` · no title in D shares a word with q, so this one is as good as any`) + `</div>` +
+      `<div class="part">c⁽²⁾ · authors</div>` +
+      `<p class="pauth"${a.dot > 0 ? "" : ` style="opacity:.5"`}>${authorsHTML(A[1], cShared)}</p>` +
+      `<div class="src">from D #${a.doc + 1}, “<b>${esc(short(A[0]))}</b>”` +
+      (a.dot > 0 ? "" : ` · no paper in D shares an author with q, so every author list is equally far from q⁽²⁾ and this one is arbitrary`) + `</div>` +
+      metricsHTML(q, c, "c");
+  } else {
+    $("rView").innerHTML = wordsHTML(c, qWords) +
+      (view === "paper" ? `<p class="note">With a random split, c is not a paper: it is a bag of words taken from ${donors.length} different papers (see the table below).</p>` : "") +
+      metricsHTML(q, c, "c");
+  }
+
+  // best single paper
+  const sShared = new Set([...sv.keys()].filter(w => qWords.has(w)));
+  const SP = PAPERS.D[sd];
+  $("sView").innerHTML = (view === "paper"
+    ? `<p class="ptitle">${titleHTML(SP[0], sShared)}</p><p class="pauth">${authorsHTML(SP[1], sShared)}</p><div class="src">D #${sd + 1}</div>`
+    : wordsHTML(sv, qWords)) + metricsHTML(q, sv, "x");
+
+  // subspace table
+  $("subLab").textContent = `— ‖q − c‖² = Σ of the last column = ${sqdist(q, c).toFixed(3)}`;
+  $("subs").innerHTML = parts.map(p => {
+    const label = mode === "field" ? ["title", "authors"][p.z] : `S${p.z + 1}`;
+    const qv = new Map(p.words), dv = new Map([...DV[p.doc]].filter(([w]) => S.zOf(w) === p.z));
+    const D0 = PAPERS.D[p.doc];
+    return `<tr><td class="z">${p.z + 1} · ${label}</td>` +
+      `<td>${qv.size ? wordsHTML(qv, new Set([...dv.keys()])) : `<span class="empty">q has no words here</span>`}</td>` +
+      `<td>${p.empty
+        ? `<span class="empty">c<sup>(z)</sup> = 0, an empty subvector${qv.size ? ": no x<sup>(z)</sup> that overlaps q<sup>(z)</sup> is any closer" : ""}</span>`
+        : wordsHTML(dv, qWords) + `<div class="donor">from D #${p.doc + 1}: “${esc(short(D0[0], 80))}”` +
+          (p.dot > 0 ? "" : ` · shares nothing with q<sup>(z)</sup>, and every choice ties`) + `</div>`}</td>` +
+      `<td class="n">${p.err.toFixed(3)}</td></tr>`;
+  }).join("");
+
+  renderPlot();
+}
+
+function renderPlot() {
+  const avg = averages(seed);
+  $("avgLab").textContent = `— |Q| = ${QV.length}, |D| = ${ND}, split #${seed}`;
+  const W = 760, H = 260, L = 46, R = 16, T = 12, B = 40;
+  const hi = Math.ceil(Math.max(...avg.map(a => a.err), FIELDAVG.err) * 5) / 5, ticks = [];
+  for (let v = 0; v <= hi + 1e-9; v += 0.2) ticks.push(v);
+  const X = k => L + (k - 1) / 15 * (W - L - R), Y = v => T + (hi - v) / hi * (H - T - B);
+  let g = `<g class="grid">` + ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("");
+  g += `</g><g class="axis">` + ticks.map(v => `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v.toFixed(1)}</text>`).join("");
+  for (let k = 1; k <= 16; k++) if (k === 1 || k % 3 === 1 || k === 16) g += `<text x="${X(k)}" y="${H - B + 16}" text-anchor="middle">${k}</text>`;
+  g += `<text class="title" x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">subspaces m (code = m × ${Math.ceil(Math.log2(ND))} bits)</text>` +
+       `<text class="title" transform="translate(12 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">mean ‖q − c‖²</text></g>`;
+  g += `<line class="field" x1="${L}" x2="${W - R}" y1="${Y(FIELDAVG.err)}" y2="${Y(FIELDAVG.err)}"/>` +
+       `<text class="flab" x="${W - R - 4}" y="${Y(FIELDAVG.err) - 5}" text-anchor="end">title | authors: ${FIELDAVG.err.toFixed(3)} (mean cos ${FIELDAVG.cos.toFixed(3)})</text>`;
+  g += `<polyline class="series" points="${avg.map((v, i) => `${X(i + 1)},${Y(v.err)}`).join(" ")}"/>`;
+  avg.forEach((v, i) => {
+    const cur = mode !== "field" && K === i + 1;
+    g += `<circle class="dot ${cur ? "cur" : ""}" cx="${X(i + 1)}" cy="${Y(v.err)}" r="${cur ? 5.5 : 4}"/>`;
+  });
+  avg.forEach((v, i) => { g += `<circle class="hitbox" data-k="${i + 1}" cx="${X(i + 1)}" cy="${Y(v.err)}" r="11"/>`; });
+  const plot = $("plot"), tip = $("tip");
+  plot.querySelector("svg")?.remove();
+  plot.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="mean squared reconstruction error versus number of subspaces">${g}</svg>`);
+  const svg = plot.querySelector("svg");
+  svg.onmousemove = e => {
+    const hb = e.target.closest("circle.hitbox"); if (!hb) { tip.style.display = "none"; return; }
+    const k = +hb.dataset.k;
+    tip.innerHTML = `m = ${k}: mean ‖q − c‖² = <b>${avg[k - 1].err.toFixed(3)}</b>, mean cos(q, c) = <b>${avg[k - 1].cos.toFixed(3)}</b><br><span class="show">${k * Math.ceil(Math.log2(ND))}-bit codes, ${ND}<sup>${k}</sup> reconstructions</span>`;
+    const pr = plot.getBoundingClientRect(); tip.style.display = "block";
+    tip.style.left = Math.max(0, Math.min(e.clientX - pr.left + 12, pr.width - tip.offsetWidth - 4)) + "px";
+    tip.style.top = (e.clientY - pr.top + 12) + "px";
+  };
+  svg.onmouseleave = () => { tip.style.display = "none"; };
+  svg.onclick = e => { const hb = e.target.closest("circle.hitbox"); if (hb) { mode = "random"; K = +hb.dataset.k; $("K").value = K; render(); } };
+}
+
+// ---- controls ----------------------------------------------------------------------------------------
+$("qsel").innerHTML = PAPERS.Q.map((p, i) => `<option value="${i}">${i + 1}. ${esc(short(p[0], 90))}</option>`).join("");
+$("qsel").onchange = e => { qi = +e.target.value; render(); };
+$("prev").onclick = () => { qi = (qi + QV.length - 1) % QV.length; render(); };
+$("next").onclick = () => { qi = (qi + 1) % QV.length; render(); };
+$("rand").onclick = () => { qi = Math.floor(Math.random() * QV.length); render(); };
+$("best").onclick = () => { qi = SHOWCASE; mode = "field"; render(); };
+$("mField").onclick = () => { mode = "field"; render(); };
+$("mRand").onclick = () => { mode = "random"; render(); };
+$("K").oninput = e => { K = +e.target.value; render(); };
+$("reseed").onclick = () => { seed++; render(); };
+$("vPaper").onclick = () => { view = "paper"; render(); };
+$("vWords").onclick = () => { view = "words"; render(); };
+$("foot").innerHTML = `Data: ${esc(PAPERS.source)}. Author lists are capped at 30 names. Features are title words
+  (lower-cased, minus a few stopwords) and whole author names, weighted by (1 + log tf)·idf with idf computed on D.
+  A real PQ index would first shrink each subspace's codebook to J centroids with J-means; here the codebook is all
+  of D's subvectors (J = |D|), so every piece of c is a real title, author list or set of words.`;
+
+qi = SHOWCASE; render();
+</script>
+</body>
+</html>
