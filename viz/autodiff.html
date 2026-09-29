@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>autodiff.py — reverse-mode autodifferentiation, visualized</title>
+<style>
+  :root {
+    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
+    --line:#3a4568; --accent:#7cc4ff; --green:#8ce99a; --amber:#ffd166;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding:20px 24px 6px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  h1 code { color:var(--accent); font-size:20px; }
+  .sub { color:var(--muted); max-width:940px; }
+  .sub b { color:var(--ink); }
+  .wrap { display:flex; flex-wrap:wrap; gap:18px; padding:12px 24px 28px; }
+  .stage { flex:1 1 640px; min-width:340px; }
+  canvas { width:100%; height:auto; background:var(--panel);
+           border:1px solid var(--line); border-radius:12px; }
+  .side { flex:0 1 320px; min-width:270px; }
+  .card { background:var(--panel); border:1px solid var(--line);
+          border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { margin:0 0 10px; font-size:14px; letter-spacing:.04em;
+             text-transform:uppercase; color:var(--muted); }
+  .row { display:flex; align-items:center; justify-content:space-between;
+         gap:8px; margin:8px 0; font-size:13px; }
+  .row label { color:var(--muted); }
+  input[type=range] { width:130px; accent-color:var(--accent); }
+  .val { font-variant-numeric:tabular-nums; min-width:26px; text-align:right; }
+  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+           border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
+  button:hover { background:#303c60; }
+  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+                   font-weight:600; }
+  button.sel { background:var(--green); color:#0a2417; border-color:var(--green); font-weight:600; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .chk { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--muted); font-size:13px; }
+  .chk input { accent-color:var(--accent); width:16px; height:16px; }
+  .metric { display:flex; justify-content:space-between; margin:5px 0;
+            font-variant-numeric:tabular-nums; font-size:13px; }
+  .metric b { color:var(--accent); font-weight:600; }
+  .wl { font:12.5px/1.55 "SFMono-Regular", Menlo, Consolas, monospace; color:var(--muted); }
+  .wl div { padding:1px 6px; border-radius:5px; white-space:pre; }
+  .wl div.cur { background:#243052; color:var(--ink); }
+  .wl div.done { color:#c4ccdf; }
+  ol.trace { margin:2px 0 0; padding-left:22px; color:var(--muted); font-size:12.5px;
+             max-height:230px; overflow:auto; font-variant-numeric:tabular-nums; }
+  ol.trace li { margin:2px 0; cursor:pointer; padding:1px 4px; border-radius:4px; }
+  ol.trace li:hover { background:#222a44; }
+  ol.trace li.done { color:#c4ccdf; }
+  ol.trace li.cur { color:var(--ink); font-weight:600; background:#243052; }
+  ol.trace li.fwd::marker { color:var(--green); }
+  ol.trace li.bwd::marker { color:var(--accent); }
+  .hd { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+        margin:8px 0 2px; }
+  .legend { color:var(--muted); font-size:13px; }
+  .legend b { color:var(--ink); }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle;}
+  footer { color:var(--muted); padding:0 24px 30px; max-width:1000px; font-size:13px; }
+  footer code { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1><code>autodiff.py</code> — reverse-mode automatic differentiation</h1>
+  <div class="sub">
+    A function is written as a <b>Wengert list</b> (a flattened computation graph):
+    a sequence of assignments <code>out = fn(inputs…)</code>. The
+    <b style="color:var(--green)">forward pass</b> runs the list top-to-bottom to
+    compute every <code>val[·]</code>; the <b style="color:var(--accent)">backward
+    pass</b> runs it in reverse, using each op's local derivatives to accumulate
+    <code>δ[·] ≡ df/d·</code> — the gradient. Watch how <code>δ</code> for a variable
+    is <b>incremented</b> once per outgoing edge (e.g. <code>x1</code> feeds
+    <code>add</code> twice).
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1000" height="580"></canvas>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>Program &amp; inputs</h2>
+      <div class="btns">
+        <button id="p1" class="sel">PROGRAM1</button>
+        <button id="p2">PROGRAM2</button>
+      </div>
+      <div id="inputs" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Controls</h2>
+      <div class="row">
+        <label>Speed</label>
+        <input id="speed" type="range" min="0.3" max="3" step="0.1" value="1.2">
+        <span class="val" id="speedV">1.2×</span>
+      </div>
+      <div class="btns">
+        <button id="play" class="primary">Play ▸</button>
+        <button id="step">Step ▸</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label class="chk"><input id="pauseEach" type="checkbox" checked>
+        pause after each step</label>
+    </div>
+
+    <div class="card">
+      <h2>Wengert list</h2>
+      <div class="wl" id="wl"></div>
+    </div>
+
+    <div class="card">
+      <h2>Trace <span style="text-transform:none;letter-spacing:0;color:#66708c">(click to jump)</span></h2>
+      <ol class="trace" id="trace"></ol>
+    </div>
+
+    <div class="card">
+      <h2>Gradient</h2>
+      <div id="grad"></div>
+    </div>
+
+    <div class="card legend">
+      <h2>Legend</h2>
+      <div><span class="sw" style="background:var(--green)"></span><b>val[·]</b> — value from the forward pass</div>
+      <div><span class="sw" style="background:var(--amber)"></span><b>δ[·]</b> — sensitivity df/d· from the backward pass</div>
+      <div style="margin-top:6px">Forward edges point <b>into</b> each op; backward,
+        the arrow reverses and carries <code style="color:var(--accent)">δ[out]·∂fn/∂in</code> to the input.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  This is a faithful animation of <code>autodiff.py</code>: the same
+  <code>PROGRAM1</code> = (2x₁+x₂)² and <code>PROGRAM2</code> = ln(x²), the same
+  function library <code>G</code> and partial-derivative library <code>DG</code>.
+  Each forward step is one iteration of <code>forward()</code>; each backward step
+  is one <code>delta[xi] += delta[output] * dxi_dinputi_fn(*input_vals)</code>.
+  Because <code>z1 = add(x1, x1)</code> lists <code>x1</code> twice, the loop adds to
+  <code>delta[x1]</code> twice — which is exactly why the update must be
+  <b>+=</b>, not <b>=</b>.
+</footer>
+
+<script>
+"use strict";
+
+// ===== the sample program, verbatim from autodiff.py ========================
+const PROGRAMS = {
+  PROGRAM1: {
+    title: 'f(x₁, x₂) = (2x₁ + x₂)²',
+    ops: [ ['z1','add',['x1','x1']],
+           ['z2','add',['z1','x2']],
+           ['f','square',['z2']] ],
+    inputs: {x1:2, x2:3},
+    spec: {x1:{min:-5,max:5,step:1}, x2:{min:-5,max:5,step:1}},
+    // per-node vertical nudges (px) so the x2→z2 edge doesn't run behind z1
+    nudge: {z1:-40, x2:40},
+  },
+  PROGRAM2: {
+    title: 'f(x) = ln(x²)',
+    ops: [ ['z','square',['x']],
+           ['f','ln',['z']] ],
+    inputs: {x:3},
+    spec: {x:{min:1,max:8,step:1}},
+  },
+};
+// function library G and partial-derivative library DG
+const G  = { add:(a,b)=>a+b, square:a=>a*a, ln:a=>Math.log(a) };
+const DG = { add:[()=>1, ()=>1], square:[a=>2*a], ln:[a=>1/a] };
+// source text of the library functions (shown in the narration line)
+const G_SRC  = { add:'lambda x1,x2: x1 + x2', square:'lambda x: x * x', ln:'lambda x: math.log(x)' };
+const DG_SRC = { add:['lambda x1,x2: 1','lambda x1,x2: 1'], square:['lambda x: 2.0 * x'], ln:['lambda x: 1/x'] };
+
+// ===== canvas / palette =====================================================
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+const W = 1000, H = 580;
+function fitDPI(){
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.aspectRatio = W+' / '+H;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+fitDPI(); window.addEventListener('resize', fitDPI);
+
+const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', panel:'#191d2e',
+              node:'#1c2337', input:'#232a40', edge:'#46527a',
+              green:'#8ce99a', cyan:'#7cc4ff', amber:'#ffd166' };
+
+// ===== small helpers ========================================================
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp  = (a,b,t)=>a+(b-a)*t;
+const ease  = t=>t*t*(3-2*t);
+const $ = id=>document.getElementById(id);
+function fmt(x){
+  if(x===undefined||x===null) return '—';
+  if(Number.isInteger(x)) return ''+x;
+  let r = Math.round(x*1000)/1000;
+  return (''+r);
+}
+
+// ===== state ================================================================
+let curName = 'PROGRAM1';
+let inputs = {};                 // live input values (editable)
+let layout = null;               // {pos, ops}
+let events = [];                 // the precomputed trace
+let idx = 0;                     // # of completed events; events[idx] is in progress
+let elapsed = 0, DUR = 1.0;      // seconds per event
+let speed = 1.2, playing = false, pauseEach = true, stepToStop = false;
+
+// ===== build the event trace (mirrors forward() then backward()) ============
+function arithFwd(fn, iv, res){
+  if(fn==='add')    return fmt(iv[0])+' + '+fmt(iv[1])+' = '+fmt(res);
+  if(fn==='square') return fmt(iv[0])+'² = '+fmt(res);
+  if(fn==='ln')     return 'ln('+fmt(iv[0])+') = '+fmt(res);
+  return fmt(res);
+}
+function derivStr(fn, xi, iv){
+  if(fn==='add')    return '∂add/∂'+xi+' = 1';
+  if(fn==='square') return '∂square/∂'+xi+' = 2·'+fmt(iv[0])+' = '+fmt(2*iv[0]);
+  if(fn==='ln')     return '∂ln/∂'+xi+' = 1/'+fmt(iv[0])+' = '+fmt(1/iv[0]);
+  return '';
+}
+function buildTrace(prog, inp){
+  const ops = prog.ops, ev = [];
+  const val = Object.assign({}, inp);
+  // forward pass
+  for(const [out,fn,ins] of ops){
+    const iv = ins.map(v=>val[v]);
+    const res = G[fn](...iv);
+    val[out] = res;
+    ev.push({kind:'forward', out, fn, ins, iv, res, arith:arithFwd(fn,iv,res)});
+  }
+  // backward pass
+  const lastOut = ops[ops.length-1][0];
+  const delta = {}; delta[lastOut] = 1;
+  ev.push({kind:'init', node:lastOut});
+  for(let j=ops.length-1;j>=0;j--){
+    const [out,fn,ins] = ops[j];
+    const iv = ins.map(v=>val[v]);
+    for(let i=0;i<ins.length;i++){
+      const xi = ins[i];
+      const deriv = DG[fn][i](...iv);
+      const dOut = delta[out]||0;
+      const contribution = dOut*deriv;
+      delta[xi] = (delta[xi]||0) + contribution;
+      ev.push({kind:'back', out, fn, ins, i, xi, iv, deriv, dOut, contribution,
+               derivStr:derivStr(fn,xi,iv)});
+    }
+  }
+  return ev;
+}
+
+// state (val/delta dicts) after `k` completed events
+function computeState(k){
+  const val = Object.assign({}, inputs), delta = {};
+  for(let e=0;e<k && e<events.length;e++){
+    const ev = events[e];
+    if(ev.kind==='forward') val[ev.out] = ev.res;
+    else if(ev.kind==='init') delta[ev.node] = 1;
+    else if(ev.kind==='back') delta[ev.xi] = (delta[ev.xi]||0) + ev.contribution;
+  }
+  return {val, delta};
+}
+
+// ===== graph layout =========================================================
+const NODE_W = 156, NODE_H = 80;
+function buildLayout(prog){
+  const ops = prog.ops;
+  const outSet = new Set(ops.map(o=>o[0]));
+  const fnOf = {}, insOf = {};
+  for(const [o,fn,ins] of ops){ fnOf[o]=fn; insOf[o]=ins; }
+  // inputs in first-seen order
+  const inputsOrder = [], seen = new Set();
+  for(const [o,fn,ins] of ops) for(const v of ins)
+    if(!outSet.has(v) && !seen.has(v)){ seen.add(v); inputsOrder.push(v); }
+  // column = longest path from inputs
+  const memo = {};
+  function col(v){
+    if(v in memo) return memo[v];
+    if(!outSet.has(v)) return memo[v]=0;
+    return memo[v] = 1 + Math.max(...insOf[v].map(col));
+  }
+  const vars = [...inputsOrder, ...ops.map(o=>o[0])];
+  let maxc = 0; vars.forEach(v=>maxc=Math.max(maxc,col(v)));
+  const byCol = {};
+  vars.forEach(v=>{ const c=col(v); (byCol[c]=byCol[c]||[]).push(v); });
+  const pos = {};
+  const left = 40+NODE_W/2, right = W-40-NODE_W/2, midY = 258, gap = 120;
+  for(let c=0;c<=maxc;c++){
+    const cx = maxc===0 ? left : left + c*(right-left)/maxc;
+    const list = byCol[c]||[], n = list.length;
+    const y0 = midY - (n-1)*gap/2;
+    list.forEach((v,i)=>{
+      const cy = y0 + i*gap;
+      pos[v] = { x:cx-NODE_W/2, y:cy-NODE_H/2, w:NODE_W, h:NODE_H, cx, cy,
+                 fn:fnOf[v], ins:insOf[v], isInput:!outSet.has(v) };
+    });
+  }
+  // apply per-node vertical nudges from the program config
+  const nudge = prog.nudge || {};
+  for(const v in nudge){ if(pos[v]){ pos[v].y += nudge[v]; pos[v].cy += nudge[v]; } }
+  // edges (one per op-input, keep duplicates; offset those sharing a from/to pair)
+  const edges = [];
+  for(const [out,fn,ins] of ops)
+    ins.forEach((from,k)=> edges.push({from, to:out, k}));
+  const groups = {};
+  edges.forEach(e=>{ const key=e.from+'>'+e.to; (groups[key]=groups[key]||[]).push(e); });
+  Object.values(groups).forEach(g=> g.forEach((e,i)=>{ e.g=i; e.s=g.length; }));
+  return {pos, ops, edges};
+}
+
+// ===== drawing primitives ===================================================
+function roundRect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function bez(A,C,B,t){
+  const u=1-t;
+  return { x:u*u*A.x+2*u*t*C.x+t*t*B.x, y:u*u*A.y+2*u*t*C.y+t*t*B.y };
+}
+function bezTan(A,C,B,t){
+  const u=1-t;
+  return { x:2*u*(C.x-A.x)+2*t*(B.x-C.x), y:2*u*(C.y-A.y)+2*t*(B.y-C.y) };
+}
+function head(p, ang, col, size){
+  ctx.fillStyle=col; ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(p.x-size*Math.cos(ang-0.42), p.y-size*Math.sin(ang-0.42));
+  ctx.lineTo(p.x-size*Math.cos(ang+0.42), p.y-size*Math.sin(ang+0.42));
+  ctx.closePath(); ctx.fill();
+}
+
+// ===== the active element for the in-progress event =========================
+function activeInfo(){
+  if(idx>=events.length) return null;
+  const ev = events[idx];
+  if(ev.kind==='forward') return {ev, primary:ev.out, sources:ev.ins, color:COL.green, back:false};
+  if(ev.kind==='init')    return {ev, primary:ev.node, sources:[], color:COL.cyan, back:false};
+  return {ev, primary:ev.xi, sources:[ev.out], color:COL.cyan, back:true};
+}
+
+// ===== draw =================================================================
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const info = activeInfo();
+  const p = idx<events.length ? clamp(elapsed/DUR,0,1) : 1;
+
+  // display state: completed events, plus the in-progress one once p passes 0.55
+  const applied = (idx<events.length && p>=0.55) ? idx+1 : idx;
+  const disp = computeState(applied);
+  const justVar = (applied===idx+1) ? (info.ev.kind==='forward'?info.ev.out
+                    : info.ev.kind==='init'?info.ev.node : info.ev.xi) : null;
+
+  const {pos, edges} = layout;
+
+  // ---- title + pass banner ----
+  ctx.textAlign='left';
+  ctx.fillStyle=COL.ink; ctx.font='600 19px sans-serif';
+  ctx.fillText(PROGRAMS[curName].title, 24, 34);
+  let phase = 'ready';
+  if(info) phase = info.ev.kind==='forward' ? 'forward' : 'backward';
+  else phase = 'done';
+  const banner = phase==='forward' ? '① forward pass — compute val[·]'
+               : phase==='backward' ? '② backward pass — accumulate δ[·] = df/d·'
+               : phase==='done' ? '✓ gradient complete' : 'press Play or Step';
+  const bcol = phase==='forward'?COL.green : phase==='backward'?COL.cyan : COL.amber;
+  ctx.fillStyle=bcol; ctx.font='600 17px sans-serif'; ctx.textAlign='right';
+  ctx.fillText(banner, W-24, 34);
+
+  // ---- edges ----
+  for(const e of edges){
+    const A0=pos[e.from], B0=pos[e.to];
+    const off = (e.g-(e.s-1)/2)*13;
+    const A = {x:A0.x+A0.w, y:A0.cy+off};
+    const B = {x:B0.x,      y:B0.cy+off};
+    const C = {x:(A.x+B.x)/2, y:(A.y+B.y)/2 + off*1.4};
+    const isFwd = info && !info.back && info.ev.kind==='forward' && e.to===info.ev.out;
+    const isBwd = info && info.back && e.to===info.ev.out && e.k===info.ev.i;
+    const act = isFwd || isBwd;
+    const col = isBwd?COL.cyan : isFwd?COL.green : COL.edge;
+    ctx.strokeStyle=col; ctx.lineWidth=act?3:1.6; ctx.globalAlpha=act?1:0.85;
+    ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.quadraticCurveTo(C.x,C.y,B.x,B.y); ctx.stroke();
+    ctx.globalAlpha=1;
+    // static arrowhead at rest
+    if(!act){
+      const tp=bez(A,C,B,0.98), tg=bezTan(A,C,B,0.98);
+      head(bez(A,C,B,1), Math.atan2(tg.y,tg.x), col, 7);
+    } else if(isFwd){
+      const t=ease(p), tp=bez(A,C,B,t), tg=bezTan(A,C,B,t);
+      head(tp, Math.atan2(tg.y,tg.x), col, 10);
+    } else { // backward: travel B -> A
+      const t=1-ease(p), tp=bez(A,C,B,t), tg=bezTan(A,C,B,t);
+      head(tp, Math.atan2(-tg.y,-tg.x), col, 10);
+    }
+  }
+
+  // ---- nodes ----
+  for(const v in pos){
+    const n = pos[v];
+    const val = disp.val[v], delta = disp.delta[v];
+    const isPrimary = info && info.primary===v;
+    const isSource  = info && info.sources.includes(v);
+    const accent = n.isInput ? COL.amber : COL.green;
+    // box
+    ctx.save();
+    if(isPrimary){ ctx.shadowColor=info.color; ctx.shadowBlur=18; }
+    ctx.fillStyle = n.isInput ? COL.input : COL.node;
+    roundRect(n.x,n.y,n.w,n.h,10); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.lineWidth = isPrimary?2.5 : isSource?2 : 1.2;
+    ctx.strokeStyle = isPrimary?info.color : isSource?info.color : COL.line;
+    roundRect(n.x,n.y,n.w,n.h,10); ctx.stroke();
+    ctx.restore();
+    // left accent stripe
+    ctx.fillStyle = accent; ctx.globalAlpha=0.9;
+    roundRect(n.x,n.y,5,n.h,3); ctx.fill(); ctx.globalAlpha=1;
+    // header: name + op
+    ctx.textAlign='left'; ctx.fillStyle=COL.ink; ctx.font='700 18px sans-serif';
+    ctx.fillText(v, n.x+15, n.y+25);
+    if(!n.isInput){
+      ctx.fillStyle=COL.muted; ctx.font='13px "SFMono-Regular",Menlo,monospace';
+      const label = n.fn+'('+n.ins.join(',')+')';
+      ctx.textAlign='right'; ctx.fillText(label, n.x+n.w-13, n.y+24);
+    } else {
+      ctx.fillStyle=COL.muted; ctx.font='13px sans-serif';
+      ctx.textAlign='right'; ctx.fillText('input', n.x+n.w-13, n.y+23);
+    }
+    // val line
+    ctx.textAlign='left';
+    const valDef = val!==undefined;
+    ctx.globalAlpha = valDef?1:0.4;
+    ctx.fillStyle = valDef?COL.green:COL.muted; ctx.font='600 16px "SFMono-Regular",Menlo,monospace';
+    ctx.fillText('val '+fmt(val), n.x+15, n.y+52);
+    // delta line
+    const dDef = delta!==undefined;
+    ctx.globalAlpha = dDef?1:0.4;
+    ctx.fillStyle = dDef?COL.amber:COL.muted;
+    ctx.fillText('δ   '+fmt(delta), n.x+15, n.y+72);
+    ctx.globalAlpha=1;
+    // "just changed" pulse
+    if(justVar===v){
+      ctx.strokeStyle=info.color; ctx.globalAlpha=0.5*(1-Math.abs(p-0.78)/0.4);
+      ctx.lineWidth=2; roundRect(n.x-3,n.y-3,n.w+6,n.h+6,12); ctx.stroke(); ctx.globalAlpha=1;
+    }
+  }
+
+  // ---- bottom narration (mirrors the print() in autodiff.py) ----
+  // line1 = the update; line2 = which library function (G / DG) is used
+  let cap='', sub='', ccol=COL.amber;
+  if(info){
+    const ev=info.ev;
+    if(ev.kind==='forward'){ ccol=COL.green;
+      cap = 'val['+ev.out+'] = '+ev.fn+'('+ev.ins.join(', ')+')   →   '+ev.arith;
+      sub = "G['"+ev.fn+"'] = "+G_SRC[ev.fn]; }
+    else if(ev.kind==='init'){ ccol=COL.cyan;
+      cap = 'seed the output:  δ['+ev.node+'] = df/df = 1'; sub=''; }
+    else { ccol=COL.cyan;
+      cap = 'δ['+ev.xi+'] += δ['+ev.out+'] · '+ev.derivStr
+          + '   =   '+fmt(ev.dOut)+' · '+fmt(ev.deriv)+' = '+fmt(ev.contribution);
+      sub = "DG['"+ev.fn+"']["+ev.i+"] = "+DG_SRC[ev.fn][ev.i]
+          + "   evaluated at input_vals = ("+ev.iv.map(fmt).join(', ')+")"; }
+  } else {
+    ccol=COL.amber; cap = '✓ done — δ of each input is its gradient df/d·'; sub='';
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle=ccol; ctx.font='600 18px sans-serif';
+  ctx.fillText(cap, 24, H-38);
+  if(sub){
+    ctx.fillStyle=COL.muted; ctx.font='15px "SFMono-Regular",Menlo,Consolas,monospace';
+    ctx.fillText(sub, 24, H-15);
+  }
+
+  syncPanels();
+}
+
+// ===== side panels ==========================================================
+function buildWengert(){
+  const wl = $('wl'); wl.innerHTML='';
+  const activeOut = idx<events.length ?
+        (events[idx].kind==='forward'?events[idx].out
+         : events[idx].kind==='init'?events[idx].node : events[idx].out) : null;
+  for(const [out,fn,ins] of layout.ops){
+    const d = document.createElement('div');
+    d.textContent = out.padEnd(3)+' = '+fn+'('+ins.join(', ')+')';
+    if(out===activeOut) d.className='cur';
+    wl.appendChild(d);
+  }
+}
+function buildTraceList(){
+  const ol = $('trace'); ol.innerHTML='';
+  events.forEach((ev,i)=>{
+    const li = document.createElement('li');
+    if(ev.kind==='forward'){ li.className='fwd'; li.textContent='val['+ev.out+'] = '+fmt(ev.res); }
+    else if(ev.kind==='init'){ li.className='bwd'; li.textContent='δ['+ev.node+'] = 1   (seed)'; }
+    else { li.className='bwd'; li.textContent='δ['+ev.xi+'] += '+fmt(ev.contribution); }
+    li.addEventListener('click', ()=>{ idx=i; elapsed=0; playing=false; setPlayLabel(); draw(); });
+    ol.appendChild(li);
+  });
+}
+function syncPanels(){
+  // Wengert current-op highlight
+  const activeOut = idx<events.length ?
+        (events[idx].kind==='forward'?events[idx].out
+         : events[idx].kind==='init'?events[idx].node : events[idx].out) : null;
+  const wlDivs = $('wl').children, opOuts = layout.ops.map(o=>o[0]);
+  for(let i=0;i<wlDivs.length;i++)
+    wlDivs[i].className = opOuts[i]===activeOut ? 'cur' : '';
+  // trace highlight
+  const lis = $('trace').children;
+  for(let i=0;i<lis.length;i++){
+    const base = lis[i].classList.contains('fwd')?'fwd':'bwd';
+    lis[i].className = base + (i<idx?' done' : i===idx?' cur':'');
+  }
+  if(idx<lis.length) lis[idx].scrollIntoView({block:'nearest'});
+  // gradient card (live)
+  const st = computeState(idx<events.length && elapsed/DUR>=0.55 ? idx+1 : idx);
+  const g = $('grad'); g.innerHTML='';
+  const inNames = Object.keys(inputs);
+  const fRow = document.createElement('div'); fRow.className='metric';
+  fRow.innerHTML = '<span>f = '+PROGRAMS[curName].ops.slice(-1)[0][0]+'</span><b>'+fmt(st.val.f)+'</b>';
+  g.appendChild(fRow);
+  inNames.forEach(v=>{
+    const r=document.createElement('div'); r.className='metric';
+    r.innerHTML = '<span>df/d'+v+'  =  δ['+v+']</span><b>'+fmt(st.delta[v])+'</b>';
+    g.appendChild(r);
+  });
+}
+
+// ===== rebuild on program / input change ====================================
+function buildInputControls(){
+  const box = $('inputs'); box.innerHTML='';
+  const spec = PROGRAMS[curName].spec;
+  for(const v in inputs){
+    const s = spec[v];
+    const row = document.createElement('div'); row.className='row';
+    row.innerHTML = '<label>'+v+'</label>'
+      + '<input type="range" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+inputs[v]+'">'
+      + '<span class="val">'+inputs[v]+'</span>';
+    const rng = row.querySelector('input'), lab = row.querySelector('.val');
+    rng.addEventListener('input', e=>{
+      inputs[v] = +e.target.value; lab.textContent = inputs[v]; rebuild(false);
+    });
+    box.appendChild(row);
+  }
+}
+function rebuild(resetInputs){
+  const prog = PROGRAMS[curName];
+  if(resetInputs){ inputs = Object.assign({}, prog.inputs); buildInputControls(); }
+  layout = buildLayout(prog);
+  events = buildTrace(prog, inputs);
+  idx = 0; elapsed = 0; playing = false; stepToStop = false;
+  buildWengert(); buildTraceList(); setPlayLabel(); draw();
+}
+function selectProgram(name){
+  curName = name;
+  $('p1').className = name==='PROGRAM1'?'sel':'';
+  $('p2').className = name==='PROGRAM2'?'sel':'';
+  rebuild(true);
+}
+
+// ===== loop / controls ======================================================
+function setPlayLabel(){
+  $('play').textContent = (idx>=events.length) ? 'Replay ▸' : (playing ? 'Pause' : 'Play ▸');
+}
+let lastTs=null;
+function tick(ts){
+  if(lastTs==null) lastTs=ts;
+  const dt=(ts-lastTs)/1000; lastTs=ts;
+  if(playing && idx<events.length){
+    elapsed += dt*speed;
+    if(elapsed>=DUR){
+      elapsed=0; idx++;
+      if(idx>=events.length){ playing=false; setPlayLabel(); }
+      else if(pauseEach||stepToStop){ playing=false; stepToStop=false; setPlayLabel(); }
+    }
+  }
+  draw();
+  requestAnimationFrame(tick);
+}
+
+$('p1').addEventListener('click', ()=>selectProgram('PROGRAM1'));
+$('p2').addEventListener('click', ()=>selectProgram('PROGRAM2'));
+$('speed').addEventListener('input', e=>{ speed=+e.target.value; $('speedV').textContent=speed.toFixed(1)+'×'; });
+$('play').addEventListener('click', ()=>{
+  if(idx>=events.length){ idx=0; elapsed=0; }
+  playing=!playing; if(playing) stepToStop=false; setPlayLabel();
+});
+$('step').addEventListener('click', ()=>{
+  if(idx>=events.length){ idx=0; elapsed=0; }
+  stepToStop=true; playing=true; setPlayLabel();
+});
+$('reset').addEventListener('click', ()=>{ idx=0; elapsed=0; playing=false; setPlayLabel(); draw(); });
+$('pauseEach').addEventListener('change', e=>{ pauseEach=e.target.checked; });
+
+selectProgram('PROGRAM1');
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
