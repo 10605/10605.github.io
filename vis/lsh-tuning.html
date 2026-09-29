@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSH Tuning Lab</title>
+<meta name="description" content="Explore locality-sensitive hashing curves and compare Jaccard and MinHash similarities for example documents.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23123060%22%2F%3E%3Cpath%20d%3D%22M10%2047L23%2037L34%2039L48%2017%22%20fill%3D%22none%22%20stroke%3D%22%237ae0d1%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2217%22%20r%3D%225%22%20fill%3D%22%237ae0d1%22%2F%3E%3C%2Fsvg%3E">
+<style>
+:root { color-scheme: light dark; --background:#f5f8fc; --surface:#ffffff; --foreground:#14233a; --muted-foreground:#4b6078; --border:#cbd6e5; --viz-series-1:#1659cb; --highlight:#e7f0ff; --shadow:0 10px 30px rgba(20,45,83,.06); }
+@media (prefers-color-scheme: dark) { :root { --background:#0c1424; --surface:#14233a; --foreground:#edf4ff; --muted-foreground:#b8c8db; --border:#3e536e; --viz-series-1:#83b5ff; --highlight:#243f66; --shadow:none; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--background); color:var(--foreground); font:16px/1.48 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+main { max-width:1160px; margin:0 auto; padding:24px 20px 48px; }
+header { margin-bottom:22px; }
+h1 { font-size:clamp(1.7rem,3vw,2.25rem); line-height:1.18; letter-spacing:-.02em; margin:0 0 6px; }
+header p { color:var(--muted-foreground); margin:0; max-width:68ch; }
+h2 { font-size:1.22rem; margin:0 0 16px; }
+h3 { font-size:1.04rem; margin:20px 0 8px; }
+.workspace { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:18px; align-items:start; }
+.panel { min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
+.matrix-panel { margin-top:18px; }
+.viz-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.form-label { display:block; font-size:.9rem; margin-bottom:8px; }
+.form-range { display:block; width:100%; accent-color:var(--viz-series-1); }
+.lsh-length { color:var(--muted-foreground); margin:14px 0 4px; font-size:.94rem; }
+.lsh-length strong { color:var(--foreground); }
+#lsh-plot-container { width:100%; }
+#lsh-plot { display:block; width:100%; height:auto; }
+#lsh-plot text { fill:var(--foreground); font-size:12px; font-weight:400; }
+#lsh-plot .tick-label { fill:var(--muted-foreground); }
+.lsh-documents { display:grid; gap:8px; }
+.form-check { display:flex; align-items:flex-start; gap:10px; font-size:.93rem; line-height:1.35; }
+.form-check-input { accent-color:var(--viz-series-1); width:18px; height:18px; margin:1px 0 0; flex:none; }
+.form-check-label { min-width:0; }
+.table-responsive { width:100%; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:.9rem; }
+th,td { text-align:left; padding:8px 9px; border-bottom:1px solid var(--border); vertical-align:top; }
+th { font-weight:600; }
+.lsh-pairs td,.lsh-matrix td { font-variant-numeric:tabular-nums; }
+.lsh-matrix .lsh-band-match { background:var(--highlight); }
+.lsh-values { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; white-space:nowrap; font-size:.84rem; }
+.text-small { font-size:.82rem; }
+.text-muted,caption { color:var(--muted-foreground); }
+caption { text-align:left; padding-bottom:8px; }
+strong { font-weight:600; }
+input:focus-visible { outline:2px solid var(--viz-series-1); outline-offset:2px; }
+@media (max-width:820px) { .workspace { grid-template-columns:1fr; } }
+@media (max-width:480px) { main { padding:16px 12px 32px; } .panel { padding:16px 12px; } .viz-controls { grid-template-columns:1fr; gap:12px; } th,td { padding:7px 6px; } }
+</style>
+</head>
+<body>
+<main id="lsh-document-comparison">
+<header><h1>LSH tuning lab</h1><p>Adjust banding to see the candidate probability curve, then compare four short documents using exact Jaccard and supplied MinHash signatures.</p></header>
+<div class="workspace">
+<section class="panel" aria-labelledby="curve-heading">
+<h2 id="curve-heading">Banding curve</h2>
+<div class="viz-controls">
+<div><label class="form-label" for="lsh-rows">Rows per band <strong id="lsh-rows-value">3</strong> (AND)</label><input class="form-range" id="lsh-rows" type="range" min="1" max="32" value="3" step="1"></div>
+<div><label class="form-label" for="lsh-bands">Bands <strong id="lsh-bands-value">4</strong> (OR)</label><input class="form-range" id="lsh-bands" type="range" min="1" max="32" value="4" step="1"></div>
+</div>
+<div class="lsh-length" aria-live="polite">Signature length: <strong id="lsh-length-value">12</strong> hash values</div>
+<div id="lsh-plot-container"><svg id="lsh-plot" role="img" aria-label="LSH candidate probability versus Jaccard similarity"></svg></div>
+</section>
+<section class="panel" aria-labelledby="documents-heading">
+<h2 id="documents-heading">Example documents <span class="text-small text-muted">(distinct word sets)</span></h2>
+<div class="lsh-documents" role="group" aria-label="Show documents">
+<label class="form-check"><input class="form-check-input" type="checkbox" name="lsh-document" value="0" checked><span class="form-check-label"><strong>A</strong> · the quick brown fox jumps over the lazy dog</span></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" name="lsh-document" value="1" checked><span class="form-check-label"><strong>B</strong> · the quick brown fox jumps over a lazy dog</span></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" name="lsh-document" value="2" checked><span class="form-check-label"><strong>C</strong> · the red fox sleeps under the old oak tree</span></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" name="lsh-document" value="3" checked><span class="form-check-label"><strong>D</strong> · the red fox sleeps under the tall oak tree</span></label>
+</div>
+<h3>Pairwise similarity</h3>
+<div class="table-responsive"><table class="lsh-pairs"><thead><tr><th scope="col">Pair</th><th scope="col">Exact Jaccard</th><th scope="col">MinHash agreement</th><th scope="col">LSH candidate</th></tr></thead><tbody id="lsh-pair-body"></tbody></table></div>
+</section>
+</div>
+<section class="panel matrix-panel" aria-labelledby="matrix-heading">
+<h2 id="matrix-heading">Signature matrix by band</h2>
+<div class="table-responsive"><table class="lsh-matrix"><caption class="text-small" id="lsh-matrix-caption">Each value identifies the minimum word under one random permutation.</caption><thead id="lsh-matrix-head"></thead><tbody id="lsh-matrix-body"></tbody></table></div>
+</section>
+</main>
+<script>
+
+(() => {
+  const root = document.getElementById('lsh-document-comparison');
+  const svg = root.querySelector('#lsh-plot');
+  const container = root.querySelector('#lsh-plot-container');
+  const rowsInput = root.querySelector('#lsh-rows');
+  const bandsInput = root.querySelector('#lsh-bands');
+  const ns = 'http://www.w3.org/2000/svg';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let previous = { r: Number(rowsInput.value), b: Number(bandsInput.value) };
+  let animation = 0;
+  const documents = [
+    { name: 'A', words: 'the quick brown fox jumps over the lazy dog' },
+    { name: 'B', words: 'the quick brown fox jumps over a lazy dog' },
+    { name: 'C', words: 'the red fox sleeps under the old oak tree' },
+    { name: 'D', words: 'the red fox sleeps under the tall oak tree' },
+  ];
+  const sets = documents.map(doc => new Set(doc.words.split(' ')));
+  // Supplied MinHash signatures: 1,024 rows by four example documents.
+  const encodedSignatures = (
+    'AgIEBAMDDA0GBgcHAwMPDwICEBAFBQcHAwMHBw4ODg4EBAQECQkPDwkJCAQKChAQBAQEBAMDDw8JCQsNCQELCwICCA0JCQ8PBAQI' +
+    'BAUFCA8OAQcHBgYLCwMDEBAODg4OBgYEBAYGBw0EBAQEAwMLCwMDDAwGBggNAgIODgYGCAwEBAgPAgILDQQEBAQJCQcNCQkQEAUF' +
+    'EBAEBAQECQkIBwMDCA8JCQwMBgYQDQ4OCAsKCg8PCQkIDgoKBAQDAwcHCQkQEAQEDAwFBQsLAgIHBwICDg4DAQsLBAQPDwMDCBAK' +
+    'CgcHBQUPDw4ODg4CAhAQBgYIDQQEDAwEBAQEBgYLCwYGDg4CAgQEAwMHBwQECwsFBQcHAwMHBwYGBwcEBAQECQkLCwYGDAwCAggE' +
+    'BgYHBwkJDw8FBQsLBQUIBAkJEBACAQsLBQUHBwICDAwODgwNCQkMDAUFDAwDAwwMCQkODgQEBw0KCgQEDg4LCwQEEBACAg8PBAQQ' +
+    'EAkJCwsGBggNCQkLCwkJCA0EBAgEAgEHBw4ODg4GBg8PDg4ICw4ODAwCAQwNBQUQEAIBBwcCAg4ODg4ODgQEEBAEBBAQAgIODg4O' +
+    'Dg4KCgwMDgEHBwoKBAQEBAQEBgYIDQQEBAQODg4OCQkQEAYGCw0GBgQEBgYQEAICCA0FBQQEBAQEBAQEBAQKAQcNCgoHBwQEBw0K' +
+    'CgcHBQUEBAYGCBAKAQcHBAQIBA4ODg4EBA8PBQUIDQoKEBACAgsLCQkQEAUFDw8GBhAQAwMIDAMDCw0JCQgPDg4ODgUBEBADAwwM' +
+    'AgILCwkJCBAODggOAgIPDwYGEBAODg4ODg4ODgQEDw0FBQ8PCgoLDQ4ODg4EBAwMAgIEBAQEBA0GBgsLBgYHBwoKDw8EBAsLCQEI' +
+    'CwoKDAwEBAQEBgYODgoKEBAODgsLBQUHBwkJDw8JCQ8PAwMPDQMDDg4DAQcHBgEPDwQEBAQDAwwMBQUEBAUFCwsDAwgNBgEODgoK' +
+    'CAsGBgcHCQkLCwkJDAwCAQ8PCgoIBwICDAwGBhAQAwMLCwQEEBAEBAQECgEQEAUFEBAGBg4NBAQEBAkJCAwEBAQEBAQEBAoKCwsC' +
+    'AhAQBAQEBAQEBAQGBgsLBAQEBAMDCAwODg4OAgIQEAMDDA0GBgwMAwEIDQICBwcDAQ4OAwMHBwYGCAwCAg8PBQUIDQYGCwsEBAQE' +
+    'CQkMDAkJCBAEAQQECQkHBwkJDw8GBgQEBAQEBAQEBAQDAwgMBAQEBAMDDw8FBRANBgYLCwoKCwsODgwNCgoMDAQECAQKChAQCQEM' +
+    'DAYGBw0ODgsLCgoMDAQEBAQDAwcHBgYODgQEBAQCAgwMAgIQEAMDCA8ODg4OBAQEBA4ODg4OAQ4OAgIPDw4ODg4DAw8PBgYHBwUF' +
+    'EBACAg8PAgIPDwYGDw8EBAsLAgELCwUFCAwFBQ8PCQkMDAICEBAKCgwMDg4MDAUFCA0GBhANCgoIBwoKCA0JARANBgYIBwMDDAwF' +
+    'BQwMBgYIBA4BBwcGBggQCgoLCwkJDg4KChAQBQUHBwYGCwsKCg8NBgYIDgICDg4DAwwMCQkEBA4ODg4KCgsLAgEHBwMDCAwDAw8P' +
+    'AwELCw4ODg4GBg8PBgYMDAMDBwcDAwwMAwMICwYGCA0ODgwMBQUEBAUFBwcEBAQEBQULDQkJDg4CAg4OCgoLCwkJEA0FBQ8PBQUM' +
+    'DA4BCwsCAggNAwMMDAMDDw8FBQsNDg4ODg4BEBAFBQgLCgoMDAUBEBAODg4OBAQIDwUFBAQFBQwMBQULCwICCwsKCgwMBQUQEAoK' +
+    'CwsFBQ8PCgoMDAUFCA4DAwwNBQUIEAUFDAwCAg4OBgYPDwkJBwcGAQcHAwMMDAYGCwsODg4OCgoLCwMDDw8DAwsNCgoHBwoKDw8K' +
+    'CgcHAgIODgYGCAwODgsNBgYMDAUFCA8CAhAQAgIPDwQEBAQFBQcHDg4ODgUFDAwCAgcHAwMPDwkJBAQODggOBgYMDAUFBwcJCQgQ' +
+    'BgEQEAoKCw0GBggNAwMPDwQEEA0JCQ8PDg4ODgUFBwcFBQwMBAQEBAoKBAQJCQ8PCQkIDwICCA8FARAQDgELCwQEBAQODg4OCgoQ' +
+    'EAkJDw8EBAQEAgILCwoKDw8FBQsLBQUMDAUFBwcEBAsLBQEHBwYGDw8GBg4OCQkQEAoKBAQEBAcHCgoLCw4ODw8DAxANCQkMDAMD' +
+    'EBAODg4OBgYPDQICDw8GBggNBQUIDwYGCBAEBA8PDg4ODgYGBAQGBgwMCQkODg4ODg4EAQQEAgIODgUBDAwJARAQBQUMDAkJBwcG' +
+    'Bg8PBgYPDwQEBAQJCQgOBQUMDAkJDAwFBQgLAgIEBA4OEBADAwwMBAQEBAoKDg4CAggQBgYMDAQEBAQCAhAQBQUEBAICDw8EBAQE' +
+    'BAQEBAMDDw0KCg8PBAQPDwUBDw0ODgcHCgoQEAoKDw8FBQ8PBAQIBAQEDAwCAg8PCgoLDQQEBAQFAQcHAwMMDAMDCAsDAwsNCQEI' +
+    'CwYGEBAFBQcHAgIQEAkJEBAGBgsLBgYODgUFDg0DAwgNAwMODgQEBwcFBQwMBQUPDwYGDAwCAgQEAwMODgYGDw0FAQ8PBgYMDQoK' +
+    'Dw8FBQwMCgoIEAYGDw0JCQgMBgYMDA4OEBAFBQcHCQkQEAICEBADAwgMAgIEBAkJCwsGBhAQBAQPDwMBBwcJCQcHCQkPDw4ODg4E' +
+    'BA8PDg4ODgYGDg4ODg4OBAQEBAMDDw0EBAQEDg4QEAkJDAwFBQwMBQUPDwQEBAQCAggPDg4HBwQEBAQJCQ8PAwMQEAICDg4KChAQ' +
+    'AgIIDg4ODg4ODg4OAgILCwQBCAQFAQgNBgYLCwMDDA0OAQ4OCgoPDwICCwsDAw8PDg4ODg4OBwcFBQgHCgoQEAUFCAwCAgcHCgEL' +
+    'CwICEBAODg4NCgEQEAUFDA0KCgwMAwMPDwoKBAQCAgsLCQkIDwMDDw8JCQ8NCQkIDgQEBAQGBhAQBgYODQYGBw0DAwcHAgIMDQIC' +
+    'DAwFBQQNCQkLCwICDw8EBAQEDg4ODgoKDAwGBhAQCgEHBwYGDw8GAQ8NCQkODgUFBwcEBAQEBAQQEA4OEBAEBAQEBAQHBwkJDw8J' +
+    'CQwMAgEQEAYGDw8JCQ8PBgYQEAQEBwcEBAwMDg4ODgICCAsGBg8PBAQLCwYGEBACAggLBAQEBAYGDw8OAQ8PCgoHBwYGCwsCAg4O' +
+    'Dg4HBwICDw8ODggOBgYHBw4ODg4FBQQEBQUPDQYGCAsKAQ8PBQUIDwQEBAQODgwMAgILCwMDCAQGBgsLBAQIBAYGDg4GBgcHDg4H' +
+    'Bw4ODg4FBQ8PDg4ODgMBCwsKCg4OAwMIBAkBEBACAgcHBAQPDwYGDg0CAg4OBgYMDAYGDA0JCQcHDg4ODg4ODg4KCgcHDg4HBwoK' +
+    'Dw8ODg4OBQUHBwUBDw8EBAQEAwMPDwQEBwcCAg4ODg4IDgYGBw0CAg4OAgIQEAIBBAQODg4OBAQEBAUFBAQDAQwMCgoMDAICCAcD' +
+    'AwcHBQULCwQEBAQJCQsLBgYODgMDCwsEBAQEBgEMDAIBDw8KChAQCQkIBAYGCwsEBAQEBAQPDwYGBwcFBQ4OBAQEBAUFCwsODg4O' +
+    'CQkQEAoKBwcJCRAQCgoQEAICDAwFBQcHAgEMDQ4ODg4JCQsLBAQQEAQEDw8GBg4OCQkLCwICDAwDAxAQAwMLCw4ODg4GBgsLAgIP' +
+    'DwUFDAwCAg4NAwMEBAQBCAwDAwsLCgoQEAICCAsCAggHDg4ODgICBAQGBg4OCgoLCwoKDw8KARAQAwMPDQkJBwcDAwgLCgELCw4O' +
+    'Dw8EBAQEDg4ODgkJDw8KCgwMBQUMDAkJCwsDAw4NBgYMDAQEBAQJCQgODg4ODgMDEBAKChAQCQkMDAUBEBAODg4OAwMHBwIBDg4G' +
+    'BgcHCgoIBAQEBAQKCgQEBAQPDwICCwsEBAQEAwMPDw4ODAwGBgwMBAQEBAYGCA8KCgwMDg4ODgYBCwsKCgQECgoEDQQEBAQODg4O' +
+    'Dg4ODgYGBAQFAQcHBAQQEAICCAsKCgcHBgYODQYGBwcODgsLCQkIDw4ODw8CAgwMAgIPDwYGDw8ODg4OBgELCwkJDAwDAw8PAgIH' +
+    'BwkJDw8FBQsLBAQEBAICDA0DAw4OBQULCw4ODg4JCQcHBgYQEAICDw8CAg8PAwMLCwMDDw0GBgQECQkEBAoKBwcGBggMDg4LCwYG' +
+    'Dw0FBQwMBgYQEAUFEBAJCRAQBAQPDwYGCA0JCQ4OCQkIBAkJEBAEBAQEBQUMDAUFDA0FBQsLBAQEBAICDAwKCgsLCgEIBwYBDAwJ' +
+    'CQgHBQUODg4ODAwODgcHBgYPDwUFCwsKCggMBQUPDwQEBAQEBBAQAgIHDQYBCwsGBggQCgoPDwoKCwsFBQgPCQkMDAkJEBACAg8P' +
+    'CgoQEA4ODAwODg4OBQUHBwUFCwsKCgsLAwMHDQoKDw8CAggNAgIIBAkJCwsDAxAQBQUPDwoKBwcCAgwMCQkHBwkJBAQODg4OAwMO' +
+    'DgICDw8KCg8PAwMMDAQEBAQJCRAQBgYIDwoKCw0CAg8PDg4QEAQEBAQJCRAQBQUQEAMDBwcDAwgNBgYIDQoKCwsCAgwMCgoPDwMD' +
+    'DA0FBQ4OAwMQEAUFDAwGBgwNBgYODgUFBAQODg4OCQkIDgQBBA0JARAQDg4HDQMDBwcEBAQECQkIEAkJBwcKCgQEBQEQEAkJCAwK' +
+    'AQcHBAQEBAkJDw8JCQcHBgYLCw4ODg0FBQsNBQUODgUBEBACAgcHBQUQEA4OCAcEBAQEBAQLCwkJBAQEBAQEBQELCwkJBwcFBRAQ' +
+    'BQUODgUFDg0EBAQECQkLCwICBAQJCQgMBgYEBA4ODg4FBQQEBAQEBA4ODw8EBAQEBAQEBA4ODg4EBAQECgoIEAkJEBAJCQcNBQUI' +
+    'DQQEBAQEBAQEDgEQEAUBDg4ODg4OBAQQEAUBDA0DAwcHAgEEDQoKBwcEBAQEDg4ODgkJCwsJCQcHBQUIDQkBCAsEBAQEAwMODgQE' +
+    'BAQODg4OBQUMDAkJDw8GAQ8PBQULCwoKDw8JCQwMAgEPDwQEBA0EBAQEBQUIDQUFCAwCAg8PBAQLCwMDCA8EBBAQAgIODQYGBAQE' +
+    'AQQEBAQEBAQEBAQFBQsNBAQHBwMDDg4KAQ8PBAQEBAIBDAwKCgcNBQUQEAoBDAwFBQ4OCQkIDQoKDg4EBAQEBQUMDAMDEBAODg4O' +
+    'BgYEBAkJDAwDAwQNBQULDQICDAwCAgcHAgEPDw4ODg4GAQ8PCQkIDAMDBwcGBhAQBAQEBAIBBwcDAwcHCQkMDQICDA0EBAwMAgIL' +
+    'CwICCwsKCgcHCQkMDAMDCAwGBgwMCgoEBAkJDAwJARANBgYODQUFDw8DAwgNCQkPDwICDA0FAQcNCQkLCwoKDw8DAwcHCgoHBw4O' +
+    'Dg4KAQcHCQkLCwQEBAQDAxAQCQEMDA4ODg4EBAQEAwMLDQoKBAQODg4OBQULCw=='
+  );
+  const bytes = atob(encodedSignatures);
+  const signatures = Array.from({ length: 1024 }, (_, row) =>
+    Array.from({ length: 4 }, (_, col) => bytes.charCodeAt(row * 4 + col)));
+
+  function selectedDocuments() {
+    return [...root.querySelectorAll('input[name="lsh-document"]:checked')].map(input => Number(input.value));
+  }
+  function exactJaccard(i, j) {
+    const intersection = [...sets[i]].filter(word => sets[j].has(word)).length;
+    return intersection / (sets[i].size + sets[j].size - intersection);
+  }
+  function pairStats(i, j, r, b) {
+    let equal = 0;
+    let candidate = false;
+    for (let band = 0; band < b; band++) {
+      let fullBandMatch = true;
+      for (let row = band * r; row < (band + 1) * r; row++) {
+        const match = signatures[row][i] === signatures[row][j];
+        equal += Number(match);
+        if (!match) fullBandMatch = false;
+      }
+      if (fullBandMatch) candidate = true;
+    }
+    return { jaccard: exactJaccard(i, j), estimate: equal / (r * b), candidate };
+  }
+  function cell(tag, value) {
+    const node = document.createElement(tag);
+    node.textContent = value;
+    return node;
+  }
+  function updateTables() {
+    const r = Number(rowsInput.value);
+    const b = Number(bandsInput.value);
+    const selected = selectedDocuments();
+    const pairBody = root.querySelector('#lsh-pair-body');
+    const pairRows = [];
+    for (let x = 0; x < selected.length; x++) {
+      for (let y = x + 1; y < selected.length; y++) {
+        const i = selected[x], j = selected[y];
+        const stats = pairStats(i, j, r, b);
+        const tr = document.createElement('tr');
+        const th = cell('th', `${documents[i].name}–${documents[j].name}`);
+        th.scope = 'row';
+        tr.append(th, cell('td', stats.jaccard.toFixed(3)), cell('td', stats.estimate.toFixed(3)), cell('td', stats.candidate ? 'Yes' : 'No'));
+        pairRows.push(tr);
+      }
+    }
+    if (!pairRows.length) {
+      const tr = document.createElement('tr');
+      const td = cell('td', 'Select two or more documents to compare.');
+      td.colSpan = 4;
+      tr.appendChild(td);
+      pairRows.push(tr);
+    }
+    pairBody.replaceChildren(...pairRows);
+
+    const head = root.querySelector('#lsh-matrix-head');
+    const heading = document.createElement('tr');
+    const bandHeading = cell('th', 'Band');
+    bandHeading.scope = 'col';
+    heading.appendChild(bandHeading);
+    for (const index of selected) {
+      const th = cell('th', documents[index].name);
+      th.scope = 'col';
+      heading.appendChild(th);
+    }
+    const matchingHeading = cell('th', 'Matching pairs');
+    matchingHeading.scope = 'col';
+    heading.appendChild(matchingHeading);
+    head.replaceChildren(heading);
+
+    const matrixRows = [];
+    for (let band = 0; band < b; band++) {
+      const tr = document.createElement('tr');
+      const th = cell('th', String(band + 1));
+      th.scope = 'row';
+      tr.appendChild(th);
+      for (const index of selected) {
+        const values = Array.from({ length: r }, (_, row) => signatures[band * r + row][index]);
+        const visible = r <= 8 ? values : [...values.slice(0, 4), '…', ...values.slice(-2)];
+        const td = cell('td', visible.map(value => typeof value === 'number' ? String(value).padStart(2, '0') : value).join(' '));
+        td.className = 'lsh-values';
+        tr.appendChild(td);
+      }
+      const matchingPairs = [];
+      for (let x = 0; x < selected.length; x++) {
+        for (let y = x + 1; y < selected.length; y++) {
+          const i = selected[x], j = selected[y];
+          if (Array.from({ length: r }, (_, row) => signatures[band * r + row][i] === signatures[band * r + row][j]).every(Boolean)) {
+            matchingPairs.push(`${documents[i].name}–${documents[j].name}`);
+          }
+        }
+      }
+      if (matchingPairs.length) tr.className = 'lsh-band-match';
+      tr.appendChild(cell('td', matchingPairs.length ? matchingPairs.join(', ') : '—'));
+      matrixRows.push(tr);
+    }
+    root.querySelector('#lsh-matrix-body').replaceChildren(...matrixRows);
+    root.querySelector('#lsh-matrix-caption').textContent = r <= 8
+      ? `Each band contains ${r} MinHash values per document; matching pairs agree at every value in a band.`
+      : `First four and last two values shown per band; all ${r} values are used to determine matching pairs.`;
+  }
+
+  function probability(s, r, b) {
+    return 1 - Math.pow(1 - Math.pow(s, r), b);
+  }
+  function element(name, attrs) {
+    const node = document.createElementNS(ns, name);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+    svg.appendChild(node);
+    return node;
+  }
+  function draw(from = null, progress = 1) {
+    const r = Number(rowsInput.value);
+    const b = Number(bandsInput.value);
+    root.querySelector('#lsh-rows-value').textContent = r;
+    root.querySelector('#lsh-bands-value').textContent = b;
+    root.querySelector('#lsh-length-value').textContent = r * b;
+
+    const width = Math.max(240, container.clientWidth);
+    const height = width < 480 ? 290 : 340;
+    const margin = { left: 65, right: 20, top: 16, bottom: 55 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+    const x = s => margin.left + innerWidth * s;
+    const y = p => margin.top + innerHeight * (1 - p);
+    const curve = s => from === null ? probability(s, r, b)
+      : (1 - progress) * probability(s, from.r, from.b) + progress * probability(s, r, b);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('aria-label', `Theoretical probability of becoming an LSH candidate, with ${r} rows per band and ${b} bands, over Jaccard similarities from zero to one.`);
+    svg.replaceChildren();
+
+    const ticks = [0, 0.25, 0.5, 0.75, 1];
+    const xTicks = width < 480 ? [0, 0.5, 1] : ticks;
+    for (const value of ticks) {
+      element('line', { x1: x(0), y1: y(value), x2: x(1), y2: y(value), stroke: 'var(--border)', 'stroke-width': 1 });
+      const label = element('text', { x: margin.left - 9, y: y(value) + 4, 'text-anchor': 'end', class: 'tick-label' });
+      label.textContent = value === 0 || value === 1 ? String(value) : value.toFixed(2);
+    }
+    for (const value of xTicks) {
+      element('line', { x1: x(value), y1: y(0), x2: x(value), y2: y(1), stroke: 'var(--border)', 'stroke-width': 1 });
+      const label = element('text', { x: x(value), y: y(0) + 20, 'text-anchor': value === 0 ? 'start' : value === 1 ? 'end' : 'middle', class: 'tick-label' });
+      label.textContent = value === 0 || value === 1 ? String(value) : value.toFixed(2);
+    }
+    element('rect', { x: margin.left, y: margin.top, width: innerWidth, height: innerHeight, fill: 'none', stroke: 'var(--border)', 'stroke-width': 1, 'data-chart-frame': '' });
+    const xTitle = element('text', { x: x(0.5), y: height - 8, 'text-anchor': 'middle', class: 'axis-title', 'data-axis': 'x' });
+    xTitle.textContent = 'Jaccard similarity';
+    const yTitle = element('text', { x: 17, y: y(0.5), transform: `rotate(-90 17 ${y(0.5)})`, 'text-anchor': 'middle', class: 'axis-title', 'data-axis': 'y' });
+    yTitle.textContent = 'Candidate probability';
+    const path = Array.from({ length: 201 }, (_, i) => `${i === 0 ? 'M' : 'L'}${x(i / 200).toFixed(2)},${y(curve(i / 200)).toFixed(2)}`).join(' ');
+    element('path', { d: path, fill: 'none', stroke: 'var(--viz-series-1)', 'stroke-width': 3 });
+  }
+  function onChange() {
+    cancelAnimationFrame(animation);
+    updateTables();
+    const from = previous;
+    const to = { r: Number(rowsInput.value), b: Number(bandsInput.value) };
+    previous = to;
+    if (reducedMotion.matches) { draw(); return; }
+    const start = performance.now();
+    const frame = now => {
+      const t = Math.min(1, (now - start) / 230);
+      draw(from, t * (2 - t));
+      if (t < 1) animation = requestAnimationFrame(frame);
+    };
+    animation = requestAnimationFrame(frame);
+  }
+  rowsInput.addEventListener('input', onChange);
+  bandsInput.addEventListener('input', onChange);
+  root.querySelectorAll('input[name="lsh-document"]').forEach(input => input.addEventListener('change', updateTables));
+  new ResizeObserver(() => draw()).observe(container);
+  draw();
+  updateTables();
+})();
+
+</script>
+</body>
+</html>

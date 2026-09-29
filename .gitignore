@@ -3,3 +3,5 @@
 *.yaml~
 config-local.yaml
 .history/
+# downloaded arXiv pages from viz/build_pq_papers_data.py
+viz/arx/

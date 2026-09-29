@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product Quantization in 2-D</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --pt:          #8e9ca6;   /* a data point */
+    --mem:         #0086a3;   /* codewords, 1-D centroids */
+    --mem-soft:    #d3e9ef;
+    --hit:         #a4530c;   /* quantization error */
+    --hit-soft:    #f0dfc9;
+    --probe:       #6a3d8f;   /* the point q */
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --pt:          #6f818c;
+      --mem:         #1d97b3;
+      --mem-soft:    #10333c;
+      --hit:         #c47a2e;
+      --hit-soft:    #3a2a15;
+      --probe:       #9a70cc;
+      --focus:       #c47a2e;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --pt:          #6f818c;
+    --mem:         #1d97b3;
+    --mem-soft:    #10333c;
+    --hit:         #c47a2e;
+    --hit-soft:    #3a2a15;
+    --probe:       #9a70cc;
+    --focus:       #c47a2e;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 82ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px;
+  }
+  h2 .show { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 120px; }
+  select {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line); border-radius: 3px; padding: 5px 8px;
+  }
+  label.check {
+    display: flex; align-items: center; gap: 7px; cursor: pointer;
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line);
+    border-radius: 3px; padding: 5px 10px 5px 8px;
+  }
+  label.check input { accent-color: var(--mem); margin: 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 7px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: var(--mem-soft); border-color: var(--mem); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+
+  /* ---- three panels ---- */
+  .panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+  @media (max-width: 1000px) { .panels { grid-template-columns: minmax(0, 1fr); max-width: 560px; } }
+  .panels .card { margin-bottom: 0; display: flex; flex-direction: column; }
+  .panels canvas { width: 100%; height: auto; display: block; cursor: crosshair; touch-action: none; margin-top: 8px; }
+  .sub { font-size: 13px; color: var(--ink-soft); margin: 0; min-height: 2.6em; }
+  .pstats { display: grid; grid-template-columns: auto auto; gap: 1px 12px; font-size: 13px; margin-top: 10px;
+    border-top: 1px solid var(--line-soft); padding-top: 8px; }
+  .pstats div:nth-child(odd) { color: var(--ink-soft); }
+  .pstats div:nth-child(even) { font-family: var(--mono); text-align: right; }
+  .pstats .big { font-weight: 600; color: var(--ink); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin: 14px 0 22px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; }
+  .sw.pt { width: 6px; height: 6px; background: var(--pt); }
+  .sw.cw { width: 8px; height: 8px; background: var(--mem); border-radius: 1px; }
+  .sw.tick { width: 3px; height: 12px; border-radius: 0; background: var(--mem); }
+  .sw.err { width: 16px; height: 0; border-radius: 0; border-top: 2px solid var(--hit); }
+  .sw.q { width: 12px; height: 12px; border-radius: 0; background: var(--probe);
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+  .say {
+    margin: 0 0 22px; padding: 10px 12px; min-height: 2.8em;
+    background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--probe); border-radius: 2px; font-size: 14px;
+  }
+
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.cmp th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint);
+    text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+  table.cmp td { font-family: var(--mono); text-align: right; padding: 3px 8px; border-bottom: 1px solid var(--line-soft); }
+  table.cmp td:first-child { font-family: var(--sans); color: var(--ink-soft); }
+
+  .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 0 22px; align-items: start; }
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 12px; overflow-x: auto;
+  }
+  pre.code .fn { color: var(--ink-soft); font-weight: 600; }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (max-width: 520px) { .wrap { padding: 20px 16px 48px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms 2 · product quantization</p>
+  <h1>Product quantization in two dimensions</h1>
+  <p class="standfirst">
+    Split each point <b>x</b> = (x, y) into <i>m</i> = 2 subvectors, <b>x</b><sup>(1)</sup> = x and <b>x</b><sup>(2)</sup> = y,
+    and run J-means separately in each subspace. That stores only 2<i>J</i> one-dimensional centroids, but every pair
+    (<b>c</b><sup>(1)</sup>, <b>c</b><sup>(2)</sup>) is a possible reconstruction <b>c</b>: <i>J</i><sup>2</sup> codewords
+    on a grid. Compare it with ordinary J-means using the same number of codewords (<i>J</i><sup>2</sup>) and using
+    the same storage (<i>J</i> two-dimensional centroids). Click any panel to place a point <b>q</b>.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="J">centroids per subspace J</label>
+    <input id="J" type="range" min="2" max="8" value="3">
+    <span class="val" id="JV"></span>
+  </div>
+  <div class="field">
+    <label for="N">points N</label>
+    <input id="N" type="range" min="200" max="3000" step="100" value="1200">
+    <span class="val" id="NV"></span>
+  </div>
+  <div class="field">
+    <label for="shape">data</label>
+    <select id="shape">
+      <option value="grid">3 × 3 grid of clusters</option>
+      <option value="blobs">random clusters</option>
+      <option value="stretched">one stretched cloud</option>
+      <option value="uniform">uniform</option>
+      <option value="curves">curves</option>
+    </select>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label for="rot">rotate the data</label>
+    <input id="rot" type="range" min="0" max="90" step="5" value="0">
+    <span class="val" id="rotV"></span>
+  </div>
+  <div class="field">
+    <label>show</label>
+    <label class="check"><input id="errs" type="checkbox" checked> error lines</label>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>randomness</label>
+    <div class="btns"><button id="newData">New data</button><button id="newInit" title="re-run every J-means from a new initialization">New init</button></div>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+</div>
+
+<div class="panels">
+  <div class="card">
+    <h2>Product quantization <span class="show" id="h0"></span></h2>
+    <p class="sub">J-means on x and on y separately. Ticks on the axes are the 1-D centroids; the grid is every pair of them.</p>
+    <canvas id="c0" width="400" height="400"></canvas>
+    <div class="pstats" id="s0"></div>
+  </div>
+  <div class="card">
+    <h2>J-means, same codewords <span class="show" id="h1"></span></h2>
+    <p class="sub">Ordinary J-means with J² centroids: the same code length as PQ, but J² 2-D centroids to store and search.</p>
+    <canvas id="c1" width="400" height="400"></canvas>
+    <div class="pstats" id="s1"></div>
+  </div>
+  <div class="card">
+    <h2>J-means, same storage <span class="show" id="h2"></span></h2>
+    <p class="sub">Ordinary J-means with J centroids: the same 2J stored numbers as PQ, but only J codewords.</p>
+    <canvas id="c2" width="400" height="400"></canvas>
+    <div class="pstats" id="s2"></div>
+  </div>
+</div>
+
+<div class="legend">
+  <span><i class="sw pt"></i>point x</span>
+  <span><i class="sw cw"></i>codeword (reconstruction)</span>
+  <span><i class="sw tick"></i>1-D centroid of one subspace</span>
+  <span><i class="sw err"></i>error x → c(x)</span>
+  <span><i class="sw q"></i>q (click to move)</span>
+</div>
+
+<div class="say" id="say"></div>
+
+<div class="below">
+  <div class="card">
+    <h2>Side by side</h2>
+    <table class="cmp">
+      <thead><tr><th></th><th>PQ</th><th>J-means, J²</th><th>J-means, J</th></tr></thead>
+      <tbody id="cmp"></tbody>
+    </table>
+    <p class="note">MSE is the mean squared distance ‖x − c(x)‖² over all points (the data fills the unit square).
+      "Codewords used" counts codewords that at least one point maps to: PQ's grid is axis-aligned, so when the data
+      runs diagonally many grid cells are empty.</p>
+  </div>
+  <div class="card">
+    <h2>Algorithm</h2>
+<pre class="code"><span class="fn">Train:</span>
+  for z = 1, …, m:                       <span class="show">here m = 2: z = x-axis, y-axis</span>
+    run J-means on {x<sup>(z)</sup> : x in D} → centroids c<sub>1</sub><sup>(z)</sup>,…,c<sub>J</sub><sup>(z)</sup>
+<span class="fn">Encode x:</span>
+  for z = 1, …, m:
+    j<sub>z</sub> = argmin<sub>j</sub> ‖x<sup>(z)</sup> − c<sub>j</sub><sup>(z)</sup>‖          <span class="show">J distance computations</span>
+  code = (j<sub>1</sub>,…,j<sub>m</sub>)                       <span class="show">m·log₂J bits, J<sup>m</sup> possible codes</span>
+  c(x) = c<sub>j<sub>1</sub></sub><sup>(1)</sup> … c<sub>j<sub>m</sub></sub><sup>(m)</sup></pre>
+  </div>
+</div>
+
+<footer>
+  All three quantizers are trained on the same points with k-means++ initialization and up to 40 Lloyd iterations
+  (seeded, so the same settings give the same result). Rotating the data does not change J-means, which has no
+  preferred direction, but it does change PQ, whose subspaces are fixed coordinates. On the 3 × 3 grid with J = 3,
+  PQ matches J-means with 9 centroids at 0° and does several times worse once the grid is rotated. On a single
+  stretched cloud the effect is mostly on how many codewords get used. Optimized PQ (OPQ) learns a rotation
+  before splitting for this reason.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+let J = 3, N = 1200, shape = "grid", rot = 0, showErr = true, dataSeed = 1, initSeed = 1;
+let P = [], Q = { pq: null, big: null, small: null }, q = [0.3, 0.7];
+
+function mulberry32(a) {
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let z = Math.imul(a ^ a >>> 15, 1 | a);
+    z = z + Math.imul(z ^ z >>> 7, 61 | z) ^ z; return ((z ^ z >>> 14) >>> 0) / 4294967296; };
+}
+const gauss = rnd => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+const d2 = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2; return s; };
+
+// ---- data: generated around the center, scaled to fit any rotation, then rotated -------------------
+function makeData() {
+  const rnd = mulberry32(dataSeed * 104729 + 11);
+  let pts;
+  if (shape === "uniform") pts = Array.from({ length: N }, () => [rnd() - .5, rnd() - .5]);
+  else if (shape === "grid") pts = Array.from({ length: N }, () => {   // axis-aligned: PQ with J = 3 fits it exactly
+    const i = Math.floor(rnd() * 3), j = Math.floor(rnd() * 3);
+    return [(i - 1) * 0.233 + 0.025 * gauss(rnd), (j - 1) * 0.233 + 0.025 * gauss(rnd)];
+  });
+  else if (shape === "stretched") pts = Array.from({ length: N }, () => [0.22 * gauss(rnd), 0.05 * gauss(rnd)]);
+  else if (shape === "curves") pts = Array.from({ length: N }, () => {
+    const c = Math.floor(rnd() * 3), t = rnd();
+    return [-0.4 + 0.8 * t + 0.015 * gauss(rnd), -0.25 + 0.25 * c + 0.08 * Math.sin(6 * t + c) + 0.015 * gauss(rnd)];
+  });
+  else {
+    const B = 6, blobs = Array.from({ length: B }, () => ({ c: [rnd() - .5, rnd() - .5].map(v => 0.75 * v), s: 0.02 + 0.05 * rnd() }));
+    pts = Array.from({ length: N }, () => { const b = blobs[Math.floor(rnd() * B)]; return [b.c[0] + b.s * gauss(rnd), b.c[1] + b.s * gauss(rnd)]; });
+  }
+  const a = rot * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), k = 0.68;   // k·√2·0.5 < 0.5 keeps rotated data inside
+  return pts.map(([x, y]) => [0.5 + k * (ca * x - sa * y), 0.5 + k * (sa * x + ca * y)])
+            .map(p => p.map(v => Math.min(0.995, Math.max(0.005, v))));
+}
+
+// ---- J-means (any dimension) ------------------------------------------------------------------------------
+function kmeans(pts, k, rnd) {   // k-means++ init + Lloyd; returns centroids (no empty clusters)
+  k = Math.min(k, pts.length);
+  const cents = [pts[Math.floor(rnd() * pts.length)].slice()];
+  const best = pts.map(p => d2(p, cents[0]));
+  while (cents.length < k) {
+    const tot = best.reduce((a, b) => a + b, 0); let u = rnd() * tot, j = 0;
+    while (u > best[j] && j < pts.length - 1) u -= best[j++];
+    cents.push(pts[j].slice());
+    pts.forEach((p, t) => { best[t] = Math.min(best[t], d2(p, cents[cents.length - 1])); });
+  }
+  const asg = new Int32Array(pts.length).fill(-1);
+  for (let it = 0; it < 40; it++) {
+    let moved = 0;
+    pts.forEach((p, t) => { const j = nearest(p, cents); if (asg[t] !== j) { asg[t] = j; moved++; } });
+    const dim = pts[0].length, sum = cents.map(() => new Float64Array(dim + 1));
+    pts.forEach((p, t) => { const s = sum[asg[t]]; for (let i = 0; i < dim; i++) s[i] += p[i]; s[dim]++; });
+    sum.forEach((s, j) => { if (s[dim]) cents[j] = Array.from(s.subarray(0, dim), v => v / s[dim]); });
+    if (!moved) break;
+  }
+  return cents;
+}
+function nearest(p, cents) { let bj = 0, bd = Infinity; cents.forEach((c, j) => { const dd = d2(p, c); if (dd < bd) { bd = dd; bj = j; } }); return bj; }
+
+// ---- the three quantizers: each maps x to (code, c(x)) -------------------------------------------------
+function train() {
+  const rnd = mulberry32(initSeed * 7919 + J);
+  const cx = kmeans(P.map(p => [p[0]]), J, rnd).map(c => c[0]).sort((a, b) => a - b);
+  const cy = kmeans(P.map(p => [p[1]]), J, rnd).map(c => c[0]).sort((a, b) => a - b);
+  const near1 = (v, cs) => { let bj = 0; for (let j = 1; j < cs.length; j++) if (Math.abs(v - cs[j]) < Math.abs(v - cs[bj])) bj = j; return bj; };
+  Q.pq = { kind: "pq", cx, cy, K: cx.length * cy.length, floats: cx.length + cy.length, comps: cx.length + cy.length,
+    encode: x => { const i = near1(x[0], cx), j = near1(x[1], cy); return { code: [i, j], c: [cx[i], cy[j]], id: i * cy.length + j }; } };
+  for (const [key, k] of [["big", J * J], ["small", J]]) {
+    const cents = kmeans(P, k, rnd);
+    Q[key] = { kind: "km", cents, K: cents.length, floats: 2 * cents.length, comps: cents.length,
+      encode: x => { const j = nearest(x, cents); return { code: [j], c: cents[j], id: j }; } };
+  }
+  for (const key of ["pq", "big", "small"]) {
+    const M = Q[key]; let se = 0; const used = new Set();
+    M.enc = P.map(p => { const e = M.encode(p); se += d2(p, e.c); used.add(e.id); return e; });
+    M.mse = se / P.length; M.used = used.size; M.cells = null;
+  }
+}
+
+// ---- drawing ---------------------------------------------------------------------------------------------
+const W = 400, H = 400, PAD = 22;           // PAD leaves room for the 1-D centroid ticks
+const X = v => PAD + v * (W - PAD - 6), Y = v => 6 + (1 - v) * (H - PAD - 6);
+const invX = px => (px - PAD) / (W - PAD - 6), invY = py => 1 - (py - 6) / (H - PAD - 6);
+const G = 2;
+
+function cellIds(M) {            // J-means cells: which centroid each grid cell maps to
+  if (M.cells) return M.cells;
+  const gw = Math.ceil((W - PAD - 6) / G), gh = Math.ceil((H - PAD - 6) / G), ids = new Int32Array(gw * gh);
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++)
+    ids[gy * gw + gx] = nearest([invX(PAD + (gx + .5) * G), invY(6 + (gy + .5) * G)], M.cents);
+  return (M.cells = { gw, gh, ids });
+}
+
+function draw(cv, M) {
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const col = { surf: css("--surface"), sunk: css("--surface-sunk"), ink: css("--ink"), soft: css("--ink-soft"),
+    faint: css("--ink-faint"), line: css("--line"), pt: css("--pt"), mem: css("--mem"), hit: css("--hit"), probe: css("--probe") };
+  g.fillStyle = col.surf; g.fillRect(0, 0, W, H);
+  g.strokeStyle = col.line; g.lineWidth = 1; g.strokeRect(X(0), Y(1), X(1) - X(0), Y(0) - Y(1));
+
+  // cells
+  g.fillStyle = col.soft;
+  if (M.kind === "pq") {
+    const mids = cs => cs.slice(1).map((c, j) => (c + cs[j]) / 2);
+    g.strokeStyle = col.faint; g.lineWidth = 1.2;
+    for (const v of mids(M.cx)) { g.beginPath(); g.moveTo(X(v), Y(0)); g.lineTo(X(v), Y(1)); g.stroke(); }
+    for (const v of mids(M.cy)) { g.beginPath(); g.moveTo(X(0), Y(v)); g.lineTo(X(1), Y(v)); g.stroke(); }
+  } else {
+    const { gw, gh, ids } = cellIds(M); g.fillStyle = col.faint;
+    for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) {
+      const a = ids[gy * gw + gx];
+      if (gx + 1 < gw && ids[gy * gw + gx + 1] !== a) g.fillRect(PAD + (gx + 1) * G - .6, 6 + gy * G, 1.2, G);
+      if (gy + 1 < gh && ids[(gy + 1) * gw + gx] !== a) g.fillRect(PAD + gx * G, 6 + (gy + 1) * G - .6, G, 1.2);
+    }
+  }
+
+  // error lines, then points
+  if (showErr) {
+    g.strokeStyle = col.hit; g.globalAlpha = 0.35; g.lineWidth = 1;
+    g.beginPath(); P.forEach((p, t) => { const c = M.enc[t].c; g.moveTo(X(p[0]), Y(p[1])); g.lineTo(X(c[0]), Y(c[1])); }); g.stroke();
+    g.globalAlpha = 1;
+  }
+  g.fillStyle = col.pt;
+  for (const p of P) { g.beginPath(); g.arc(X(p[0]), Y(p[1]), 1.6, 0, 2 * Math.PI); g.fill(); }
+
+  // codewords (squares); unused PQ codewords are hollow
+  const used = new Set(M.enc.map(e => e.id)), s = 3.5;
+  const square = (x, y, filled) => {
+    g.beginPath(); g.rect(X(x) - s, Y(y) - s, 2 * s, 2 * s);
+    if (filled) { g.fillStyle = col.mem; g.fill(); g.strokeStyle = col.surf; g.lineWidth = 1.5; g.stroke(); }
+    else { g.strokeStyle = col.mem; g.lineWidth = 1.5; g.stroke(); }
+  };
+  if (M.kind === "pq") {
+    M.cx.forEach((x, i) => M.cy.forEach((y, j) => square(x, y, used.has(i * M.cy.length + j))));
+    // the 1-D codebooks as ticks on the axes
+    g.fillStyle = col.mem;
+    for (const x of M.cx) g.fillRect(X(x) - 1.5, Y(0) + 4, 3, 12);
+    for (const y of M.cy) g.fillRect(X(0) - 16, Y(y) - 1.5, 12, 3);
+    g.fillStyle = col.faint; g.font = `10px ${css("--mono")}`; g.textAlign = "left"; g.textBaseline = "alphabetic";
+    g.fillText("x⁽¹⁾", X(1) - 22, H - 3); g.save(); g.translate(9, Y(1) + 22); g.rotate(-Math.PI / 2); g.fillText("x⁽²⁾", -20, 0); g.restore();
+  } else M.cents.forEach(c => square(c[0], c[1], true));
+
+  // q and its reconstruction
+  const e = M.encode(q), Qp = [X(q[0]), Y(q[1])], C = [X(e.c[0]), Y(e.c[1])];
+  if (M.kind === "pq") {   // dashed guides from q to its two 1-D centroids
+    g.strokeStyle = col.probe; g.setLineDash([3, 3]); g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(C[0], Y(0) + 4); g.lineTo(C[0], C[1]); g.moveTo(X(0) - 4, C[1]); g.lineTo(C[0], C[1]); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = col.probe; g.fillRect(C[0] - 2, Y(0) + 3, 4, 14); g.fillRect(X(0) - 17, C[1] - 2, 14, 4);
+  }
+  g.strokeStyle = col.probe; g.lineWidth = 2; g.beginPath(); g.moveTo(...Qp); g.lineTo(...C); g.stroke();
+  g.beginPath(); g.rect(C[0] - 5, C[1] - 5, 10, 10); g.strokeStyle = col.probe; g.lineWidth = 2; g.stroke();
+  g.beginPath();
+  for (let j = 0; j < 10; j++) { const a = -Math.PI / 2 + j * Math.PI / 5, rr = j % 2 ? 4 : 9.5; g[j ? "lineTo" : "moveTo"](Qp[0] + rr * Math.cos(a), Qp[1] + rr * Math.sin(a)); }
+  g.closePath(); g.fillStyle = col.probe; g.fill(); g.strokeStyle = col.surf; g.lineWidth = 1.5; g.stroke();
+  return e;
+}
+
+// ---- panels and table -----------------------------------------------------------------------------------
+const bits = K => Math.ceil(Math.log2(Math.max(2, K)));
+function render() {
+  $("JV").textContent = `J = ${J}`; $("NV").textContent = `N = ${N}`; $("rotV").textContent = `${rot}°`;
+  $("seedV").textContent = `data #${dataSeed} · init #${initSeed}`;
+  const keys = ["pq", "big", "small"], E = {};
+  keys.forEach((k, i) => {
+    const M = Q[k]; E[k] = draw($("c" + i), M);
+    $("h" + i).textContent = `— ${M.K} codewords`;
+    $("s" + i).innerHTML = [
+      ["MSE ‖x − c(x)‖²", `<span class="big">${(1000 * M.mse).toFixed(2)}</span> ×10⁻³`],
+      ["codewords used", `${M.used} / ${M.K}`],
+      ["numbers stored", M.floats],
+      ["code length", `${k === "pq" ? `2 × ${bits(J)}` : bits(M.K)} bits`],
+      ["distance comps to encode", M.comps],
+    ].map(([a, v]) => `<div>${a}</div><div>${v}</div>`).join("");
+  });
+  const r = Q.pq, e = E.pq;
+  $("say").innerHTML = `<b>q</b> = (${q[0].toFixed(2)}, ${q[1].toFixed(2)}). PQ encodes it one subspace at a time:
+    x⁽¹⁾ = ${q[0].toFixed(2)} is closest to 1-D centroid ${e.code[0] + 1} (${r.cx[e.code[0]].toFixed(2)}) and
+    x⁽²⁾ = ${q[1].toFixed(2)} to centroid ${e.code[1] + 1} (${r.cy[e.code[1]].toFixed(2)}), so its code is
+    (${e.code[0] + 1}, ${e.code[1] + 1}) and c(q) = (${e.c[0].toFixed(2)}, ${e.c[1].toFixed(2)}),
+    with ‖q − c(q)‖² = ${(1000 * d2(q, e.c)).toFixed(2)}×10⁻³.
+    J-means with J² centroids gives ${(1000 * d2(q, E.big.c)).toFixed(2)}×10⁻³; with J centroids, ${(1000 * d2(q, E.small.c)).toFixed(2)}×10⁻³.`;
+  const row = (label, f) => `<tr><td>${label}</td>${keys.map(k => `<td>${f(Q[k], k)}</td>`).join("")}</tr>`;
+  $("cmp").innerHTML = [
+    row("codewords", M => M.K),
+    row("codewords used", M => `${M.used} (${Math.round(100 * M.used / M.K)}%)`),
+    row("numbers stored", M => M.floats),
+    row("code length (bits)", (M, k) => k === "pq" ? 2 * bits(J) : bits(M.K)),
+    row("distance comps to encode", M => M.comps),
+    row("MSE (×10⁻³)", M => (1000 * M.mse).toFixed(2)),
+  ].join("");
+}
+
+function rebuild(newData) { if (newData) P = makeData(); train(); render(); }
+
+// ---- interaction -------------------------------------------------------------------------------------------
+[0, 1, 2].forEach(i => {
+  const cv = $("c" + i); let drag = false;
+  const move = e => { const b = cv.getBoundingClientRect();
+    q = [invX((e.clientX - b.left) * W / b.width), invY((e.clientY - b.top) * H / b.height)].map(v => Math.min(1, Math.max(0, v)));
+    render(); };
+  cv.addEventListener("pointerdown", e => { drag = true; cv.setPointerCapture(e.pointerId); move(e); });
+  cv.addEventListener("pointermove", e => { if (drag) move(e); });
+  cv.addEventListener("pointerup", () => { drag = false; });
+});
+$("J").oninput = e => { J = +e.target.value; rebuild(false); };
+$("N").oninput = e => { N = +e.target.value; rebuild(true); };
+$("shape").onchange = e => { shape = e.target.value; rebuild(true); };
+$("rot").oninput = e => { rot = +e.target.value; rebuild(true); };
+$("errs").onchange = e => { showErr = e.target.checked; render(); };
+$("newData").onclick = () => { dataSeed++; rebuild(true); };
+$("newInit").onclick = () => { initSeed++; rebuild(false); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", render);
+
+rebuild(true);
+</script>
+</body>
+</html>

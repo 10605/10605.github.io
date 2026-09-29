@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J-Means Tree k-NN</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --line-soft:   #dbe2e8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --pt:          #8e9ca6;   /* a data point */
+    --mem:         #0086a3;   /* tree search: visited cells, approximate k-NN */
+    --mem-soft:    #d3e9ef;
+    --hit:         #a4530c;   /* exact k-NN */
+    --hit-soft:    #f0dfc9;
+    --probe:       #6a3d8f;   /* the query qx */
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --line-soft:   #1e2c33;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --pt:          #6f818c;
+      --mem:         #1d97b3;
+      --mem-soft:    #10333c;
+      --hit:         #c47a2e;
+      --hit-soft:    #3a2a15;
+      --probe:       #9a70cc;
+      --focus:       #c47a2e;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --line-soft:   #1e2c33;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --pt:          #6f818c;
+    --mem:         #1d97b3;
+    --mem-soft:    #10333c;
+    --hit:         #c47a2e;
+    --hit-soft:    #3a2a15;
+    --probe:       #9a70cc;
+    --focus:       #c47a2e;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 80ch; }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px;
+  }
+  h2 .show { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* ---- controls ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    margin: 22px 0; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .field .val { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  input[type=range] { accent-color: var(--mem); width: 120px; }
+  select {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    background: var(--surface-sunk); border: 1px solid var(--line); border-radius: 3px; padding: 5px 8px;
+  }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 7px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: var(--mem-soft); border-color: var(--mem); }
+  button.primary { background: var(--mem); border-color: var(--mem); color: var(--surface); font-weight: 600; }
+  button.primary:hover { filter: brightness(1.08); background: var(--mem); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 22px;
+  }
+  .note { font-size: 13px; color: var(--ink-soft); margin: 10px 0 0; }
+  .show { color: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+
+  /* ---- layout ---- */
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 22px; align-items: start; }
+  @media (max-width: 1000px) { .cols { grid-template-columns: minmax(0,1fr); } }
+  .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 0 22px; align-items: start; }
+
+  canvas#c { width: 100%; height: auto; display: block; cursor: crosshair; touch-action: none;
+    border-radius: 3px; background: var(--surface); }
+  .say {
+    margin: 12px 0 0; padding: 10px 12px; min-height: 2.8em;
+    background: var(--surface-sunk); border-left: 3px solid var(--mem); border-radius: 2px; font-size: 14px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; }
+  .sw.pt { width: 6px; height: 6px; background: var(--pt); }
+  .sw.q { width: 12px; height: 12px; border-radius: 0; background: var(--probe);
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+  .sw.approx { border: 2.5px solid var(--mem); }
+  .sw.exact { border: 2.5px solid var(--hit); }
+  .sw.cent { border-radius: 2px; background: var(--ink); transform: rotate(45deg); width: 9px; height: 9px; }
+  .sw.cell { border-radius: 2px; background: color-mix(in srgb, var(--mem) 30%, var(--surface)); }
+
+  .stats { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 13px; }
+  .stats div:nth-child(odd) { color: var(--ink-soft); }
+  .stats div:nth-child(even) { font-family: var(--mono); text-align: right; }
+  .stats div.sep { border-top: 1px solid var(--line-soft); margin: 4px 0 2px; height: 0; }
+
+  ol.steps { margin: 0; padding-left: 20px; font-size: 13.5px; }
+  ol.steps li { padding: 2px 0; color: var(--ink-soft); }
+  ol.steps li.on { color: var(--ink); font-weight: 600; }
+  ol.steps li.done { color: var(--ink); }
+
+  table.log { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.log th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: var(--ink-faint);
+    text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  table.log td { font-family: var(--mono); text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--line-soft); }
+
+  pre.code {
+    margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    background: var(--surface-sunk); border-radius: 3px; padding: 10px 12px; overflow-x: auto;
+  }
+  pre.code .fn { color: var(--ink-soft); font-weight: 600; }
+
+  footer { color: var(--ink-soft); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (max-width: 520px) { .wrap { padding: 20px 16px 48px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">10-605 · Randomized algorithms 2 · k-NN search</p>
+  <h1>Approximate k-NN with a hierarchical J-means tree</h1>
+  <p class="standfirst">
+    Cluster the <i>N</i> points into <i>J</i> clusters, then run J-means again inside each cluster, down to depth <i>d</i>.
+    To search for a query <b>qx</b>, find the centroid closest to <b>qx</b> among its <i>J</i> siblings at each level
+    (<i>O</i>(<i>dJ</i>) distance computations), then scan only the points in that leaf (<i>O</i>(<i>N</i>/<i>J</i><sup><i>d</i></sup>)).
+    Click or drag anywhere on the plot to move <b>qx</b>.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="N">points N</label>
+    <input id="N" type="range" min="200" max="4000" step="100" value="1500">
+    <span class="val" id="NV"></span>
+  </div>
+  <div class="field">
+    <label for="J">clusters per node J</label>
+    <input id="J" type="range" min="2" max="8" value="4">
+    <span class="val" id="JV"></span>
+  </div>
+  <div class="field">
+    <label for="d">depth d</label>
+    <input id="d" type="range" min="1" max="4" value="2">
+    <span class="val" id="dV"></span>
+  </div>
+  <div class="field">
+    <label for="k">neighbors k</label>
+    <input id="k" type="range" min="1" max="10" value="5">
+    <span class="val" id="kV"></span>
+  </div>
+  <div class="field">
+    <label for="shape">data</label>
+    <select id="shape">
+      <option value="blobs">clusters</option>
+      <option value="uniform">uniform</option>
+      <option value="curves">curves</option>
+    </select>
+    <span class="val">&nbsp;</span>
+  </div>
+  <div class="field">
+    <label>randomness</label>
+    <div class="btns">
+      <button id="newData">New data</button>
+      <button id="newTree" title="re-run J-means with a new random initialization">New tree</button>
+    </div>
+    <span class="val" id="seedV">&nbsp;</span>
+  </div>
+</div>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <canvas id="c" width="800" height="560" aria-label="points, J-means cells and the query"></canvas>
+      <div class="legend">
+        <span><i class="sw pt"></i>point x</span>
+        <span><i class="sw q"></i>query qx</span>
+        <span><i class="sw cent"></i>centroid (bigger = higher level)</span>
+        <span><i class="sw cell"></i>cells qx descends into</span>
+        <span><i class="sw approx"></i>tree k-NN</span>
+        <span><i class="sw exact"></i>exact k-NN</span>
+      </div>
+      <div class="say" id="say"></div>
+      <div class="btns" style="margin-top:10px">
+        <button id="step" class="primary">Step through search ▸</button>
+        <button id="showAll">Show whole search</button>
+        <button id="randomQ">Random qx</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Search for qx</h2>
+      <ol class="steps" id="steps"></ol>
+    </div>
+    <div class="card">
+      <h2>This query</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="card">
+      <h2>Vector quantization</h2>
+      <div class="stats" id="vq"></div>
+      <p class="note">The path through the tree is a compact code for qx: its leaf centroid is an
+        approximate encoding of qx, like an LSH signature.</p>
+    </div>
+  </div>
+</div>
+
+<div class="below">
+  <div class="card">
+    <h2>Average over random queries</h2>
+    <div class="btns" style="margin-bottom:10px">
+      <button id="evalBtn" class="primary">Evaluate 300 queries</button>
+      <button id="clearLog">Clear</button>
+    </div>
+    <table class="log">
+      <thead><tr><th>N</th><th>J</th><th>d</th><th>k</th><th>avg leaf size</th><th>distance comps</th><th>vs. N</th><th>recall@k</th></tr></thead>
+      <tbody id="log"></tbody>
+    </table>
+    <p class="note">Each run draws 300 queries from the same distribution as the data and adds one row,
+      so you can compare settings. "distance comps" is <i>dJ</i> + |leaf| per query, averaged.</p>
+  </div>
+  <div class="card">
+    <h2>Algorithm</h2>
+<pre class="code"><span class="fn">Build(points, depth):</span>
+  if depth = 0: return a leaf holding points
+  run J-means on points → centroids c<sub>1</sub>,…,c<sub>J</sub>, clusters C<sub>1</sub>,…,C<sub>J</sub>
+  child<sub>i</sub> = Build(C<sub>i</sub>, depth − 1)   for i = 1,…,J
+<span class="fn">Search(qx, k):</span>
+  node = root
+  while node is not a leaf:                     <span class="show">O(J) per level, d levels</span>
+    i = argmin<sub>i</sub> dist(qx, c<sub>i</sub>) over node's children
+    node = child<sub>i</sub>
+  return the k points x in node closest to qx   <span class="show">O(N/J<sup>d</sup>)</span></pre>
+  </div>
+</div>
+
+<footer>
+  Distances are Euclidean. Each J-means run uses k-means++ initialization and up to 30 Lloyd iterations,
+  seeded so the same settings give the same tree. A node with fewer than J points is not split further,
+  so leaves can be uneven. The tree search is approximate because a true neighbor can sit just across a
+  cell boundary; the exact k-NN column computes all N distances.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+let N = 1500, J = 4, D = 2, K = 5, shape = "blobs", dataSeed = 1, treeSeed = 1;
+let P = [], tree = null, qx = [0.62, 0.38], stage = Infinity, cellCache = null;
+
+function mulberry32(a) {
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let z = Math.imul(a ^ a >>> 15, 1 | a);
+    z = z + Math.imul(z ^ z >>> 7, 61 | z) ^ z; return ((z ^ z >>> 14) >>> 0) / 4294967296; };
+}
+const gauss = rnd => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
+const clamp01 = v => Math.min(0.995, Math.max(0.005, v));
+
+// ---- data ------------------------------------------------------------------------
+function makeData() {
+  const rnd = mulberry32(dataSeed * 104729 + 7);
+  if (shape === "uniform") return Array.from({ length: N }, () => [rnd(), rnd()]);
+  if (shape === "curves") return Array.from({ length: N }, () => {
+    const c = Math.floor(rnd() * 3), t = rnd();
+    const x = [0.1 + 0.8 * t, 0.2 + 0.25 * c + 0.08 * Math.sin(6 * t + c)];
+    return [clamp01(x[0] + 0.015 * gauss(rnd)), clamp01(x[1] + 0.015 * gauss(rnd))];
+  });
+  const B = 7, blobs = Array.from({ length: B }, () => ({
+    c: [0.12 + 0.76 * rnd(), 0.12 + 0.76 * rnd()], s: 0.025 + 0.06 * rnd(), w: 0.4 + rnd() }));
+  const W = blobs.reduce((a, b) => a + b.w, 0);
+  return Array.from({ length: N }, () => {
+    if (rnd() < 0.06) return [rnd(), rnd()];   // a little background noise
+    let u = rnd() * W, b = 0; while (u > blobs[b].w && b < B - 1) u -= blobs[b++].w;
+    return [clamp01(blobs[b].c[0] + blobs[b].s * gauss(rnd)), clamp01(blobs[b].c[1] + blobs[b].s * gauss(rnd))];
+  });
+}
+
+// ---- J-means tree ------------------------------------------------------------------
+function jmeans(idx, rnd) {   // k-means++ init + Lloyd; returns [{c, idx}] with no empty clusters
+  const pts = idx.map(i => P[i]);
+  const cents = [pts[Math.floor(rnd() * pts.length)].slice()];
+  const best = pts.map(p => d2(p, cents[0]));
+  while (cents.length < J) {
+    const tot = best.reduce((a, b) => a + b, 0); let u = rnd() * tot, j = 0;
+    while (u > best[j] && j < pts.length - 1) u -= best[j++];
+    cents.push(pts[j].slice());
+    pts.forEach((p, t) => { best[t] = Math.min(best[t], d2(p, cents[cents.length - 1])); });
+  }
+  let asg = new Array(pts.length).fill(-1);
+  for (let it = 0; it < 30; it++) {
+    let moved = 0;
+    pts.forEach((p, t) => {
+      let bj = 0, bd = Infinity;
+      cents.forEach((c, j) => { const dd = d2(p, c); if (dd < bd) { bd = dd; bj = j; } });
+      if (asg[t] !== bj) { asg[t] = bj; moved++; }
+    });
+    const sum = cents.map(() => [0, 0, 0]);
+    pts.forEach((p, t) => { const s = sum[asg[t]]; s[0] += p[0]; s[1] += p[1]; s[2]++; });
+    sum.forEach((s, j) => { if (s[2]) cents[j] = [s[0] / s[2], s[1] / s[2]]; });
+    if (!moved) break;
+  }
+  return cents.map((c, j) => ({ c, idx: idx.filter((_, t) => asg[t] === j) })).filter(g => g.idx.length);
+}
+function build(idx, depth, rnd, path) {
+  const node = { idx, path, children: null };
+  if (depth === 0 || idx.length < J) return node;
+  node.children = jmeans(idx, rnd).map((g, j) => ({ ...build(g.idx, depth - 1, rnd, path.concat(j)), c: g.c }));
+  return node;
+}
+function descend(q) {        // the list of nodes visited, root first
+  const visits = [tree]; let node = tree;
+  while (node.children) {
+    let best = node.children[0], bd = Infinity;
+    for (const ch of node.children) { const dd = d2(q, ch.c); if (dd < bd) { bd = dd; best = ch; } }
+    visits.push(best); node = best;
+  }
+  return visits;
+}
+function search(q) {
+  const visits = descend(q), leaf = visits[visits.length - 1];
+  const comps = visits.slice(0, -1).reduce((a, v) => a + v.children.length, 0) + leaf.idx.length;
+  const approx = leaf.idx.map(i => [i, d2(q, P[i])]).sort((a, b) => a[1] - b[1]).slice(0, K).map(e => e[0]);
+  return { visits, leaf, comps, approx };
+}
+function exactKNN(q) {
+  return P.map((p, i) => [i, d2(q, p)]).sort((a, b) => a[1] - b[1]).slice(0, K).map(e => e[0]);
+}
+
+function rebuildData() { P = makeData(); rebuildTree(); }
+function rebuildTree() { stage = Infinity; tree = build(P.map((_, i) => i), D, mulberry32(treeSeed * 7919 + D * 31 + J), []); cellCache = null; }
+
+// ---- drawing -------------------------------------------------------------------------
+const cv = $("c"), W = 800, H = 560, M = 12;
+const X = x => M + x * (W - 2 * M), Y = y => M + y * (H - 2 * M);
+const invX = px => (px - M) / (W - 2 * M), invY = py => (py - M) / (H - 2 * M);
+const G = 2;                 // grid cell size (canvas px) for drawing tree cells
+
+function cellMap() {         // per grid cell: the path of child indices from the root
+  if (cellCache) return cellCache;
+  const gw = Math.ceil((W - 2 * M) / G), gh = Math.ceil((H - 2 * M) / G);
+  const paths = new Array(gw * gh);
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) {
+    const v = descend([invX(M + (gx + 0.5) * G), invY(M + (gy + 0.5) * G)]);
+    paths[gy * gw + gx] = v[v.length - 1].path;
+  }
+  return (cellCache = { gw, gh, paths });
+}
+const firstDiff = (a, b) => { const n = Math.min(a.length, b.length); for (let l = 0; l < n; l++) if (a[l] !== b[l]) return l; return a.length === b.length ? -1 : n; };
+
+function draw() {
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const col = { surf: css("--surface"), ink: css("--ink"), soft: css("--ink-soft"), faint: css("--ink-faint"),
+    line: css("--line"), pt: css("--pt"), mem: css("--mem"), hit: css("--hit"), probe: css("--probe") };
+  g.fillStyle = col.surf; g.fillRect(0, 0, W, H);
+
+  const R = search(qx), ex = exactKNN(qx);
+  const levels = R.visits.length - 1;          // number of descents actually made
+  const shownLevels = Math.min(levels, stage);  // how much of the search to reveal
+  const { gw, gh, paths } = cellMap(), qpath = R.leaf.path;
+
+  // shade the cells qx descends into, darker for deeper levels
+  for (let t = 0; t < paths.length; t++) {
+    let l = 0; while (l < shownLevels && paths[t][l] === qpath[l]) l++;
+    if (!l) continue;
+    g.globalAlpha = 0.07 + 0.09 * l; g.fillStyle = col.mem;
+    g.fillRect(M + (t % gw) * G, M + Math.floor(t / gw) * G, G, G);
+  }
+  g.globalAlpha = 1;
+  // cell boundaries: thicker for higher levels of the tree
+  const widthAt = l => [2.6, 1.6, 1.0, 0.7][l] || 0.6, colorAt = l => l === 0 ? col.soft : l === 1 ? col.faint : col.line;
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) {
+    const a = paths[gy * gw + gx];
+    if (gx + 1 < gw) { const l = firstDiff(a, paths[gy * gw + gx + 1]); if (l >= 0) { g.fillStyle = colorAt(l); const w = widthAt(l); g.fillRect(M + (gx + 1) * G - w / 2, M + gy * G, w, G); } }
+    if (gy + 1 < gh) { const l = firstDiff(a, paths[(gy + 1) * gw + gx]); if (l >= 0) { g.fillStyle = colorAt(l); const w = widthAt(l); g.fillRect(M + gx * G, M + (gy + 1) * G - w / 2, G, w); } }
+  }
+
+  // points
+  g.fillStyle = col.pt;
+  const pr = N > 2500 ? 1.4 : 1.9;
+  for (const p of P) { g.beginPath(); g.arc(X(p[0]), Y(p[1]), pr, 0, 2 * Math.PI); g.fill(); }
+
+  // the distance computations of the revealed steps
+  const Q = [X(qx[0]), Y(qx[1])];
+  for (let l = 0; l < shownLevels; l++) {
+    const node = R.visits[l], chosen = R.visits[l + 1], last = l === shownLevels - 1;
+    for (const ch of node.children) {
+      g.strokeStyle = ch === chosen ? col.mem : col.faint; g.lineWidth = ch === chosen ? 2 : 1;
+      g.globalAlpha = last || ch === chosen ? 1 : 0.35;
+      g.setLineDash(ch === chosen ? [] : [4, 3]);
+      g.beginPath(); g.moveTo(...Q); g.lineTo(X(ch.c[0]), Y(ch.c[1])); g.stroke();
+    }
+  }
+  g.setLineDash([]); g.globalAlpha = 1;
+  const scanning = stage > levels;
+  if (scanning && stage === levels + 1) {       // leaf scan: one line per point in the leaf
+    g.strokeStyle = col.mem; g.globalAlpha = 0.25; g.lineWidth = 1;
+    for (const i of R.leaf.idx) { g.beginPath(); g.moveTo(...Q); g.lineTo(X(P[i][0]), Y(P[i][1])); g.stroke(); }
+    g.globalAlpha = 1;
+  }
+
+  // centroids: diamonds, bigger for higher levels; the ones on qx's path are filled teal
+  const onPath = new Set(R.visits);
+  (function walk(node, l) {
+    if (!node.children) return;
+    for (const ch of node.children) {
+      walk(ch, l + 1);
+      const s = [7, 5, 3.6, 2.8][l] || 2.5, x = X(ch.c[0]), y = Y(ch.c[1]);
+      const hl = onPath.has(ch) && l < shownLevels;
+      g.beginPath(); g.moveTo(x, y - s); g.lineTo(x + s, y); g.lineTo(x, y + s); g.lineTo(x - s, y); g.closePath();
+      g.fillStyle = hl ? col.mem : col.ink; g.fill();
+      g.strokeStyle = col.surf; g.lineWidth = 1.5; g.stroke();
+    }
+  })(tree, 0);
+
+  // results: rings around the approximate (teal) and exact (orange) neighbors
+  if (stage === Infinity) {
+    for (const i of ex) { g.strokeStyle = col.hit; g.lineWidth = 2.5; g.beginPath(); g.arc(X(P[i][0]), Y(P[i][1]), 8, 0, 2 * Math.PI); g.stroke(); }
+    for (const i of R.approx) { g.strokeStyle = col.mem; g.lineWidth = 2.5; g.beginPath(); g.arc(X(P[i][0]), Y(P[i][1]), 5, 0, 2 * Math.PI); g.stroke(); }
+  }
+
+  // the query: a star
+  g.beginPath();
+  for (let j = 0; j < 10; j++) {
+    const a = -Math.PI / 2 + j * Math.PI / 5, rr = j % 2 ? 4.5 : 11;
+    g[j ? "lineTo" : "moveTo"](Q[0] + rr * Math.cos(a), Q[1] + rr * Math.sin(a));
+  }
+  g.closePath(); g.fillStyle = col.probe; g.fill(); g.strokeStyle = col.surf; g.lineWidth = 1.5; g.stroke();
+  return { R, ex, levels };
+}
+
+// ---- panels ---------------------------------------------------------------------------
+function render() {
+  $("NV").textContent = `N = ${N}`; $("JV").textContent = `J = ${J}`;
+  $("dV").textContent = `d = ${D}`; $("kV").textContent = `k = ${K}`;
+  $("seedV").textContent = `data #${dataSeed} · tree #${treeSeed}`;
+  const { R, ex, levels } = draw();
+  const exSet = new Set(ex), found = R.approx.filter(i => exSet.has(i)).length;
+  const dist = i => Math.sqrt(d2(qx, P[i]));
+  const kthA = R.approx.length ? dist(R.approx[R.approx.length - 1]) : NaN, kthE = dist(ex[ex.length - 1]);
+
+  // step list
+  const items = [];
+  for (let l = 0; l < levels; l++) {
+    const n = R.visits[l].children.length, j = R.visits[l + 1].path[l] + 1;
+    items.push(`level ${l + 1}: compare qx with ${n} centroids → child ${j}`);
+  }
+  items.push(`leaf: scan its ${R.leaf.idx.length} points for the ${K} closest`);
+  items.push(`compare with the exact ${K}-NN (all ${N} distances)`);
+  const cur = stage === Infinity ? items.length : stage;
+  $("steps").innerHTML = items.map((t, s) =>
+    `<li class="${s + 1 === cur ? "on" : s + 1 < cur ? "done" : ""}">${t}</li>`).join("");
+
+  const say = $("say");
+  if (stage === Infinity) {
+    say.innerHTML = `The tree search made <b>${R.comps}</b> distance computations (${levels} levels × ≤${J} centroids + ${R.leaf.idx.length} leaf points)
+      instead of <b>${N}</b>, and found <b>${found} of ${K}</b> exact nearest neighbors.` +
+      (found < K ? ` The ones it missed lie outside qx's leaf cell.` : "");
+  } else if (stage <= levels) {
+    const l = stage - 1, node = R.visits[l];
+    say.innerHTML = `Level ${stage}: compute dist(qx, c<sub>i</sub>) for the ${node.children.length} centroids under the current node,
+      and descend into the closest one (teal). The shaded region is where every query ends up in the same cell at this level.`;
+  } else {
+    say.innerHTML = `Leaf: compute the distance from qx to each of the ${R.leaf.idx.length} points in the leaf cell, and keep the ${K} closest.`;
+  }
+
+  $("stats").innerHTML = [
+    ["distance computations, tree", `${R.comps}`],
+    ["  … centroids (≈ dJ)", `${R.comps - R.leaf.idx.length}`],
+    ["  … leaf points (≈ N/J<sup>d</sup>)", `${R.leaf.idx.length}`],
+    ["distance computations, exact", N],
+    ["sep"],
+    [`recall@${K}`, `${found} / ${K}`],
+    [`dist to ${K}th neighbor, tree`, isNaN(kthA) ? "—" : kthA.toFixed(3)],
+    [`dist to ${K}th neighbor, exact`, kthE.toFixed(3)],
+    ["sep"],
+    ["expected N/J<sup>d</sup>", (N / Math.pow(J, D)).toFixed(1)],
+    ["J minimizing dJ + N/J<sup>d</sup>: N<sup>1/(d+1)</sup>", Math.pow(N, 1 / (D + 1)).toFixed(1)],
+  ].map(([a, v]) => a === "sep" ? `<div class="sep"></div><div class="sep"></div>` : `<div>${a}</div><div>${v}</div>`).join("");
+
+  const leafC = R.leaf.c || [NaN, NaN], bits = levels * Math.ceil(Math.log2(J));
+  $("vq").innerHTML = [
+    ["code: path through the tree", R.leaf.path.map(j => j + 1).join(" → ") || "—"],
+    ["code length", `${levels} × ⌈log₂ ${J}⌉ = ${bits} bits`],
+    ["leaves in the tree", countLeaves(tree)],
+    ["qx", `(${qx[0].toFixed(2)}, ${qx[1].toFixed(2)})`],
+    ["leaf centroid c", R.leaf.c ? `(${leafC[0].toFixed(2)}, ${leafC[1].toFixed(2)})` : "—"],
+    ["quantization error ‖qx − c‖", R.leaf.c ? Math.sqrt(d2(qx, leafC)).toFixed(3) : "—"],
+  ].map(([a, v]) => `<div>${a}</div><div>${v}</div>`).join("");
+
+  $("step").textContent = stage === Infinity ? "Step through search ▸" : stage > levels ? "Show results ▸" : "Next step ▸";
+}
+const countLeaves = node => node.children ? node.children.reduce((a, ch) => a + countLeaves(ch), 0) : 1;
+
+// ---- evaluation over random queries -----------------------------------------------------
+const LOG = [];
+function evaluate() {
+  const rnd = mulberry32(dataSeed * 31 + treeSeed * 17 + LOG.length);
+  let comps = 0, rec = 0, leaf = 0; const T = 300;
+  for (let t = 0; t < T; t++) {   // queries: a random data point plus a little noise
+    const p = P[Math.floor(rnd() * N)], q = [p[0] + 0.02 * gauss(rnd), p[1] + 0.02 * gauss(rnd)];
+    const R = search(q), ex = new Set(exactKNN(q));
+    comps += R.comps; leaf += R.leaf.idx.length; rec += R.approx.filter(i => ex.has(i)).length / K;
+  }
+  LOG.push([N, J, D, K, (leaf / T).toFixed(1), (comps / T).toFixed(1), `${(100 * comps / T / N).toFixed(1)}%`, (rec / T).toFixed(3)]);
+  $("log").innerHTML = LOG.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join("")}</tr>`).join("");
+}
+
+// ---- interaction ---------------------------------------------------------------------------
+function toQuery(e) {
+  const b = cv.getBoundingClientRect();
+  qx = [clamp01(invX((e.clientX - b.left) * W / b.width)), clamp01(invY((e.clientY - b.top) * H / b.height))];
+  render();
+}
+let dragging = false;
+cv.addEventListener("pointerdown", e => { dragging = true; cv.setPointerCapture(e.pointerId); toQuery(e); });
+cv.addEventListener("pointermove", e => { if (dragging) toQuery(e); });
+cv.addEventListener("pointerup", () => { dragging = false; });
+
+$("N").oninput = e => { N = +e.target.value; rebuildData(); render(); };
+$("J").oninput = e => { J = +e.target.value; rebuildTree(); render(); };
+$("d").oninput = e => { D = +e.target.value; rebuildTree(); render(); };
+$("k").oninput = e => { K = +e.target.value; render(); };
+$("shape").onchange = e => { shape = e.target.value; rebuildData(); render(); };
+$("newData").onclick = () => { dataSeed++; rebuildData(); render(); };
+$("newTree").onclick = () => { treeSeed++; rebuildTree(); render(); };
+$("step").onclick = () => {
+  const levels = descend(qx).length - 1;
+  stage = stage === Infinity ? 1 : stage > levels ? Infinity : stage + 1; render();
+};
+$("showAll").onclick = () => { stage = Infinity; render(); };
+$("randomQ").onclick = () => { qx = [0.05 + 0.9 * Math.random(), 0.05 + 0.9 * Math.random()]; render(); };
+$("evalBtn").onclick = evaluate;
+$("clearLog").onclick = () => { LOG.length = 0; $("log").innerHTML = ""; };
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", render);
+
+rebuildData(); render();
+</script>
+</body>
+</html>
