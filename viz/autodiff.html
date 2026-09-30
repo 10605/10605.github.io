@@ -517,7 +517,14 @@ function syncPanels(){
     const base = lis[i].classList.contains('fwd')?'fwd':'bwd';
     lis[i].className = base + (i<idx?' done' : i===idx?' cur':'');
   }
-  if(idx<lis.length) lis[idx].scrollIntoView({block:'nearest'});
+  // keep the current step visible *within the trace box only* — never scroll
+  // the page (that would push the main canvas panel out of view)
+  if(idx<lis.length){
+    const ol = $('trace'), li = lis[idx];
+    const olR = ol.getBoundingClientRect(), liR = li.getBoundingClientRect();
+    if(liR.top < olR.top) ol.scrollTop += liR.top - olR.top;
+    else if(liR.bottom > olR.bottom) ol.scrollTop += liR.bottom - olR.bottom;
+  }
   // gradient card (live)
   const st = computeState(idx<events.length && elapsed/DUR>=0.55 ? idx+1 : idx);
   const g = $('grad'); g.innerHTML='';
