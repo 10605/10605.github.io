@@ -156,18 +156,15 @@
   - autodiff-short.pptx
 
 
-- title: 'Parallel Optimization with GPUs'  #TODO: way too long as is, need to cut down
+- title: 'Autodiff / Parallel Optimization with GPUs'
   summary: ''
-  pptx_link: https://docs.google.com/presentation/d/1W-vLRtHi7NC9glhYlL7Jsp9dVLlG5Whi/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1r-iiUsjfhOrIjInB078siaO0r6rvnizS/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1w3Hid13jUBnlLrnr1MIGjQALOJhxaRa4/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1NPW1HU3lqNvEO_pELwz3AGTGOmGfGruT/view?usp=drive_link
   content:
+  - autodiff.pptx
   - gpu-intro.pptx
   - gpu-programming-intro-short.pptx
-  - distributed_dl.pptx
-  - dl_finetuning.pptx
-  - '* HW2 Slot B deadline (tentative)'
   - '* HW 3 Slot A due Thu Oct 1'
-
 
 - title: 'HW3 Writing Session'
   type: recitation
