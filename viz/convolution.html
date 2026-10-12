@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convolution — edge filters on MNIST, visualized</title>
+<style>
+  :root {
+    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
+    --line:#3a4568; --accent:#7cc4ff; --green:#8ce99a; --amber:#ffd166;
+    --pos:#ff6b6b; --neg:#5c9dff;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding:20px 24px 6px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  .sub { color:var(--muted); max-width:940px; }
+  .sub b { color:var(--ink); }
+  .wrap { display:flex; flex-wrap:wrap; gap:18px; padding:12px 24px 28px; }
+  .stage { flex:1 1 640px; min-width:340px; }
+  canvas { width:100%; height:auto; background:var(--panel);
+           border:1px solid var(--line); border-radius:12px; }
+  .side { flex:0 1 320px; min-width:270px; }
+  .card { background:var(--panel); border:1px solid var(--line);
+          border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { margin:0 0 10px; font-size:14px; letter-spacing:.04em;
+             text-transform:uppercase; color:var(--muted); }
+  .row { display:flex; align-items:center; justify-content:space-between;
+         gap:8px; margin:8px 0; font-size:13px; }
+  .row label { color:var(--muted); }
+  input[type=range] { width:130px; accent-color:var(--accent); }
+  .val { font-variant-numeric:tabular-nums; min-width:56px; text-align:right; }
+  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+           border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
+  button:hover { background:#303c60; }
+  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+                   font-weight:600; }
+  button.sel { background:var(--green); color:#0a2417; border-color:var(--green); font-weight:600; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  #digits button { padding:6px 0; width:38px; font-variant-numeric:tabular-nums; }
+  #filters button { flex:1 1 40%; }
+  .metric { display:flex; justify-content:space-between; margin:5px 0;
+            font-variant-numeric:tabular-nums; font-size:13px; }
+  .metric b { color:var(--accent); font-weight:600; }
+  .legend { color:var(--muted); font-size:13px; }
+  .legend b { color:var(--ink); }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle;}
+  footer { color:var(--muted); padding:0 24px 30px; max-width:1000px; font-size:13px; }
+  footer code { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Convolution — sliding a 3×3 edge filter over an MNIST digit</h1>
+  <div class="sub">
+    A <b>filter</b> (kernel) is a small grid of weights. It slides over the input image one
+    pixel at a time (stride 1, no padding); at each position the output is the
+    <b>sum of element-wise products</b> of the filter and the 3×3 <b>patch</b> of
+    pixels under it. A 28×28 image therefore produces a 26×26 <b>feature map</b>.
+    Each simple edge filter is a dark row (or column) of <b style="color:var(--neg)">−1</b>s
+    next to a bright one of <b style="color:var(--pos)">+1</b>s, so it fires strongly
+    <b style="color:var(--pos)">positive</b> where the image matches that pattern and
+    <b style="color:var(--neg)">negative</b> where it matches the reverse.
+    <b>Hover</b> over the input or output to inspect any position.
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1000" height="660"></canvas>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>Input digit</h2>
+      <div class="btns" id="digits"></div>
+    </div>
+
+    <div class="card">
+      <h2>Filter</h2>
+      <div class="btns" id="filters"></div>
+    </div>
+
+    <div class="card">
+      <h2>Controls</h2>
+      <div class="row">
+        <label>Speed</label>
+        <input id="speed" type="range" min="0" max="1" step="0.01" value="0.35">
+        <span class="val" id="speedV"></span>
+      </div>
+      <div class="btns">
+        <button id="play" class="primary">Play ▸</button>
+        <button id="step">Step ▸</button>
+        <button id="fill">Fill all</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Current position</h2>
+      <div id="info"></div>
+    </div>
+
+    <div class="card legend">
+      <h2>Legend</h2>
+      <div><span class="sw" style="background:#fff"></span><b>input pixel</b> — intensity scaled to [0, 1]</div>
+      <div><span class="sw" style="background:var(--amber)"></span><b>window</b> — the 3×3 patch the filter is over</div>
+      <div><span class="sw" style="background:var(--pos)"></span><b>positive</b> output (pattern matches)</div>
+      <div><span class="sw" style="background:var(--neg)"></span><b>negative</b> output (reverse pattern)</div>
+      <div style="margin-top:6px">Output colour is scaled so the largest |value|
+        in the feature map is fully saturated.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Each output is <code>out[r,c] = Σ<sub>i,j</sub> x[r+i, c+j] · w[i,j]</code> for
+  <i>i, j</i> ∈ {0,1,2}. Strictly speaking that is <i>cross-correlation</i>, since the
+  filter is not flipped, but it is what deep-learning libraries (e.g.
+  <code>torch.nn.Conv2d</code>) compute and call "convolution". A CNN learns the filter
+  weights; these four hand-made edge detectors are the kind of filter that early
+  convolutional layers typically end up learning. Images are the first test example of
+  each digit in MNIST. Inspired by the
+  <a href="https://deeplizard.com/resource/pavq7noze2" style="color:var(--accent)">deeplizard
+  convolution demo</a>.
+</footer>
+
+<script>
+"use strict";
+
+// ===== data: first MNIST test image of each digit, 28×28 bytes as hex ======
+const DIGITS = [
+  [0, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b96fdca1f000000000000000000000000000000000000000000000025fbfbfd6b0000000000000000000000000000000000000000000015c5fbfbfd6b0000000000000000000000000000000000000000006ebefbfbfbfda96d3e00000000000000000000000000000000000000fdfbfbfbfbfdfbfbdc330000000000000000000000000000000000b6fffdfdfdfdeadefdfdfd000000000000000000000000000000003fddfdfbfbfb934d3e80fbfb69000000000000000000000000000020e7fbfdfbdc890a00001fe6fbf3710500000000000000000000000025fbfbfdbc1400000000006dfbfdfb2300000000000000000000000025fbfbc91e0000000000001fc8fdfb2300000000000000000000000025fdfd000000000000000020cafffda40000000000000000000000008cfbfb00000000000000006dfbfdfb23000000000000000000000000d9fbfb000000000000153fe7fbfde61e000000000000000000000000d9fbfb00000000000090fbfbfbdd3d00000000000000000000000000d9fbfb0000000000b6ddfbfbfbb40000000000000000000000000000dafdfd4949e4fdfdfffdfdfdfd00000000000000000000000000000071fbfbfdfbfbfbfbfdfbfbfb930000000000000000000000000000001fe6fbfdfbfbfbfbfde6bd230a000000000000000000000000000000003e8efdfbfbfbfbfd6b00000000000000000000000000000000000000000048aefbad47481e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [1, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000026fe6d0000000000000000000000000000000000000000000000000057fc520000000000000000000000000000000000000000000000000087f1000000000000000000000000000000000000000000000000002df4960000000000000000000000000000000000000000000000000054fe3f00000000000000000000000000000000000000000000000000cadf0b00000000000000000000000000000000000000000000000020fed8000000000000000000000000000000000000000000000000005ffec3000000000000000000000000000000000000000000000000008cfe4d00000000000000000000000000000000000000000000000039edcd080000000000000000000000000000000000000000000000007cffa500000000000000000000000000000000000000000000000000abfe5100000000000000000000000000000000000000000000000018e8d70000000000000000000000000000000000000000000000000078fe9f0000000000000000000000000000000000000000000000000097fe8e00000000000000000000000000000000000000000000000000e4fe420000000000000000000000000000000000000000000000003dfbfe420000000000000000000000000000000000000000000000008dfecd0300000000000000000000000000000000000000000000000ad7fe7900000000000000000000000000000000000000000000000005c6b00a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [2, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000747dabffff965d0000000000000000000000000000000000000000a9fdfdfdfdfdfdda1e000000000000000000000000000000000000a9fdfdfdd58eb0fdfd7a000000000000000000000000000000000034fafdd2200c0006cefd8c00000000000000000000000000000000004dfbd2190000007af8fd410000000000000000000000000000000000001f1200000000d1fdfd41000000000000000000000000000000000000000000000075f7fdc60a000000000000000000000000000000000000000000004cf7fde73f000000000000000000000000000000000000000000000080fdfd900000000000000000000000000000000000000000000000b0f6fd9f0c0000000000000000000000000000000000000000000019eafde9230000000000000000000000000000000000000000000000c6fdfd8d00000000000000000000000000000000000000000000004ef8fdbd0c0000000000000000000000000000000000000000000013c8fdfd8d000000000000000000000000000000000000000000000086fdfdad0c0000000000000000000000000000000000000000000000f8fdfd19000000000000000000000000000000000000000000000000f8fdfd2b14141414050005141425969696930a000000000000000000f8fdfdfdfdfdfdfda88fa6fdfdfdfdfdfdfd7b000000000000000000aefdfdfdfdfdfdfdfdfdfdfdf9f7f7a975753900000000000000000000767b7b7ba6fdfdfd9b7b7b29000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [3, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c29929230000000000000000000000000000000000000000000000c81fdfdfdfaa312000000000000000000000000000000000000000085fdfdfdfdfdfde5460000000000000000000000000000000000000065fdfc91666bedfdf7800a0000000000000000000000000000000000b5fda70000003debfdfda30500000000000000000000000000000000fffd2b000000003ac1fdfda404000000000000000000000000000000bbfd20000000000037ecfdfd5600000000000000000000000000000092fd200064be57575793fdfd7b0000000000000000000000000000005efd4e28f8fdfdfdfdfdfdfddf540f000000000000000000000000000e5c0c23f0fdfdfdfdfdfdfdfdfdf4590a0000000000000000000000000000004ba1b3fdfdfdfdfdfdfdfdfdd12b000000000000000000000000000000000310102726101091f3fdfdb93000000000000000000000000000143a00000000000000003ad1fdfdb70000000000000000000000004dddf74f00000000000000000ddbfdf04800000000000000000000005af7fdfc39000000000000000035fbfdbf00000000000000000000000074fdfd3b000000000000000063fcfd910000000000000000000000000ebcfddd9e26000000006fd3f6fdfd91000000000000000000000000000cddf6fdfbf9f9f9f9fdfdfdfdc8130000000000000000000000000000005fb7e4fdfdfdfdfdfdc37c1700000000000000000000000000000000000018258a4a7e58250700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [4, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000032e000000000000000461d000000000000000000000000000000000079e70000000000000094a80000000000000000000000000000000004c3e70000000000000060d20b00000000000000000000000000000045fc860000000000000072fc1500000000000000000000000000002decd90c00000000000000c0fc150000000000000000000000000000a8f7350000000000000012fffd150000000000000000000000000054f2d300000000000000008dfdbd0500000000000000000000000000a9fc6a0000000000000020e8fa42000000000000000000000000000fe1fc000000000000000086fcd3000000000000000000000000000016fca40000000000000000a9fca7000000000000000000000000000009ccd11200000000000016fdfd6b000000000000000000000000000000a9fcc75555555581a4c3fcfc6a00000000000000000000000000000029aaf5fcfcfcfce8e7fbfcfc09000000000000000000000000000000000031545454540000a1fcfc000000000000000000000000000000000000000000000000007ffcfc2d00000000000000000000000000000000000000000000000080fdfd000000000000000000000000000000000000000000000000007ffcfc0000000000000000000000000000000000000000000000000087fcf400000000000000000000000000000000000000000000000000e8ec6f00000000000000000000000000000000000000000000000000b34200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [5, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f2f2f1081552f0000000000000000000000000000000000004b99d9fdfdfdd7f6fdfd000000000000000000000000000000238ef4fcfdfdfdfdfdfdfdfdfd0000000000000000000000000000003ffdfdfdfdfdfdfdd5aaaaaaaa00000000000000000000001484480039eee3eea87c45140b00000000000000000000000000000bcefd4e000020001e02000000000000000000000000000000000006b1fd840a000000000000000000000000000000000000000000000c85fde90f00000000000000000000000000000000000000000000005cfddf1c00000000000000000000000000000000000000000000000096fdae00000000000000000000000000000000000000000000000000eafdf67f310000000000000000000000000000000000000000000000fffdfdfdfb935b79552a2a551c0000000000000000000000000000008bfdfdfdfdfdfdfdfdfdfdfde8a800000000000000000000000000000335dadefbfdfdfdfdfdfdfdfdfc7c00000000000000000000000000000000004348c8fdfdfdfdfdfdfdaf0000000000000000000000000000000000000078fdf99833a4fdfdaf0000000000000000000000000000000000000032fdfdfdbcfcfdfd940000000000000000000000000000000000000009a7fdfdfdfdfaaf0b000000000000000000000000000000000000000017b4e7fddd800000000000000000000000000000000000000000000000005d9516000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [6, "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007ccfdb000000000000000000000000000000000000000000000000796fcfc7d000000000000000000000000000000000000000000000075fcba380000000000000000000000000000000000000000000000008dfc76000000000000000000000000000000000000000000000000009af7320000000000000000000000000000000000000000000000001afdc40000000000000000000000000000000000000000000000000096fdc400000000000000395555260000000000000000000000000000e1fd60000000000097e2f3fcfcee7d0000000000000000000000000ae5e20000000436e5fdffeaafe1ffe41f00000000000000000000006efc9600001a80fcfce3861c0000b2fc3800000000000000000000009ffc71000096fdfcba2b000000008dfc380000000000000000000000b9fc710026edfd970600000000008dca060000000000000000000000c6fd720093fda3000000000000009ac5000000000000000000000000c5fc7100acfcbc0000000000001afdab000000000000000000000000c5fc710013e7f77a1300000000c8f43800000000000000000000001adefc71000019cbfcc10d004cc8f97d00000000000000000000000000b9fdb30a0000004c231d9afdf47d00000000000000000000000000001cd1fdc452393983c5fcfdd6510000000000000000000000000000000019d8fcfcfcfdfcfcfc9c1300000000000000000000000000000000000010678bf08c8b8b2800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [7, "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000054b99f973c2400000000000000000000000000000000000000000000defefefefef1c6c6c6c6c6c6c6c6aa3400000000000000000000000043724872a3e3fee1fefefefae5fefe8c000000000000000000000000000000000011420e4343433b15ecfe6a00000000000000000000000000000000000000000000000053fdd112000000000000000000000000000000000000000000000016e9ff5300000000000000000000000000000000000000000000000081feee2c00000000000000000000000000000000000000000000003bf9fe3e00000000000000000000000000000000000000000000000085febb05000000000000000000000000000000000000000000000009cdf83a0000000000000000000000000000000000000000000000007efeb60000000000000000000000000000000000000000000000004bfbf039000000000000000000000000000000000000000000000013ddfea6000000000000000000000000000000000000000000000003cbfedb23000000000000000000000000000000000000000000000026fefe4d00000000000000000000000000000000000000000000001fe0fe7301000000000000000000000000000000000000000000000085fefe3400000000000000000000000000000000000000000000003df2fefe34000000000000000000000000000000000000000000000079fefedb28000000000000000000000000000000000000000000000079fecf12000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [8, "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b2f2f0000000000000000000000000000000000000000000000096cf9fdfdd0cfcfcf95410d00000000000000000000000000000009b8fefdfdfdfefdfdfdfefdd5190000000000000000000000000037cbfefec77f7f3c5d544497defea1000000000000000000000000008afdfdc713000000000000009bfdd3000000000000000000000000008afdfd11000000000000004af1fdd30000000000000000000000000069fdfd6600000000000022e5fdfda0000000000000000000000000000095fee5280000002699fefefeb419000000000000000000000000000013c6fecf092248ebfdfde08b0d0000000000000000000000000000000011d3fdd7f0fefdea801100000000000000000000000000000000000066e5fdfdfde44d0d000000000000000000000000000000000046aafefefefefefe77000000000000000000000000000000001a82e6fefdfdb97340d3fdf8150000000000000000000000000000a6e8fdfdf7a22e0d075bf5fdfe38000000000000000000000000000080fdfdfdd25d7f9fccfdfdfde40f00000000000000000000000000000086f1fefffefefefefefee42200000000000000000000000000000000001b738ccecececfce7b0f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  [9, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e95c10500000000000000000000000000000000000000000000005be0fdfd13000000000000000000000000000000000000000000001cebfefdfda61200000000000000000000000000000000000000000090fdfefdfdfdee73060000000000000000000000000000000000001ff1fdd0b9fdfdfde7180000000000000000000000000000000000004ffec1000862dbfeffc912000000000000000000000000000000000056fd50000000b6fdfebf0c0000000000000000000000000000000000affd9b000000eafdfe8700000000000000000000000000000000000056fdd02855a6fbedfeec2a000000000000000000000000000000000012eefdfefdfdb924d8fd9800000000000000000000000000000000000044f0fffe91080086fedf23000000000000000000000000000000000000449e8e0c000009affda10000000000000000000000000000000000000000000000000058fde21200000000000000000000000000000000000000000000000002a6fd7e0000000000000000000000000000000000000000000000000030f5fd260000000000000000000000000000000000000000000000000073feac0900000000000000000000000000000000000000000000000015dafe2e000000000000000000000000000000000000000000000000001efea50000000000000000000000000000000000000000000000000000baf42a000000000000000000000000000000000000000000000000000edf4e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+];
+const IMG = DIGITS.map(([d,hex])=>{
+  const a = new Float32Array(784);
+  for(let i=0;i<784;i++) a[i] = parseInt(hex.substr(2*i,2),16)/255;
+  return a;
+});
+
+// ===== the simple edge filters ==============================================
+const FILTERS = {
+  'Top edge':    [[-1,-1,-1],[ 1, 1, 1],[ 0, 0, 0]],
+  'Bottom edge': [[ 0, 0, 0],[ 1, 1, 1],[-1,-1,-1]],
+  'Left edge':   [[-1, 1, 0],[-1, 1, 0],[-1, 1, 0]],
+  'Right edge':  [[ 0, 1,-1],[ 0, 1,-1],[ 0, 1,-1]],
+};
+const N = 28, K = 3, M = N-K+1;   // M×M output
+
+// ===== canvas / palette =====================================================
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+const W = 1000, H = 660;
+function fitDPI(){
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.aspectRatio = W+' / '+H;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+fitDPI(); window.addEventListener('resize', fitDPI);
+
+const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', panel:'#191d2e',
+              cell:'#141827', amber:'#ffd166', cyan:'#7cc4ff',
+              pos:[255,107,107], neg:[92,157,255], zero:[20,24,39] };
+const MONO = '"SFMono-Regular",Menlo,Consolas,monospace';
+
+// geometry
+const IC = 14, IX = 30,  IY = 70;              // input grid
+const OC = 14, OX = 600, IYo = IY + (N-M)*IC/2; // output grid (vertically centred)
+const MID = { cx:(IX+N*IC+OX)/2, cy:IY+N*IC/2, c:30 };  // mini filter between grids
+const CC = 40, CY = 508;                       // calculation row
+
+// ===== small helpers ========================================================
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const $ = id=>document.getElementById(id);
+const fmt = (x,d=2)=> (Math.abs(x)<0.005 ? 0 : x).toFixed(d);
+function signedColor(v, vmax){
+  const t = clamp(Math.abs(v)/vmax,0,1), c = v>=0?COL.pos:COL.neg, z = COL.zero;
+  return 'rgb('+[0,1,2].map(i=>Math.round(z[i]+(c[i]-z[i])*t)).join(',')+')';
+}
+const gray = v=>{ const g=Math.round(v*255); return 'rgb('+g+','+g+','+g+')'; };
+
+// ===== state ================================================================
+let digit = 7, filterName = 'Top edge';
+let out = null, vmax = 1;     // full M×M output (precomputed), and its max |value|
+let k = 0;                    // # output cells filled (row-major)
+let probe = null;             // hovered position {r,c}, overrides display
+let playing = false, acc = 0, rate = 1;
+
+function compute(){
+  const x = IMG[digit], w = FILTERS[filterName];
+  out = new Float32Array(M*M);
+  for(let r=0;r<M;r++) for(let c=0;c<M;c++){
+    let s=0;
+    for(let i=0;i<K;i++) for(let j=0;j<K;j++) s += x[(r+i)*N+c+j]*w[i][j];
+    out[r*M+c] = s;
+  }
+  vmax = Math.max(...out.map(Math.abs)) || 1;
+}
+function curPos(){
+  if(probe) return probe;
+  const i = Math.max(k-1,0);
+  return {r:Math.floor(i/M), c:i%M};
+}
+
+// ===== drawing ==============================================================
+function grid3(x0,y0,vals,bg,txt,label,hilite){
+  for(let i=0;i<K;i++) for(let j=0;j<K;j++){
+    const v = vals[i][j], x=x0+j*CC, y=y0+i*CC;
+    ctx.fillStyle = bg(v); ctx.fillRect(x,y,CC,CC);
+    ctx.strokeStyle = COL.line; ctx.lineWidth=1; ctx.strokeRect(x+.5,y+.5,CC-1,CC-1);
+    ctx.fillStyle = txt(v); ctx.font='12.5px '+MONO; ctx.textAlign='center';
+    ctx.fillText(typeof v==='number' && !Number.isInteger(v) ? fmt(v) : String(v), x+CC/2, y+CC/2+4);
+  }
+  if(hilite){ ctx.strokeStyle=COL.amber; ctx.lineWidth=2; ctx.strokeRect(x0,y0,K*CC,K*CC); }
+  ctx.fillStyle=COL.muted; ctx.font='13px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(label, x0+K*CC/2, y0+K*CC+20);
+}
+function symbol(s,x){
+  ctx.fillStyle=COL.muted; ctx.font='26px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(s, x, CY+K*CC/2+9);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const x = IMG[digit], w = FILTERS[filterName], {r,c} = curPos();
+  
+  // ---- title + status ----
+  ctx.textAlign='left'; ctx.fillStyle=COL.ink; ctx.font='600 19px sans-serif';
+  ctx.fillText('digit '+digit+'  *  '+filterName.toLowerCase()+' filter', 24, 34);
+  ctx.textAlign='right'; ctx.font='600 16px sans-serif';
+  ctx.fillStyle = probe ? COL.cyan : k>=M*M ? COL.amber : COL.muted;
+  ctx.fillText(probe ? 'inspecting (hover)' : k>=M*M ? '✓ feature map complete'
+               : k===0 ? 'press Play or Step' : k+' / '+(M*M)+' outputs', W-24, 34);
+
+  // ---- grid labels ----
+  ctx.fillStyle=COL.muted; ctx.font='13px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Input  28×28', IX, IY-8);
+  ctx.fillText('Output (feature map)  26×26', OX, IYo-8);
+
+  // ---- input image ----
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    ctx.fillStyle = gray(x[i*N+j]); ctx.fillRect(IX+j*IC, IY+i*IC, IC, IC);
+  }
+  ctx.strokeStyle='rgba(120,130,160,0.18)'; ctx.lineWidth=1; ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    ctx.moveTo(IX, IY+i*IC+.5); ctx.lineTo(IX+N*IC, IY+i*IC+.5);
+    ctx.moveTo(IX+i*IC+.5, IY); ctx.lineTo(IX+i*IC+.5, IY+N*IC);
+  }
+  ctx.stroke();
+  ctx.strokeStyle=COL.line; ctx.strokeRect(IX-.5, IY-.5, N*IC+1, N*IC+1);
+
+  // ---- output map ----
+  for(let i=0;i<M;i++) for(let j=0;j<M;j++){
+    const t = i*M+j;
+    ctx.fillStyle = t<k ? signedColor(out[t],vmax) : COL.cell;
+    ctx.fillRect(OX+j*OC, IYo+i*OC, OC, OC);
+  }
+  ctx.strokeStyle='rgba(120,130,160,0.14)'; ctx.beginPath();
+  for(let i=0;i<=M;i++){
+    ctx.moveTo(OX, IYo+i*OC+.5); ctx.lineTo(OX+M*OC, IYo+i*OC+.5);
+    ctx.moveTo(OX+i*OC+.5, IYo); ctx.lineTo(OX+i*OC+.5, IYo+M*OC);
+  }
+  ctx.stroke();
+  ctx.strokeStyle=COL.line; ctx.strokeRect(OX-.5, IYo-.5, M*OC+1, M*OC+1);
+
+  // ---- window, target cell, and connector lines ----
+  const wx=IX+c*IC, wy=IY+r*IC, ox=OX+c*OC, oy=IYo+r*OC;
+  ctx.strokeStyle='rgba(255,209,102,0.35)'; ctx.lineWidth=1; ctx.beginPath();
+  ctx.moveTo(wx+K*IC, wy); ctx.lineTo(ox, oy);
+  ctx.moveTo(wx+K*IC, wy+K*IC); ctx.lineTo(ox, oy+OC);
+  ctx.stroke();
+  // mini filter in the gap (drawn over the connector lines)
+  const mc=MID.c, mx=MID.cx-K*mc/2, my=MID.cy-K*mc/2;
+  ctx.fillStyle=COL.panel; ctx.fillRect(mx-6,my-30,K*mc+12,K*mc+40);
+  ctx.fillStyle=COL.muted; ctx.font='13px sans-serif'; ctx.textAlign='center';
+  ctx.font='13px '+MONO; ctx.fillText('* filter', MID.cx, my-10);
+  for(let i=0;i<K;i++) for(let j=0;j<K;j++){
+    ctx.fillStyle=signedColor(w[i][j],1.6); ctx.fillRect(mx+j*mc, my+i*mc, mc, mc);
+    ctx.strokeStyle=COL.line; ctx.strokeRect(mx+j*mc+.5, my+i*mc+.5, mc-1, mc-1);
+    ctx.fillStyle=COL.ink; ctx.font='12px '+MONO;
+    ctx.fillText(String(w[i][j]), mx+j*mc+mc/2, my+i*mc+mc/2+4);
+  }
+  ctx.strokeStyle=COL.amber; ctx.lineWidth=2;
+  ctx.strokeRect(wx, wy, K*IC, K*IC);
+  ctx.strokeRect(ox-1, oy-1, OC+2, OC+2);
+
+  // ---- calculation row: patch ⊙ filter = products, Σ → output ----
+  const patch=[], prod=[];
+  let s=0;
+  for(let i=0;i<K;i++){ patch.push([]); prod.push([]);
+    for(let j=0;j<K;j++){
+      const p = x[(r+i)*N+c+j];
+      patch[i].push(p); prod[i].push(p*w[i][j]); s += p*w[i][j];
+    }
+  }
+  const x1=30, x2=x1+K*CC+50, x3=x2+K*CC+50, x4=x3+K*CC+60;
+  grid3(x1, CY, patch, gray, v=>v>0.55?'#111':COL.ink, 'patch at ('+r+', '+c+')', true);
+  symbol('⊙', x1+K*CC+25);
+  grid3(x2, CY, w, v=>signedColor(v,1.6), ()=>COL.ink, 'filter', false);
+  symbol('=', x2+K*CC+25);
+  grid3(x3, CY, prod, v=>signedColor(v,1.6), ()=>COL.ink, 'element-wise products', false);
+  symbol('Σ', x3+K*CC+30);
+  // result box
+  const rb=60, ry=CY+K*CC/2-rb/2;
+  ctx.fillStyle=signedColor(s,vmax); ctx.fillRect(x4, ry, rb, rb);
+  ctx.strokeStyle=COL.amber; ctx.lineWidth=2; ctx.strokeRect(x4, ry, rb, rb);
+  ctx.fillStyle=COL.ink; ctx.font='600 15px '+MONO; ctx.textAlign='center';
+  ctx.fillText(fmt(s), x4+rb/2, ry+rb/2+5);
+  ctx.fillStyle=COL.muted; ctx.font='13px sans-serif';
+  ctx.fillText('out['+r+', '+c+']', x4+rb/2, CY+K*CC+20);
+  // narration: the nonzero terms of the sum
+  const terms=[];
+  for(let i=0;i<K;i++) for(let j=0;j<K;j++)
+    if(w[i][j]!==0) terms.push((w[i][j]<0?'− ':'+ ')+fmt(patch[i][j]));
+  const half = Math.ceil(terms.length/2);
+  ctx.textAlign='left'; ctx.fillStyle=COL.muted; ctx.font='13px '+MONO;
+  const nx = x4+rb+28;
+  ctx.fillText('= '+terms.slice(0,half).join(' ').replace(/^\+ /,''), nx, CY+K*CC/2-14);
+  ctx.fillText('  '+terms.slice(half).join(' '), nx, CY+K*CC/2+4);
+  ctx.fillStyle=COL.ink; ctx.font='600 14px '+MONO;
+  ctx.fillText('= '+fmt(s), nx, CY+K*CC/2+24);
+
+  syncInfo(r,c,s);
+}
+
+function syncInfo(r,c,s){
+  $('info').innerHTML =
+    '<div class="metric"><span>window rows / cols</span><b>'+r+'–'+(r+2)+' / '+c+'–'+(c+2)+'</b></div>'
+  + '<div class="metric"><span>out['+r+', '+c+']</span><b>'+fmt(s)+'</b></div>'
+  + '<div class="metric"><span>feature map min / max</span><b>'+fmt(Math.min(...out))+' / '+fmt(Math.max(...out))+'</b></div>';
+}
+
+// ===== hover: inspect any input or output position ===========================
+canvas.addEventListener('mousemove', e=>{
+  const b = canvas.getBoundingClientRect();
+  const px = (e.clientX-b.left)*W/b.width, py = (e.clientY-b.top)*H/b.height;
+  let p = null;
+  if(px>=OX && px<OX+M*OC && py>=IYo && py<IYo+M*OC)
+    p = {r:Math.floor((py-IYo)/OC), c:Math.floor((px-OX)/OC)};
+  else if(px>=IX && px<IX+N*IC && py>=IY && py<IY+N*IC)  // centre the window on the pixel
+    p = {r:clamp(Math.floor((py-IY)/IC)-1,0,M-1), c:clamp(Math.floor((px-IX)/IC)-1,0,M-1)};
+  probe = p; canvas.style.cursor = p ? 'crosshair' : 'default';
+});
+canvas.addEventListener('mouseleave', ()=>{ probe=null; canvas.style.cursor='default'; });
+
+// ===== controls =============================================================
+function setPlayLabel(){
+  $('play').textContent = k>=M*M ? 'Replay ▸' : (playing ? 'Pause' : 'Play ▸');
+}
+function setSpeed(t){  // slider 0..1 → 1..400 outputs/sec (log scale)
+  rate = Math.round(Math.pow(400, t));
+  $('speedV').textContent = rate+'/s';
+}
+function rebuild(){
+  compute(); k=0; acc=0; playing=false; setPlayLabel();
+  [...$('digits').children].forEach(b=>b.className = +b.dataset.d===digit?'sel':'');
+  [...$('filters').children].forEach(b=>b.className = b.dataset.f===filterName?'sel':'');
+}
+DIGITS.forEach(([d])=>{
+  const b=document.createElement('button'); b.textContent=d; b.dataset.d=d;
+  b.addEventListener('click', ()=>{ digit=d; rebuild(); });
+  $('digits').appendChild(b);
+});
+Object.keys(FILTERS).forEach(f=>{
+  const b=document.createElement('button'); b.textContent=f; b.dataset.f=f;
+  b.addEventListener('click', ()=>{ filterName=f; rebuild(); });
+  $('filters').appendChild(b);
+});
+$('speed').addEventListener('input', e=>setSpeed(+e.target.value));
+$('play').addEventListener('click', ()=>{
+  if(k>=M*M) k=0;
+  playing=!playing; acc=0; setPlayLabel();
+});
+$('step').addEventListener('click', ()=>{
+  if(k>=M*M) k=0;
+  playing=false; k++; setPlayLabel();
+});
+$('fill').addEventListener('click', ()=>{ k=M*M; playing=false; setPlayLabel(); });
+$('reset').addEventListener('click', ()=>{ k=0; playing=false; setPlayLabel(); });
+
+let lastTs=null;
+function tick(ts){
+  if(lastTs==null) lastTs=ts;
+  const dt=(ts-lastTs)/1000; lastTs=ts;
+  if(playing && k<M*M){
+    acc += dt*rate;
+    const n = Math.floor(acc); acc -= n;
+    k = Math.min(M*M, k+n);
+    if(k>=M*M){ playing=false; setPlayLabel(); }
+  }
+  draw();
+  requestAnimationFrame(tick);
+}
+
+setSpeed(+$('speed').value);
+rebuild();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
