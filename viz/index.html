@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10-605 Visualizations</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;
+    --mem-soft:    #d3e7ec;
+    --hit:         #a4530c;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --hit:         #e09a4d;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --hit:         #e09a4d;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+  code { font-family: var(--mono); font-size: .9em; }
+
+  /* ---- masthead ---- */
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--hit); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.2vw, 42px);
+    line-height: 1.1; margin: 0 0 10px; letter-spacing: -.01em;
+  }
+  .standfirst { margin: 0; color: var(--ink-soft); max-width: 75ch; }
+  .standfirst a { color: var(--mem); }
+  h2 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--ink-faint); margin: 32px 0 12px;
+  }
+
+  /* ---- cards ---- */
+  .grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 16px 18px;
+    transition: border-color .15s, background .15s;
+  }
+  a.card:hover { border-color: var(--mem); background: var(--mem-soft); }
+  .card h3 {
+    font-family: var(--serif); font-weight: 600; font-size: 19px;
+    margin: 0 0 6px; color: var(--ink);
+  }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+  .card .file { display: block; margin-top: 10px; font-family: var(--mono);
+                font-size: 11.5px; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">CMU 10-405 / 10-605 / 10-805</p>
+  <h1>Interactive visualizations</h1>
+  <p class="standfirst">
+    Step-by-step animations of algorithms from the course. Each one runs entirely in the
+    browser. See the <a href="../schedule.html">schedule</a> for the lectures they go with.
+  </p>
+</header>
+
+<h2>Map-Reduce and sorting</h2>
+<div class="grid">
+  <a class="card" href="merge-sort.html">
+    <h3>Low-memory scalable merge sort</h3>
+    <p>Sorting data that does not fit in memory: sorted runs are written to disk, then
+      merged while holding only a small buffer in memory.</p>
+    <span class="file">merge-sort.html</span>
+  </a>
+  <a class="card" href="partition.html">
+    <h3>Shuffle-sort in Map-Reduce</h3>
+    <p>Map, partition, shuffle, merge: how a partition function routes each key
+      to a worker, and how each worker's input ends up sorted.</p>
+    <span class="file">partition.html</span>
+  </a>
+  <a class="card" href="wordcount-partition.html">
+    <h3>Word count in Map-Reduce</h3>
+    <p>The classic example end to end: map, combine, partition, shuffle, reduce.</p>
+    <span class="file">wordcount-partition.html</span>
+  </a>
+</div>
+
+<h2>Parallel learning</h2>
+<div class="grid">
+  <a class="card" href="psgd_viz.html">
+    <h3>Parallel SGD by parameter mixing</h3>
+    <p>Workers run SGD on random shares of each superbatch, then their parameters are
+      averaged centrally and sent back out. Animates <code>psgd.py</code>.</p>
+    <span class="file">psgd_viz.html</span>
+  </a>
+</div>
+
+<h2>Randomized algorithms</h2>
+<div class="grid">
+  <a class="card" href="globe.html">
+    <h3>Random projection</h3>
+    <p>A spinning globe for the intuition behind random projections. Drag to rotate,
+      click to spin.</p>
+    <span class="file">globe.html</span>
+  </a>
+  <a class="card" href="countmin-sketch.html">
+    <h3>The countmin sketch</h3>
+    <p>Increment and retrieve with <i>t</i> hash rows; collisions only add, so estimates
+      are never too small.</p>
+    <span class="file">countmin-sketch.html</span>
+  </a>
+  <a class="card" href="simhash.html">
+    <h3>SimHash bitstrings</h3>
+    <p>Random-hyperplane signatures for course titles: similar titles get codes with
+      small Hamming distance.</p>
+    <span class="file">simhash.html</span>
+  </a>
+  <a class="card" href="multi-index-hashing.html">
+    <h3>Multi-index hashing with MinHash bands</h3>
+    <p>LSH with <i>b</i> bands of <i>r</i> MinHashes and one inverted index per band;
+      see which near neighbors are found or missed.</p>
+    <span class="file">multi-index-hashing.html</span>
+  </a>
+  <a class="card" href="jmeans-knn.html">
+    <h3>Approximate k-NN with a J-means tree</h3>
+    <p>Hierarchical J-means clustering: descend to the nearest centroid at each level,
+      then scan only that leaf.</p>
+    <span class="file">jmeans-knn.html</span>
+  </a>
+  <a class="card" href="pq-2d.html">
+    <h3>Product quantization in 2-D</h3>
+    <p>J-means in each 1-D subspace gives J² grid codewords from only 2J centroids.
+      Compare it with plain J-means.</p>
+    <span class="file">pq-2d.html</span>
+  </a>
+  <a class="card" href="pq-papers.html">
+    <h3>Product quantization of papers</h3>
+    <p>Reconstructing a paper's TF-IDF vector from per-subspace matches against the
+      other papers in the dataset.</p>
+    <span class="file">pq-papers.html</span>
+  </a>
+</div>
+
+<h2>Autodiff and deep learning</h2>
+<div class="grid">
+  <a class="card" href="autodiff.html">
+    <h3>Reverse-mode autodiff</h3>
+    <p>Forward and backward passes over a Wengert list, accumulating
+      δ = df/d· for each variable. Animates <code>autodiff.py</code>.</p>
+    <span class="file">autodiff.html</span>
+  </a>
+  <a class="card" href="convolution.html">
+    <h3>Convolution with edge filters</h3>
+    <p>Slide a 3×3 edge filter over an MNIST digit and build the feature map one
+      output at a time.</p>
+    <span class="file">convolution.html</span>
+  </a>
+</div>
+
+</div>
+</body>
+</html>
