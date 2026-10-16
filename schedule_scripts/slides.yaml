@@ -7,7 +7,7 @@ lsh-multi-index-jmeans.pptx:
   links:
    - https://10605.github.io/viz/countmin-sketch.html: Visualize countmin sketch behavior
    - https://10605.github.io/viz/multi-index-hashing.html: Visualize LSH with multi-index hashing
-   - https://10605.github.io/viz/multi-index-hashing.html: Visualize approximate kNN with heirarchical k-means
+   - https://10605.github.io/viz/jmeans-knn.html: Visualize approximate kNN with heirarchical k-means
    - https://10605.github.io/viz/pq-2d.html: Visualize PQ in 2d
    - https://10605.github.io/viz/pq-papers.html: Visualize PQ on text
 
