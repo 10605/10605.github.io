@@ -18,7 +18,7 @@
   .sub { color:var(--muted); max-width:940px; }
   .sub b { color:var(--ink); }
   .wrap { display:flex; flex-wrap:wrap; gap:18px; padding:12px 24px 28px; }
-  .stage { flex:1 1 640px; min-width:340px; }
+  .stage { flex:1 1 640px; min-width:340px; max-width:750px; }
   canvas { width:100%; height:auto; background:var(--panel);
            border:1px solid var(--line); border-radius:12px; }
   .side { flex:0 1 320px; min-width:270px; }
@@ -62,7 +62,8 @@
     next to a bright one of <b style="color:var(--pos)">+1</b>s, so it fires strongly
     <b style="color:var(--pos)">positive</b> where the image matches that pattern and
     <b style="color:var(--neg)">negative</b> where it matches the reverse.
-    <b>Hover</b> over the input or output to inspect any position.
+    <b>Hover</b> over the input or output to inspect any position; <b>click</b>
+    (or hold and drag) to write the inspected output into the feature map.
   </div>
 </header>
 
@@ -193,6 +194,7 @@ const gray = v=>{ const g=Math.round(v*255); return 'rgb('+g+','+g+','+g+')'; };
 let digit = 7, filterName = 'Top edge';
 let out = null, vmax = 1;     // full M×M output (precomputed), and its max |value|
 let k = 0;                    // # output cells filled (row-major)
+const written = new Uint8Array(M*M);  // cells written by clicking
 let probe = null;             // hovered position {r,c}, overrides display
 let playing = false, acc = 0, rate = 1;
 
@@ -239,8 +241,10 @@ function draw(){
   ctx.fillText('digit '+digit+'  *  '+filterName.toLowerCase()+' filter', 24, 34);
   ctx.textAlign='right'; ctx.font='600 16px sans-serif';
   ctx.fillStyle = probe ? COL.cyan : k>=M*M ? COL.amber : COL.muted;
-  ctx.fillText(probe ? 'inspecting (hover)' : k>=M*M ? '✓ feature map complete'
-               : k===0 ? 'press Play or Step' : k+' / '+(M*M)+' outputs', W-24, 34);
+  let nFilled = 0;
+  for(let t=0;t<M*M;t++) if(t<k || written[t]) nFilled++;
+  ctx.fillText(probe ? 'inspecting — click or drag to write' : nFilled>=M*M ? '✓ feature map complete'
+               : nFilled===0 ? 'press Play or Step' : nFilled+' / '+(M*M)+' outputs', W-24, 34);
 
   // ---- grid labels ----
   ctx.fillStyle=COL.muted; ctx.font='13px sans-serif'; ctx.textAlign='left';
@@ -262,7 +266,7 @@ function draw(){
   // ---- output map ----
   for(let i=0;i<M;i++) for(let j=0;j<M;j++){
     const t = i*M+j;
-    ctx.fillStyle = t<k ? signedColor(out[t],vmax) : COL.cell;
+    ctx.fillStyle = t<k || written[t] ? signedColor(out[t],vmax) : COL.cell;
     ctx.fillRect(OX+j*OC, IYo+i*OC, OC, OC);
   }
   ctx.strokeStyle='rgba(120,130,160,0.14)'; ctx.beginPath();
@@ -340,8 +344,8 @@ function syncInfo(r,c,s){
   + '<div class="metric"><span>feature map min / max</span><b>'+fmt(Math.min(...out))+' / '+fmt(Math.max(...out))+'</b></div>';
 }
 
-// ===== hover: inspect any input or output position ===========================
-canvas.addEventListener('mousemove', e=>{
+// ===== hover: inspect any input or output position; button down writes it ==
+function hover(e){
   const b = canvas.getBoundingClientRect();
   const px = (e.clientX-b.left)*W/b.width, py = (e.clientY-b.top)*H/b.height;
   let p = null;
@@ -350,7 +354,10 @@ canvas.addEventListener('mousemove', e=>{
   else if(px>=IX && px<IX+N*IC && py>=IY && py<IY+N*IC)  // centre the window on the pixel
     p = {r:clamp(Math.floor((py-IY)/IC)-1,0,M-1), c:clamp(Math.floor((px-IX)/IC)-1,0,M-1)};
   probe = p; canvas.style.cursor = p ? 'crosshair' : 'default';
-});
+  if(p && (e.buttons & 1)) written[p.r*M+p.c] = 1;
+}
+canvas.addEventListener('mousemove', hover);
+canvas.addEventListener('mousedown', e=>{ e.preventDefault(); hover(e); });
 canvas.addEventListener('mouseleave', ()=>{ probe=null; canvas.style.cursor='default'; });
 
 // ===== controls =============================================================
@@ -362,7 +369,7 @@ function setSpeed(t){  // slider 0..1 → 1..400 outputs/sec (log scale)
   $('speedV').textContent = rate+'/s';
 }
 function rebuild(){
-  compute(); k=0; acc=0; playing=false; setPlayLabel();
+  compute(); k=0; written.fill(0); acc=0; playing=false; setPlayLabel();
   [...$('digits').children].forEach(b=>b.className = +b.dataset.d===digit?'sel':'');
   [...$('filters').children].forEach(b=>b.className = b.dataset.f===filterName?'sel':'');
 }
@@ -386,7 +393,7 @@ $('step').addEventListener('click', ()=>{
   playing=false; k++; setPlayLabel();
 });
 $('fill').addEventListener('click', ()=>{ k=M*M; playing=false; setPlayLabel(); });
-$('reset').addEventListener('click', ()=>{ k=0; playing=false; setPlayLabel(); });
+$('reset').addEventListener('click', ()=>{ k=0; written.fill(0); playing=false; setPlayLabel(); });
 
 let lastTs=null;
 function tick(ts){
