@@ -226,21 +226,6 @@
    - hyperparam.pptx 
    - '* Miniproject: feedback on open-ended miniproject proposals given; open proposals are posted for class'
 
-- title: Model compression
-  pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1B5nLCqT3DBh5UnmNVfsvNaD20sEAQe_y/view?usp=drive_link
-  summary: 'Quantization, Pruning, and Distillation'
-  content:
-   - quantize-distill.pptx
-   - cats-and-sentiment.pptx 
-   - pruning.pptx
-
-- title: Recitation - HW5
-  type: recitation
-  summary: 
-  content: []
-
-########## Caching and Pruning
 
 - title: Embarrassingly Parallel Training
   pptx_link: https://docs.google.com/presentation/d/167TcvMTMtt9RbHuYenmyckaa-eHFHJmL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -252,6 +237,23 @@
    - '* HW 5 out - GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
+
+- title: 'Recitation - HW5'
+  type: recitation
+  summary: 
+  content: []
+
+########## Caching and Pruning
+
+- title: Model compression
+  pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1B5nLCqT3DBh5UnmNVfsvNaD20sEAQe_y/view?usp=drive_link
+  summary: 'Quantization, Pruning, and Distillation'
+  content:
+   - quantize-distill.pptx
+   - cats-and-sentiment.pptx 
+   - pruning.pptx
+
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
   pptx_link: https://docs.google.com/presentation/d/1xd31ZNQOGyoobxslUORib2qgS4v9p8p3/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
@@ -262,7 +264,7 @@
     - '* HW 4 Slot A due'
     - '* Miniproject: structured miniproject survey due'
 
-- title: Recitation - Structured miniproject
+- title: 'Recitation - Structured miniproject / HW4 Writing Session'
   type: recitation
   slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
   content:
@@ -290,7 +292,7 @@
     - contrastive-tricks.pptx
     - contreiver.pptx
 
-- title: HW4 Writing Session
+- title: 'No recitation'
   type: recitation
 
 ########## RAG, Parallel Training, PPI
