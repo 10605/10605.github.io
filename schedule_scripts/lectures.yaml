@@ -196,7 +196,6 @@
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW 4 out'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
@@ -209,6 +208,7 @@
     - transformer-discussion.pptx
     - transformer-bpe.pptx
   content:
+    - '* HW 4 out'
     - '* Miniproject: open-ended miniproject proposals due'
 
 - title: 'Recitation: PyTorch / HW4'
@@ -250,7 +250,6 @@
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
-   - '* HW 4 Slot A due'
    - '* HW 5 out - GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
@@ -261,6 +260,7 @@
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
+    - '* HW 4 Slot A due'
     - '* Miniproject: structured miniproject survey due'
 
 - title: Recitation - Structured miniproject
