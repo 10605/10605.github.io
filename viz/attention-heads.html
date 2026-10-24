@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attention Head Sharing</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;
+    --mem-soft:    #d3e7ec;
+    --focus:       #a4530c;
+    --q-fill: #dae8fc; --q-line: #6c8ebf;   /* colours follow the GQA paper's figure */
+    --k-fill: #f8cecc; --k-line: #b85450;
+    --v-fill: #ffe6cc; --v-line: #d79b00;
+    --c-fill: #e1d5e7; --c-line: #9673a6;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --focus:       #e09a4d;
+      --q-fill: #1d3150; --q-line: #8fb3e6;
+      --k-fill: #4a2322; --k-line: #e08a85;
+      --v-fill: #4a3410; --v-line: #e6b04a;
+      --c-fill: #362a40; --c-line: #c2a3d6;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --focus:       #e09a4d;
+    --q-fill: #1d3150; --q-line: #8fb3e6;
+    --k-fill: #4a2322; --k-line: #e08a85;
+    --v-fill: #4a3410; --v-line: #e6b04a;
+    --c-fill: #362a40; --c-line: #c2a3d6;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 56px; }
+  code, .num { font-family: var(--mono); font-size: .9em; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
+       line-height: 1.1; margin: 0 0 8px; }
+  header p { margin: 0; color: var(--ink-soft); max-width: 90ch; }
+  h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+       text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+          box-shadow: var(--shadow); padding: 14px 16px; }
+
+  /* ---- controls ---- */
+  .controls { display: grid; gap: 10px 22px;
+              grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .ctl { display: grid; grid-template-columns: 9.5em 1fr 4.5em; align-items: center; gap: 8px; }
+  .ctl label { font-size: 13.5px; color: var(--ink-soft); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; text-align: right; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--mem); }
+  .ctl input[type=number], .ctl select {
+    grid-column: 2 / 4; font: 13px var(--mono); color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 3px; padding: 3px 6px; min-width: 0; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px;
+             padding-top: 12px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink-soft); }
+  button { font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+           border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--mem); background: var(--mem-soft); }
+
+  /* ---- panels ---- */
+  .layout { display: grid; gap: 14px; margin: 16px 0; }
+  .panels { display: grid; gap: 14px; align-content: start;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .panel h3 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0; }
+  .panel { cursor: pointer; transition: border-color .15s; }
+  .panel:hover { border-color: var(--mem); }
+  .panel.sel { border-color: var(--mem); box-shadow: 0 0 0 1px var(--mem), var(--shadow); }
+  .panel .sub { color: var(--ink-faint); font-size: 12.5px; margin: 0 0 6px; min-height: 2.6em; }
+  .panel svg { width: 100%; height: auto; display: block; }
+  .panel .stats { font-size: 13px; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
+  .stats div { display: flex; justify-content: space-between; gap: 8px; }
+  .stats .k { color: var(--ink-soft); }
+  .rel { height: 5px; background: var(--surface-sunk); border-radius: 3px; margin: 2px 0 6px; }
+  .rel span { display: block; height: 100%; border-radius: 3px; background: var(--mem); }
+  .rel.cache span { background: var(--focus); }
+
+  svg text { font-family: var(--sans); fill: var(--ink-soft); }
+  .q { fill: var(--q-fill); stroke: var(--q-line); }
+  .k { fill: var(--k-fill); stroke: var(--k-line); }
+  .v { fill: var(--v-fill); stroke: var(--v-line); }
+  .c { fill: var(--c-fill); stroke: var(--c-line); }
+  .derived { fill-opacity: .35; stroke-dasharray: 3 2; }
+  .att { stroke: var(--ink-faint); stroke-dasharray: 3 3; fill: none; }
+  .up  { stroke: var(--c-line); stroke-opacity: .55; fill: none; }
+
+  /* ---- table ---- */
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { padding: 5px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--ink-soft); }
+  td { font-family: var(--mono); font-size: 12.5px; }
+  td:first-child { font-family: var(--sans); font-size: 13.5px; }
+  tr.total td { font-weight: 700; }
+  td.na { color: var(--ink-faint); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+  .legend svg { vertical-align: middle; margin-right: 4px; }
+  footer { margin-top: 18px; color: var(--ink-soft); font-size: 13.5px; max-width: 100ch; }
+  footer p { margin: 0 0 8px; }
+  /* ---- equation panel ---- */
+  .eqs .cols { display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .eqs[hidden] { display: none; }
+  .eqs .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .eqs h3 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0 0 4px; }
+  .eqs h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; font-weight: 600;
+            text-transform: uppercase; color: var(--ink-faint); margin: 14px 0 2px; }
+  .eqs p { margin: 4px 0; font-size: 13.5px; color: var(--ink-soft); }
+  .eqs .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .eqs .katex { font-size: 1.05em; }
+  .eqs pre { font-size: 12px; white-space: pre-wrap; }
+  .eqs table td, .eqs table th { padding: 3px 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Multi-head, grouped-query, multi-query and latent attention</h1>
+  <p>Each bar is one head's vector for a single token (bar height ∝ head dimension
+    <i>d<sub>h</sub></i>). Dashed lines show which key/value head each query head attends with.
+    The variants differ in how many key/value heads they keep, which changes both the
+    attention <b>parameter count</b> and the size of the <b>KV cache</b> needed at inference.
+    Multi-head latent attention (MLA) instead caches one small latent vector per token and
+    reconstructs every head's key and value from it.
+    <b>Click a panel</b> to see the equations that define it.</p>
+</header>
+
+<div class="card">
+  <h2>Configuration</h2>
+  <div class="controls">
+    <div class="ctl"><label for="H">Query heads <i>H</i></label>
+      <input id="H" type="range" min="1" max="128" step="1"><span class="val" id="Hv"></span></div>
+    <div class="ctl"><label for="dh">Head dim <i>d<sub>h</sub></i></label>
+      <input id="dh" type="range" min="8" max="256" step="8"><span class="val" id="dhv"></span></div>
+    <div class="ctl"><label for="G">GQA KV heads <i>G</i></label>
+      <select id="G"></select></div>
+    <div class="ctl"><label for="dc">MLA latent <i>d<sub>c</sub></i></label>
+      <input id="dc" type="range" min="16" max="2048" step="16"><span class="val" id="dcv"></span></div>
+    <div class="ctl"><label for="dm">Model dim <i>d<sub>model</sub></i></label>
+      <input id="dm" type="number" min="16" max="65536" step="64"></div>
+    <div class="ctl"><label for="L">Layers <i>L</i></label>
+      <input id="L" type="number" min="1" max="512" step="1"></div>
+    <div class="ctl"><label for="T">Context length</label>
+      <input id="T" type="number" min="1" max="10000000" step="1024"></div>
+    <div class="ctl"><label for="B">Batch size</label>
+      <input id="B" type="number" min="1" max="4096" step="1"></div>
+  </div>
+  <div class="presets">Presets:
+    <button data-p="fig">GQA paper figure</button>
+    <button data-p="llama">Llama-2-70B</button>
+    <button data-p="ds">DeepSeek-V2 (approx.)</button>
+    <button id="tie">Set <i>d<sub>model</sub></i> = <i>H·d<sub>h</sub></i></button>
+  </div>
+</div>
+
+<div class="layout" id="layout">
+  <div class="panels" id="panels"></div>
+  <aside class="card eqs" id="eqs" hidden aria-live="polite"></aside>
+</div>
+
+<div class="card">
+  <h2>Attention parameters and KV cache (biases ignored)</h2>
+  <div class="tablewrap"><table id="tbl"></table></div>
+  <div class="legend">
+    <span><svg width="12" height="16"><rect x="1" y="1" width="10" height="14" rx="2" class="k" stroke-width="1.5"/></svg>solid: stored in the KV cache</span>
+    <span><svg width="12" height="16"><rect x="1" y="1" width="10" height="14" rx="2" class="k derived" stroke-width="1.5"/></svg>dashed: recomputed from the latent, not cached</span>
+    <span><svg width="26" height="10"><line x1="1" y1="5" x2="25" y2="5" class="att" stroke-width="1.2"/></svg>query attends with this key/value</span>
+    <span><svg width="26" height="10"><line x1="1" y1="5" x2="25" y2="5" class="up" stroke-width="1.2"/></svg>up-projection from latent</span>
+  </div>
+</div>
+
+<footer>
+  <p><b>Parameters per layer.</b> Every variant has <code>W_Q</code> (<i>d<sub>model</sub></i> × <i>H·d<sub>h</sub></i>) and
+    <code>W_O</code> (<i>H·d<sub>h</sub></i> × <i>d<sub>model</sub></i>). MHA, GQA and MQA have <code>W_K</code> and
+    <code>W_V</code> of size <i>d<sub>model</sub></i> × <i>G·d<sub>h</sub></i>, with <i>G</i> = <i>H</i>, the chosen <i>G</i>, and 1
+    respectively; each caches 2·<i>G·d<sub>h</sub></i> numbers per token per layer. MLA has a shared down-projection
+    <code>W_DKV</code> (<i>d<sub>model</sub></i> × <i>d<sub>c</sub></i>) and per-head up-projections <code>W_UK</code>,
+    <code>W_UV</code> (<i>d<sub>c</sub></i> × <i>H·d<sub>h</sub></i>), and caches only the <i>d<sub>c</sub></i>-dimensional
+    latent. At inference <code>W_UK</code> can be folded into <code>W_Q</code> and <code>W_UV</code> into <code>W_O</code>, so the
+    full keys and values never need to be materialised.</p>
+  <p><b>Simplifications.</b> Real DeepSeek-V2 MLA also compresses queries through a second latent
+    (<i>d<sub>c</sub>′</i> = 1536) and adds a small decoupled RoPE key (64 dims per token, also cached);
+    both are omitted here, so the DeepSeek preset is approximate. KV-cache sizes assume 2 bytes per number (bf16).
+    Figure layout after Ainslie et al., <i>GQA: Training Generalized Multi-Query Transformer Models from
+    Multi-Head Checkpoints</i> (2023).</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const NUM_IDS = ['H','dh','dc','dm','L','T','B'];
+const PRESETS = {
+  fig:   {H:8,   dh:64,  G:4, dc:128, dm:512,  L:6,  T:2048,  B:1},
+  llama: {H:64,  dh:128, G:8, dc:512, dm:8192, L:80, T:4096,  B:1},
+  ds:    {H:128, dh:128, G:8, dc:512, dm:5120, L:60, T:32768, B:1},
+};
+let S = {...PRESETS.fig};
+
+// ===== formatting ===========================================================
+function short(n){
+  for (const [d,s] of [[1e12,'T'],[1e9,'B'],[1e6,'M'],[1e3,'K']])
+    if (n >= d) return (n/d).toPrecision(3).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'') + s;
+  return String(n);
+}
+function bytes(n){
+  for (const [d,s] of [[2**40,'TiB'],[2**30,'GiB'],[2**20,'MiB'],[2**10,'KiB']])
+    if (n >= d) return (n/d).toPrecision(3).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'') + ' ' + s;
+  return n + ' B';
+}
+const comma = n => n.toLocaleString('en-US');
+const pct = x => (x >= 10 ? x.toFixed(0) : x.toPrecision(2)) + '%';
+
+// ===== the four variants ====================================================
+// Each returns its per-layer weight matrices [name, rows, cols] and cached numbers per token per layer.
+function variants(){
+  const {H, dh, G, dc, dm} = S, q = ['W_Q', dm, H*dh], o = ['W_O', H*dh, dm];
+  const std = (g, name, sub) => ({ name, sub, kv: g,
+    mats: [q, ['W_K', dm, g*dh], ['W_V', dm, g*dh], o], cache: 2*g*dh });
+  return [
+    std(H, 'Multi-head (MHA)', `${H} query, ${H} key and ${H} value heads`),
+    std(G, 'Grouped-query (GQA)', `${G} key/value head${G>1?'s':''}, each shared by ${H/G} query head${H/G>1?'s':''}`),
+    std(1, 'Multi-query (MQA)', `one key/value head shared by all ${H} query heads`),
+    { name: 'Multi-head latent (MLA)', sub: `${H} key/value heads reconstructed from a cached ${dc}-dim latent`,
+      kv: H, latent: true, cache: dc,
+      mats: [q, ['W_DKV', dm, dc], ['W_UK', dc, H*dh], ['W_UV', dc, H*dh], o] },
+  ].map(v => ({...v, params: v.mats.reduce((s,[,r,c]) => s + r*c, 0)}));
+}
+
+// ===== drawing ==============================================================
+const SVGW = 320, LABW = 58, PAD = 8, MAXBAR = 72;
+function svgEl(tag, attrs, parent){
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return parent ? parent.appendChild(e) : e;
+}
+function drawPanel(svg, v){
+  svg.replaceChildren();
+  const {H, dh, dc} = S, barH = 18 + (MAXBAR-18) * dh/256, gap = 30;
+  const areaW = SVGW - LABW - PAD, slot = areaW / H, bw = Math.max(1.5, Math.min(18, slot*0.6));
+  const sw = bw < 5 ? 0.8 : 1.5, rx = Math.min(3, bw/3);
+  const qx = i => LABW + slot*(i + .5);
+  const per = H / v.kv, kx = j => (qx(j*per) + qx((j+1)*per - 1)) / 2;
+  const latH = 14;
+  // row tops, from the top of the figure down
+  const rows = v.latent ? ['Values','Latent','Keys','Queries'] : ['Values','Keys','Queries'];
+  const rowH = r => r === 'Latent' ? latH : barH;
+  const y = {}; let yy = PAD;
+  for (const r of rows){ y[r] = yy; yy += rowH(r) + gap * (v.latent ? .8 : 1.15); }
+  const total = yy - gap * (v.latent ? .8 : 1.15) + PAD;
+  svg.setAttribute('viewBox', `0 0 ${SVGW} ${total}`);
+  for (const r of rows)
+    svgEl('text', {x: 0, y: y[r] + rowH(r)/2 + 4, 'font-size': 13}, svg).textContent = r;
+
+  const g = svgEl('g', {}, svg);
+  // attention lines: query i -> key head floor(i/per)
+  for (let i = 0; i < H; i++)
+    svgEl('line', {x1: qx(i), y1: y.Queries, x2: kx(Math.floor(i/per)), y2: y.Keys + barH,
+                   class: 'att', 'stroke-width': H > 32 ? .5 : 1}, g);
+  if (v.latent){
+    const span = qx(H-1) - qx(0) + bw, lw = Math.max(10, Math.min(span, span * dc / (H*dh)));
+    const lx = (qx(0) + qx(H-1))/2 - lw/2, ly = y.Latent;
+    for (let j = 0; j < H; j++){
+      svgEl('line', {x1: lx + lw*(j+.5)/H, y1: ly, x2: kx(j), y2: y.Values + barH, class: 'up', 'stroke-width': H > 32 ? .5 : 1}, g);
+      svgEl('line', {x1: lx + lw*(j+.5)/H, y1: ly + latH, x2: kx(j), y2: y.Keys, class: 'up', 'stroke-width': H > 32 ? .5 : 1}, g);
+    }
+    svgEl('rect', {x: lx, y: ly, width: lw, height: latH, rx: 3, class: 'c', 'stroke-width': 1.5}, g);
+    const t = svgEl('text', {x: lx + lw + 6, y: ly + latH/2 + 4, 'font-size': 11}, g);
+    t.textContent = `c_KV (${dc}${dc > H*dh ? ' > H·dₕ' : ''})`;
+    if (lx + lw + 6 + 70 > SVGW){ t.setAttribute('x', lx - 6); t.setAttribute('text-anchor', 'end'); }
+  }
+  const bar = (x, top, cls) => svgEl('rect', {x: x - bw/2, y: top, width: bw, height: barH, rx, class: cls, 'stroke-width': sw}, g);
+  for (let j = 0; j < v.kv; j++){
+    bar(kx(j), y.Values, 'v' + (v.latent ? ' derived' : ''));
+    bar(kx(j), y.Keys,   'k' + (v.latent ? ' derived' : ''));
+  }
+  for (let i = 0; i < H; i++) bar(qx(i), y.Queries, 'q');
+}
+
+// ===== equations, one entry per variant =====================================
+// Each is a list of ['h', heading] | ['p', html] | ['m', TeX] items.
+const R = String.raw;
+const QPROJ = R`Q_i = X W^Q_i,\quad W^Q_i \in \mathbb{R}^{d_{model}\times d_h},\quad i = 1..H`;
+const OUT = [['h', 'Output'],
+  ['m', R`O = [\,\mathrm{head}_1 \cdots \mathrm{head}_H\,]\, W^O,\quad W^O \in \mathbb{R}^{H d_h \times d_{model}}`]];
+const SETUP = ['p', `<i>X</i> ∈ ℝ<sup><i>T</i>×<i>d</i><sub>model</sub></sup> holds the layer's input, one row per
+  token; <i>M</i> is the causal mask (0 on and below the diagonal, −∞ above).`];
+const softmax = (q, k, v) => R`\mathrm{head}_i = \mathrm{softmax}\!\Big(\frac{${q}\,${k}^{\top}}{\sqrt{d_h}} + M\Big)\, ${v}`;
+const EQS = [
+  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
+    ['m', R`K_i = X W^K_i,\quad V_i = X W^V_i,\quad W^K_i, W^V_i \in \mathbb{R}^{d_{model}\times d_h}`],
+    ['h', 'Attention'], ['m', softmax('Q_i', 'K_i', 'V_i')], ...OUT,
+    ['h', 'KV cache per token'], ['m', R`k_{t,i},\ v_{t,i}\ \text{for } i = 1..H:\quad 2 H d_h`] ],
+  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
+    ['m', R`K_j = X W^K_j,\quad V_j = X W^V_j,\quad j = 1..G`],
+    ['p', 'Query head <i>i</i> uses key/value head <i>g</i>(<i>i</i>), so each group of <i>H/G</i> consecutive query heads shares one:'],
+    ['m', R`g(i) = \big\lceil i\, G / H \big\rceil`],
+    ['h', 'Attention'], ['m', softmax('Q_i', 'K_{g(i)}', 'V_{g(i)}')], ...OUT,
+    ['h', 'KV cache per token'], ['m', R`k_{t,j},\ v_{t,j}\ \text{for } j = 1..G:\quad 2 G d_h`] ],
+  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
+    ['m', R`K = X W^K,\quad V = X W^V,\quad W^K, W^V \in \mathbb{R}^{d_{model}\times d_h}`],
+    ['h', 'Attention'], ['p', 'Every query head attends with the same keys and values:'],
+    ['m', softmax('Q_i', 'K', 'V')], ...OUT,
+    ['h', 'KV cache per token'], ['m', R`k_t,\ v_t:\quad 2 d_h`] ],
+  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
+    ['p', 'Keys and values are compressed jointly into a low-rank latent:'],
+    ['m', R`C = X W^{DKV},\quad W^{DKV} \in \mathbb{R}^{d_{model}\times d_c}`],
+    ['p', 'and each head expands the latent back up:'],
+    ['m', R`K_i = C\, W^{UK}_i,\quad V_i = C\, W^{UV}_i,\quad W^{UK}_i, W^{UV}_i \in \mathbb{R}^{d_c \times d_h}`],
+    ['h', 'Attention'], ['m', softmax('Q_i', 'K_i', 'V_i')], ...OUT,
+    ['p', `At inference the up-projections are folded into the neighbouring matrices, so attention runs
+      directly over the cached latent <i>C</i> (writing <i>W</i><sup>O</sup><sub><i>i</i></sub> for head <i>i</i>'s rows of <i>W</i><sup>O</sup>):`],
+    ['m', R`Q_i K_i^{\top} = \big(X\, W^Q_i\, W^{UK\top}_i\big)\, C^{\top}`],
+    ['m', R`\mathrm{head}_i\, W^O_i = \mathrm{softmax}(\cdots)\; C\, \big(W^{UV}_i W^O_i\big)`],
+    ['h', 'KV cache per token'], ['m', R`c_t \in \mathbb{R}^{d_c}:\quad d_c`] ],
+];
+const MATS_TEX = {W_Q: 'W^Q', W_K: 'W^K', W_V: 'W^V', W_O: 'W^O', W_DKV: 'W^{DKV}', W_UK: 'W^{UK}', W_UV: 'W^{UV}'};
+const tex = s => window.katex ? katex.renderToString(s, {displayMode: true, throwOnError: false}) : `<pre>${s}</pre>`;
+const texInline = s => window.katex ? katex.renderToString(s, {throwOnError: false}) : `<code>${s}</code>`;
+
+let sel = null;   // index of the variant whose equations are shown, or null
+function renderEqs(vs){
+  const box = $('eqs');
+  panelEls.forEach((el, i) => { el.classList.toggle('sel', i === sel); el.setAttribute('aria-pressed', i === sel); });
+  box.hidden = sel === null;
+  if (sel === null) return;
+  const v = vs[sel];
+  let h = `<div class="top"><h3>${v.name}</h3><button id="eqclose" aria-label="Close equations">✕</button></div>`;
+  // each heading starts a new column-section; text before the first heading spans the card
+  h += EQS[sel].map(([kind, x]) =>
+    kind === 'h' ? `</section><section><h4>${x}</h4>` : kind === 'p' ? `<p>${x}</p>` : tex(x)
+  ).join('').replace('</section>', '<div class="cols">');
+  h += '</section><section><h4>Weights at current settings</h4><table>' +
+    v.mats.map(([n, r, c]) => `<tr><td>${texInline(MATS_TEX[n])}</td><td>${comma(r)} × ${comma(c)}</td><td>${comma(r*c)}</td></tr>`).join('') +
+    `<tr class="total"><td>Total</td><td></td><td>${comma(v.params)}</td></tr></table>` +
+    `<p>Per-head matrices <i>W</i><sub><i>i</i></sub> are column blocks of these (row blocks, for <i>W</i><sup>O</sup>).</p></section></div>`;
+  box.innerHTML = h;
+  $('eqclose').addEventListener('click', () => { sel = null; renderEqs(vs); });
+}
+
+// ===== rendering ============================================================
+const panels = $('panels');
+const vs0 = variants();
+const panelEls = vs0.map((_, i) => {
+  const d = document.createElement('div'); d.className = 'card panel';
+  d.tabIndex = 0; d.setAttribute('role', 'button');
+  d.innerHTML = '<h3></h3><p class="sub"></p><svg role="img"></svg><div class="stats"></div>';
+  const pick = () => {
+    sel = sel === i ? null : i; renderEqs(variants());
+    if (sel !== null) $('eqs').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  };
+  d.addEventListener('click', pick);
+  d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } });
+  panels.appendChild(d); return d;
+});
+
+function render(){
+  for (const id of NUM_IDS) $(id).value = S[id];
+  $('Hv').textContent = S.H; $('dhv').textContent = S.dh; $('dcv').textContent = S.dc;
+  // GQA must use a divisor of H
+  const divs = [...Array(S.H).keys()].map(i => i+1).filter(d => S.H % d === 0);
+  if (!divs.includes(S.G)) S.G = divs.reduce((a,b) => Math.abs(b-S.G) < Math.abs(a-S.G) ? b : a);
+  $('G').innerHTML = divs.map(d => `<option${d===S.G?' selected':''}>${d}</option>`).join('');
+
+  const vs = variants(), mha = vs[0];
+  const maxP = Math.max(...vs.map(v => v.params)), maxC = Math.max(...vs.map(v => v.cache));
+  vs.forEach((v, i) => {
+    const el = panelEls[i];
+    el.querySelector('h3').textContent = v.name;
+    el.querySelector('.sub').textContent = v.sub;
+    const svg = el.querySelector('svg');
+    svg.setAttribute('aria-label', `${v.name}: ${v.sub}`);
+    drawPanel(svg, v);
+    el.querySelector('.stats').innerHTML =
+      `<div><span class="k">Params / layer</span><span class="num">${short(v.params)} (${pct(100*v.params/mha.params)} of MHA)</span></div>
+       <div class="rel"><span style="width:${100*v.params/maxP}%"></span></div>
+       <div><span class="k">KV cache / token / layer</span><span class="num">${comma(v.cache)} (${pct(100*v.cache/mha.cache)})</span></div>
+       <div class="rel cache"><span style="width:${100*v.cache/maxC}%"></span></div>`;
+  });
+
+  // table: one row per weight-matrix role, matched across variants
+  const roles = ['W_Q', 'W_K', 'W_V', 'W_DKV', 'W_UK', 'W_UV', 'W_O'];
+  const cell = (v, name) => { const m = v.mats.find(m => m[0] === name);
+    return m ? `<td title="${m[1]} × ${m[2]}">${comma(m[1]*m[2])}</td>` : '<td class="na">—</td>'; };
+  const {L, T, B} = S;
+  let h = '<tr><th></th>' + vs.map(v => `<th>${v.name.match(/\((.*)\)/)[1]}</th>`).join('') + '</tr>';
+  for (const name of roles) h += `<tr><td><code>${name}</code></td>` + vs.map(v => cell(v, name)).join('') + '</tr>';
+  h += '<tr class="total"><td>Params / layer</td>' + vs.map(v => `<td>${comma(v.params)}</td>`).join('') + '</tr>';
+  h += `<tr class="total"><td>Params, all ${L} layers</td>` + vs.map(v => `<td>${short(v.params*L)}</td>`).join('') + '</tr>';
+  h += '<tr><td>KV cache / token / layer</td>' + vs.map(v => `<td>${comma(v.cache)}</td>`).join('') + '</tr>';
+  h += `<tr class="total"><td>KV cache, ${comma(B)} × ${comma(T)} tokens × ${L} layers (bf16)</td>` +
+       vs.map(v => `<td>${bytes(2*v.cache*L*T*B)}</td>`).join('') + '</tr>';
+  $('tbl').innerHTML = h;
+  renderEqs(vs);
+}
+
+// ===== wiring ===============================================================
+for (const id of NUM_IDS) $(id).addEventListener('input', e => {
+  const n = parseInt(e.target.value, 10);
+  if (n > 0){ S[id] = n; render(); }
+});
+$('G').addEventListener('change', e => { S.G = +e.target.value; render(); });
+document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { S = {...PRESETS[b.dataset.p]}; render(); }));
+$('tie').addEventListener('click', () => { S.dm = S.H * S.dh; render(); });
+render();
+</script>
+</body>
+</html>
