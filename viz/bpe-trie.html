@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BPE on a Trie</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;   /* edges created by the last merge */
+    --mem-soft:    #d3e7ec;
+    --hit:         #a4530c;   /* edges the next merge will join */
+    --hit-soft:    #f0dfc9;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --hit:         #e09a4d;
+      --hit-soft:    #3a2a15;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --hit:         #e09a4d;
+    --hit-soft:    #3a2a15;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 56px; }
+  code { font-family: var(--mono); font-size: .9em; }
+  a { color: var(--mem); }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
+       line-height: 1.1; margin: 0 0 8px; }
+  header p { margin: 0; color: var(--ink-soft); max-width: 90ch; }
+  h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+       text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+          box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+  .card p { margin: 0 0 6px; font-size: 13.5px; color: var(--ink-soft); }
+  button { font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+           border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--mem); background: var(--mem-soft); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { border-color: var(--mem); }
+
+  /* ---- corpus editor ---- */
+  .corpus { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: start; }
+  textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical;
+             font: 13px var(--mono); color: var(--ink); background: var(--surface-sunk);
+             border: 1px solid var(--line); border-radius: 3px; padding: 6px 8px; }
+  .corpus .side { display: flex; flex-direction: column; gap: 6px; }
+  .hint { font-size: 12.5px; color: var(--ink-faint); margin: 4px 0 0; }
+  @media (max-width: 640px) { .corpus { grid-template-columns: minmax(0, 1fr); } }
+
+  /* ---- player ---- */
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0; }
+  .player input[type=range] { flex: 1 1 160px; accent-color: var(--mem); }
+  .player .k { font-family: var(--mono); font-size: 13px; min-width: 9ch; }
+  .status { font-size: 14px; color: var(--ink-soft); min-height: 1.5em; margin: 0 0 14px; }
+
+  .main { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr); }
+  @media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+  .col { display: grid; gap: 14px; align-content: start; min-width: 0; }
+  .treebox { overflow: auto; }
+  #tree { display: block; }
+
+  .tok { font: 13.5px var(--mono); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--line);
+         background: var(--surface-sunk); white-space: pre; }
+  .tok.eow { color: var(--ink-faint); }
+
+  /* ---- tree drawing ---- */
+  svg text { font-family: var(--mono); }
+  .edge { fill: none; stroke: var(--line); stroke-width: 1.6; }
+  .lab rect { fill: var(--surface-sunk); stroke: var(--line); }
+  .lab text { fill: var(--ink); font-size: 13px; }
+  .next .edge { stroke: var(--hit); stroke-width: 2.4; }
+  .next.lab rect { fill: var(--hit-soft); stroke: var(--hit); stroke-width: 1.5; }
+  .new .edge { stroke: var(--mem); stroke-width: 2.4; }
+  .new.lab rect { fill: var(--mem-soft); stroke: var(--mem); stroke-width: 1.5; }
+  .new.lab text { font-weight: 700; }
+  .node circle { fill: var(--surface); stroke: var(--ink-faint); stroke-width: 1.3; }
+  .node text { fill: var(--ink-soft); font-size: 10px; }
+  .node.root circle { fill: var(--ink-faint); }
+  .leafword { fill: var(--ink-faint); font-size: 12px; font-family: var(--sans) !important; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { padding: 3px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 12.5px; }
+  td.n { text-align: right; font-family: var(--mono); font-size: 13px; }
+  th.n { text-align: right; }
+  tr.top td { background: var(--hit-soft); font-weight: 600; }
+  tr.chg td.d { color: var(--mem); font-weight: 600; }
+  tr.gone td { color: var(--ink-faint); text-decoration: line-through; }
+  .scroll { max-height: 420px; overflow-y: auto; }
+  dl.stats { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; margin: 0; font-size: 13.5px; }
+  dl.stats dt { color: var(--ink-soft); }
+  dl.stats dd { margin: 0; font-family: var(--mono); font-size: 13px; text-align: right; }
+  dl.stats .sep { grid-column: 1 / 3; border-top: 1px solid var(--line); margin: 4px 0; }
+  ol.rule { margin: 0; padding-left: 1.4em; font-size: 13.5px; color: var(--ink-soft); }
+  ol.rule li { margin-bottom: 4px; }
+  footer { margin-top: 18px; color: var(--ink-soft); font-size: 13.5px; max-width: 100ch; }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Byte-pair encoding on a trie</h1>
+  <p>Instead of keeping a token list for every word, store the corpus as a <b>trie</b>: each
+    edge is a token, each root-to-leaf path is one word (ending in <code>_</code>), and each node
+    records how many corpus words pass through it. Words that start the same way share a path, so
+    their common prefix is stored, counted and merged only once. Nodes sit at a horizontal position
+    equal to the number of characters consumed, so a merge removes the node between two edges and
+    joins them into one longer edge. Edges the next merge will join are
+    <b style="color:var(--hit)">orange</b>; edges created by the last merge are
+    <b style="color:var(--mem)">teal</b>. Compare
+    <a id="mergelink" href="bpe-merges.html">the same process on token lists</a>.</p>
+</header>
+
+<div class="card">
+  <h2>Toy corpus</h2>
+  <div class="corpus">
+    <div>
+      <textarea id="text" spellcheck="false" aria-label="Corpus: words, each optionally followed by a count"></textarea>
+      <p class="hint">Words separated by spaces or newlines; a number after a word is its count
+        (otherwise each occurrence counts once).</p>
+    </div>
+    <div class="side">
+      <button id="apply" class="primary">Use this corpus</button>
+      <button data-p="sennrich">Sennrich et al. example</button>
+      <button data-p="shared">More shared prefixes</button>
+      <button data-p="hf">Hugging Face example</button>
+    </div>
+  </div>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Undo one merge (←)">◀ Back</button>
+  <button id="step" class="primary" title="Do one merge (→)">Merge ▶</button>
+  <button id="play">Play</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Number of merges">
+  <span class="k" id="kv"></span>
+</div>
+<p class="status" id="status"></p>
+
+<div class="main">
+  <div class="col">
+    <div class="card treebox">
+      <h2>Corpus trie</h2>
+      <svg id="tree" role="img" aria-label="Trie of the corpus words"></svg>
+    </div>
+    <div class="card">
+      <h2>How a merge of (a, b) rewrites the trie</h2>
+      <ol class="rule">
+        <li><b>Find sites:</b> walk the trie from the root. A site is a node <i>u</i> whose incoming
+          edge is <i>a</i> and that has a child <i>v</i> along edge <i>b</i>. (A trie node has at most
+          one child per label, so there is at most one such <i>v</i>.)</li>
+        <li><b>Re-parent:</b> detach <i>v</i> from <i>u</i> and attach it to <i>u</i>'s parent along a
+          new edge <i>ab</i>. The subtree under <i>v</i> moves unchanged, and so do its counts.</li>
+        <li><b>Prune:</b> subtract count(<i>v</i>) from <i>u</i>. If <i>u</i> has no children left,
+          delete it; otherwise it stays, still reached by <i>a</i>, for the words that continue
+          differently.</li>
+        <li><b>Recount:</b> the count of pair (<i>x</i>, <i>y</i>) is the sum of count(<i>w</i>)
+          over nodes <i>w</i> reached by edge <i>y</i> whose parent is reached by edge <i>x</i>.
+          Only pairs touching a re-parented node change.</li>
+      </ol>
+      <p style="margin-top:8px">Walking top-down and continuing below the re-parented node merges
+        each word left to right, so the trie always equals the prefix tree of the words' current
+        token lists.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h2>Size and work</h2>
+      <dl class="stats" id="stats"></dl>
+    </div>
+    <div class="card">
+      <h2>Pair counts (Δ = change from last merge)</h2>
+      <div class="scroll"><table id="pairs"></table></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Ties between equally frequent pairs go to the alphabetically first pair, as on the
+    <a href="bpe-merges.html">token-list page</a>, so both pages learn the same merges. In each
+    node, the number is the count of corpus words through that node; at a leaf it is the word's
+    frequency.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const EOW = '_';
+const PRESETS = {
+  sennrich: 'low 5\nlower 2\nnewest 6\nwidest 3',
+  shared:   'low 5\nlower 2\nlowest 3\nnew 3\nnewer 4\nnewest 6\nwide 1\nwider 2\nwidest 3',
+  hf:       'hug 10\npug 5\npun 12\nbun 4\nhugs 5',
+};
+
+// ===== corpus and pair selection (same logic as bpe-merges.html) ============
+function parseCorpus(text){
+  const counts = new Map(); let last = null;
+  for (const t of text.split(/\s+/).filter(Boolean)){
+    if (/^\d+$/.test(t) && last !== null){ counts.set(last, counts.get(last) - 1 + +t); last = null; }
+    else { counts.set(t, (counts.get(t) || 0) + 1); last = t; }
+  }
+  return [...counts].filter(([, c]) => c > 0);
+}
+function bestPair(pairs){
+  let best = null;
+  for (const [key, n] of pairs){
+    const p = key.split('\0');
+    if (!best || n > best.n || (n === best.n && (p[0] < best.a || (p[0] === best.a && p[1] < best.b))))
+      best = {a: p[0], b: p[1], n};
+  }
+  return best;
+}
+
+// ===== the trie =============================================================
+// node: {id, label (token on the incoming edge), count, kids: [node], word (leaves only)}
+function buildTrie(corpus){
+  let id = 0;
+  const root = {id: id++, label: '', count: 0, kids: []};
+  for (const [w, c] of corpus){
+    let n = root; n.count += c;
+    for (const ch of [...w, EOW]){
+      let kid = n.kids.find(k => k.label === ch);
+      if (!kid){ kid = {id: id++, label: ch, count: 0, kids: []}; n.kids.push(kid); }
+      kid.count += c; n = kid;
+    }
+    n.word = w;
+  }
+  return root;
+}
+function triePairs(root){
+  const m = new Map();
+  (function visit(n){
+    for (const c of n.kids){
+      if (n !== root){ const key = n.label + '\0' + c.label; m.set(key, (m.get(key) || 0) + c.count); }
+      visit(c);
+    }
+  })(root);
+  return m;
+}
+// merge (a, b) in place; returns the sites [{u, v, pruned}] (node ids)
+function trieMerge(root, a, b){
+  const sites = [];
+  (function visit(n){
+    for (const u of [...n.kids]){
+      if (u.label !== a) continue;
+      const v = u.kids.find(k => k.label === b);
+      if (!v) continue;
+      u.kids.splice(u.kids.indexOf(v), 1);
+      u.count -= v.count;
+      v.label = a + b;
+      const pruned = !u.kids.length;
+      n.kids.splice(n.kids.indexOf(u), pruned ? 1 : 0, v);   // v takes u's place, or goes just before it
+      sites.push({u: u.id, v: v.id, pruned});
+    }
+    for (const c of n.kids) visit(c);
+  })(root);
+  return sites;
+}
+// flat, immutable copy for drawing: id -> {label, count, parent, chars, row, word}
+function snapshot(root){
+  const nodes = new Map(); let rows = 0, maxChars = 0;
+  (function visit(n, parent, chars){
+    const rec = {id: n.id, label: n.label, count: n.count, parent, chars, word: n.word};
+    nodes.set(n.id, rec); maxChars = Math.max(maxChars, chars);
+    for (const c of n.kids) visit(c, n.id, chars + [...c.label].length);
+    if (!n.kids.length) rec.row = rows++;
+    else rec.row = (nodes.get(n.kids[0].id).row + nodes.get(n.kids[n.kids.length - 1].id).row) / 2;
+  })(root, null, 0);
+  return {nodes, rows, maxChars};
+}
+
+// ===== precomputed history: states[k] is the trie after k merges ============
+const MAX_MERGES = 300;
+let states = [], k = 0, corpus = [];
+function train(){
+  const root = buildTrie(corpus), merges = [];
+  states = [];
+  let lastSites = [];
+  for (;;){
+    const pairs = triePairs(root), next = bestPair(pairs);
+    const st = {snap: snapshot(root), pairs, next, merges: merges.slice(), lastSites, nextSites: []};
+    states.push(st);
+    if (!next || merges.length >= MAX_MERGES) break;
+    merges.push(next);
+    st.nextSites = lastSites = trieMerge(root, next.a, next.b);
+  }
+}
+
+// ===== drawing (with a short tween between states) ==========================
+const CW = 58, RH = 32, PADL = 18, PADT = 16, R = 10;
+const ease = t => t < .5 ? 2*t*t : 1 - (-2*t + 2)**2 / 2;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lerp = (a, b, t) => a + (b - a) * t;
+const pos = r => [PADL + r.chars * CW, PADT + r.row * RH];
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+let shown = null, raf = 0;
+
+function draw(from, to, t, hiNext, hiNew){
+  const ids = new Set([...from.nodes.keys(), ...to.nodes.keys()]), P = new Map();
+  for (const id of ids){
+    const o = from.nodes.get(id), n = to.nodes.get(id);
+    P.set(id, o && n ? pos(o).map((v, i) => lerp(v, pos(n)[i], t)) : pos(o || n));
+  }
+  const W = PADL + Math.max(from.maxChars, to.maxChars) * CW + 150;
+  const H = PADT * 2 + Math.max(from.rows, to.rows, 1) * RH - RH + 8;
+  let edges = '', labs = '', nodes = '';
+  for (const id of ids){
+    const o = from.nodes.get(id), n = to.nodes.get(id), rec = n || o;
+    const alpha = o && n ? 1 : n ? t : 1 - t;
+    if (alpha <= 0.01) continue;
+    const [x, y] = P.get(id);
+    const cls = hiNext.has(id) ? ' next' : hiNew.has(id) ? ' new' : '';
+    if (rec.parent !== null){
+      // a re-parented node's edge swings from its old parent to its new one
+      const po = o && o.parent !== null ? P.get(o.parent) : null, pn = n && n.parent !== null ? P.get(n.parent) : null;
+      const [px, py] = po && pn ? [lerp(po[0], pn[0], t), lerp(po[1], pn[1], t)] : (pn || po);
+      // elbow edge; the label sits on the child's row, so sibling labels never overlap
+      const label = (o && n ? (t < .5 ? o : n) : rec).label, ex = px + R + 4, mx = (ex + x - R) / 2;
+      edges += `<g class="${cls}" opacity="${alpha}"><path class="edge" d="M${px + R},${py} H${ex} V${y} H${x - R}"/></g>`;
+      const lw = [...label].length * 7.9 + 10;
+      labs += `<g class="lab${cls}" opacity="${alpha}" transform="translate(${mx},${y})">
+        <rect x="${-lw/2}" y="-10" width="${lw}" height="20" rx="3"/>
+        <text text-anchor="middle" y="4.5"${label === EOW ? ' style="fill:var(--ink-faint)"' : ''}>${esc(label)}</text></g>`;
+    }
+    const count = (o && n ? (t < .5 ? o : n) : rec).count;
+    nodes += `<g class="node${rec.parent === null ? ' root' : ''}" opacity="${alpha}" transform="translate(${x},${y})">
+      <circle r="${R}"/>${rec.parent === null ? '' : `<text text-anchor="middle" y="3.5">${count}</text>`}</g>`;
+    if (rec.word !== undefined)
+      nodes += `<text class="leafword" opacity="${alpha}" x="${x + R + 6}" y="${y + 4}">${esc(rec.word)}</text>`;
+  }
+  const svg = $('tree');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = edges + labs + nodes;
+}
+function showState(animate){
+  const s = states[k];
+  // orange: both edges of each site of the next merge; teal: edges re-parented by the last merge
+  const hiNext = new Set(s.nextSites.flatMap(x => [x.u, x.v]));
+  const hiNew = new Set(s.lastSites.map(x => x.v));
+  const from = animate && shown && !reduced ? shown : s.snap, to = s.snap;
+  shown = to; cancelAnimationFrame(raf);
+  const t0 = performance.now(), DUR = from === to ? 0 : 650;
+  const tick = now => {
+    const t = DUR ? Math.min(1, (now - t0) / DUR) : 1;
+    draw(from, to, ease(t), hiNext, hiNew);
+    if (t < 1) raf = requestAnimationFrame(tick);
+  };
+  tick(t0);
+}
+
+// ===== side panels ==========================================================
+const chip = t => `<span class="tok${t === EOW ? ' eow' : ''}">${esc(t)}</span>`;
+const pairStr = (a, b) => `${chip(a)} + ${chip(b)}`;
+const cmp = (x, y) => x < y ? -1 : x > y ? 1 : 0;
+
+function render(animate){
+  const s = states[k], prev = states[k - 1], last = s.merges[s.merges.length - 1], next = s.next;
+  $('k').max = states.length - 1; $('k').value = k;
+  $('kv').textContent = `${k} / ${states.length - 1}`;
+  $('back').disabled = $('reset').disabled = k === 0;
+  $('step').disabled = k === states.length - 1;
+
+  const ls = s.lastSites, pruned = ls.filter(x => x.pruned).length;
+  $('status').innerHTML =
+    (last ? `Merge ${k}: ${pairStr(last.a, last.b)} → ${chip(last.a + last.b)} at ${ls.length} site${ls.length > 1 ? 's' : ''}
+      (${ls.length} node${ls.length > 1 ? 's' : ''} re-parented, ${pruned} pruned). ` : 'Start: one edge per character. ') +
+    (next ? `Next: ${pairStr(next.a, next.b)}, count ${next.n}, at ${s.nextSites.length} site${s.nextSites.length > 1 ? 's' : ''}.`
+          : 'Every word is now a single edge, so there is nothing left to merge.');
+  showState(animate);
+
+  // size and work
+  // a leaf's depth is the number of tokens in that word
+  const depth = r => r.parent === null ? 0 : 1 + depth(s.snap.nodes.get(r.parent));
+  const leaves = [...s.snap.nodes.values()].filter(r => r.word !== undefined);
+  const listToks = leaves.reduce((acc, r) => acc + depth(r), 0);
+  const corpusToks = leaves.reduce((acc, r) => acc + depth(r) * r.count, 0);
+  const trieEdges = s.snap.nodes.size - 1;
+  $('stats').innerHTML = `
+    <dt>Distinct words</dt><dd>${corpus.length}</dd>
+    <dt>Tokens in corpus (with repeats)</dt><dd>${corpusToks}</dd>
+    <dt>Tokens in per-word lists</dt><dd>${listToks}</dd>
+    <dt>Trie edges</dt><dd>${trieEdges}</dd>
+    <div class="sep"></div>
+    <dt>Recounting all pairs: list positions vs trie nodes</dt><dd>${listToks} vs ${trieEdges}</dd>
+    <dt>Last merge: sites rewritten</dt><dd>${ls.length}</dd>
+    <dt>Last merge: pair counts changed</dt><dd>${prev ? [...new Set([...s.pairs.keys(), ...prev.pairs.keys()])]
+      .filter(key => s.pairs.get(key) !== prev.pairs.get(key)).length : 0}</dd>`;
+
+  // pair counts, with the change since the previous state
+  const keys = new Set([...s.pairs.keys(), ...(prev ? prev.pairs.keys() : [])]);
+  const rows = [...keys].map(key => {
+    const [a, b] = key.split('\0'), n = s.pairs.get(key) || 0;
+    return {a, b, n, d: prev ? n - (prev.pairs.get(key) || 0) : 0};
+  }).sort((x, y) => y.n - x.n || cmp(x.a, y.a) || cmp(x.b, y.b));
+  $('pairs').innerHTML = '<tr><th>Pair</th><th class="n">Count</th><th class="n">Δ</th></tr>' +
+    rows.map(r => `<tr class="${next && r.a === next.a && r.b === next.b ? 'top' : ''}${r.d ? ' chg' : ''}${r.n ? '' : ' gone'}">
+      <td>${pairStr(r.a, r.b)}</td><td class="n">${r.n}</td><td class="n d">${r.d ? (r.d > 0 ? '+' : '') + r.d : ''}</td></tr>`).join('');
+}
+
+// ===== wiring ===============================================================
+function useCorpus(text){
+  $('text').value = text;
+  const c = parseCorpus(text);
+  if (!c.length) return;
+  corpus = c; train(); k = 0; shown = null; stop(); render(false);
+  $('mergelink').href = 'bpe-merges.html?corpus=' + encodeURIComponent(text.trim());
+}
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+const go = (n, animate = true) => { const m = Math.max(0, Math.min(states.length - 1, n)); if (m === k) return; k = m; render(animate); };
+$('step').addEventListener('click', () => { stop(); go(k + 1); });
+$('back').addEventListener('click', () => { stop(); go(k - 1); });
+$('reset').addEventListener('click', () => { stop(); go(0); });
+$('k').addEventListener('input', e => { stop(); go(+e.target.value); });
+$('play').addEventListener('click', () => {
+  if (timer) return stop();
+  if (k === states.length - 1) go(0, false);
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (k >= states.length - 1) stop(); else go(k + 1); }, 1400);
+});
+$('apply').addEventListener('click', () => useCorpus($('text').value));
+document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => useCorpus(PRESETS[b.dataset.p])));
+document.addEventListener('keydown', e => {
+  if (e.target.matches('textarea, input')) return;
+  if (e.key === 'ArrowRight'){ stop(); go(k + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ stop(); go(k - 1); e.preventDefault(); }
+  else if (e.key === 'Home'){ stop(); go(0); }
+});
+useCorpus(new URLSearchParams(location.search).get('corpus') || PRESETS.shared);
+</script>
+</body>
+</html>
