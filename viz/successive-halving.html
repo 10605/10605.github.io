@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Successive Halving</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;   /* estimates, and the chosen project */
+    --mem-soft:    #d3e7ec;
+    --hit:         #a4530c;   /* eliminations */
+    --hit-soft:    #f0dfc9;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --hit:         #e09a4d;
+      --hit-soft:    #3a2a15;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --hit:         #e09a4d;
+    --hit-soft:    #3a2a15;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 56px; }
+  code { font-family: var(--mono); font-size: .9em; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
+       line-height: 1.1; margin: 0 0 8px; }
+  header p { margin: 0; color: var(--ink-soft); }
+  h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+       text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+          box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+  .card p { margin: 0 0 6px; font-size: 13.5px; color: var(--ink-soft); }
+  button { font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+           border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--mem); background: var(--mem-soft); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { border-color: var(--mem); }
+
+  /* ---- controls ---- */
+  .controls { display: grid; gap: 10px 22px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .ctl { display: grid; grid-template-columns: 9em 1fr 4.2em; align-items: center; gap: 8px; }
+  .ctl label { font-size: 13.5px; color: var(--ink-soft); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; text-align: right; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--mem); }
+  .ctl select { grid-column: 2 / 4; font: 13px var(--mono); color: var(--ink); background: var(--surface-sunk);
+                border: 1px solid var(--line); border-radius: 3px; padding: 3px 6px; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink-soft); }
+  .btnrow label { display: inline-flex; gap: 6px; align-items: center; }
+
+  /* ---- player ---- */
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0 6px; }
+  .player input[type=range] { flex: 1 1 160px; accent-color: var(--mem); }
+  .player .k { font-family: var(--mono); font-size: 13px; min-width: 7ch; }
+  .status { font-size: 14px; color: var(--ink-soft); min-height: 3em; margin: 0 0 12px; }
+  .status b { color: var(--ink); }
+
+  .panels { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+  .panel h3 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0; }
+  .panel .sub { color: var(--ink-faint); font-size: 12.5px; margin: 0 0 8px; }
+  .panel svg { width: 100%; height: auto; display: block; }
+  .verdict { font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 6px; min-height: 2.6em; color: var(--ink-soft); }
+  .verdict b { color: var(--ink); }
+  .good { color: var(--mem); font-weight: 600; }
+  .bad { color: var(--hit); font-weight: 600; }
+
+  svg text { font-family: var(--sans); fill: var(--ink-soft); font-size: 11px; }
+  .axis line, .grid { stroke: var(--line); }
+  .pull { fill: var(--surface-sunk); stroke: var(--line); }
+  .pull.new { fill: var(--mem-soft); stroke: var(--mem); }
+  .ci { stroke: var(--mem); stroke-width: 2; }
+  .mean { fill: var(--mem); }
+  .truth { stroke: var(--ink); stroke-width: 2; }
+  .row.out .ci, .row.out .mean { stroke: var(--ink-faint); fill: var(--ink-faint); opacity: .6; }
+  .row.out .pull { opacity: .55; }
+  .x { stroke: var(--hit); stroke-width: 2.2; }
+  .xlab { fill: var(--hit) !important; font-size: 10.5px !important; }
+  .win rect.band { fill: var(--mem-soft); }
+  .doomed rect.band { fill: var(--hit-soft); }
+  rect.band { fill: transparent; }
+
+  .lower { display: grid; gap: 14px; margin-top: 14px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .algo { font-family: var(--serif); font-size: 15px; line-height: 1.6; border: 1px solid var(--line);
+          padding: 10px 14px; border-radius: 3px; background: var(--surface-sunk); }
+  .algo .sc { font-variant: small-caps; }
+  .algo div { padding-left: 1.2em; }
+  .algo div.top { padding-left: 0; }
+  .algo .cur { background: var(--mem-soft); outline: 1px solid var(--mem); border-radius: 2px; }
+  #grid svg { width: 100%; height: auto; display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 12.5px; }
+  td { font-family: var(--mono); font-size: 13px; }
+  td:first-child { font-family: var(--sans); }
+  footer { margin-top: 18px; color: var(--ink-soft); font-size: 13.5px; max-width: 100ch; }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Successive halving</h1>
+  <p>Choosing the winner of a science fair: each <b>project</b> (a hyperparameter configuration)
+    has an unknown true quality, and each <b>judgment</b> (a training run or evaluation) gives a
+    noisy score. <b>Uniform allocation</b> spreads the budget of <i>B</i> judgments evenly, so most
+    of it goes to projects that are clearly bad, and the best few can stay statistically
+    indistinguishable. <b>Successive halving</b> works in rounds: judge every surviving project
+    equally, drop the worse half, and repeat, so each round spends the same share of the budget on
+    half as many projects. Bars show judgments so far; dots show each project's average score with a
+    95% interval.</p>
+</header>
+
+<div class="card">
+  <h2>Setup</h2>
+  <div class="controls">
+    <div class="ctl"><label for="n">Projects <i>n</i></label><select id="n"></select></div>
+    <div class="ctl"><label for="B">Budget <i>B</i></label>
+      <input id="B" type="range" min="16" max="4096" step="16"><span class="val" id="Bv"></span></div>
+    <div class="ctl"><label for="sigma">Judge noise σ</label>
+      <input id="sigma" type="range" min="0.1" max="3" step="0.1"><span class="val" id="sigmav"></span></div>
+  </div>
+  <div class="btnrow">
+    <button id="newproj">New projects</button>
+    <button id="newjudge">New judgments</button>
+    <label><input type="checkbox" id="truth" checked> Show true quality</label>
+  </div>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Back one step (←)">◀ Back</button>
+  <button id="step" class="primary" title="Forward one step (→)">Step ▶</button>
+  <button id="play">Play</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Step">
+  <span class="k" id="kv"></span>
+</div>
+<p class="status" id="status"></p>
+
+<div class="panels">
+  <div class="card panel">
+    <h3>Uniform judge allocation</h3>
+    <p class="sub" id="usub"></p>
+    <svg id="usvg" role="img" aria-label="Uniform allocation: judgments and average score per project"></svg>
+    <div class="verdict" id="uverdict"></div>
+  </div>
+  <div class="card panel">
+    <h3>Adaptive: successive halving</h3>
+    <p class="sub" id="ssub"></p>
+    <svg id="ssvg" role="img" aria-label="Successive halving: judgments and average score per project"></svg>
+    <div class="verdict" id="sverdict"></div>
+  </div>
+</div>
+
+<div class="lower">
+  <div class="card">
+    <h2>The algorithm (Li et al., 2018)</h2>
+    <div class="algo" id="algo"></div>
+  </div>
+  <div class="card" id="grid">
+    <h2>Budget per round</h2>
+    <p>Each row is a round; each box is one surviving project, as wide as the judgments it gets that
+      round. Every row has the same total width: about <i>B</i>/⌈log<sub>2</sub> <i>n</i>⌉.</p>
+    <svg id="gsvg" role="img" aria-label="Judgments per project in each round"></svg>
+  </div>
+  <div class="card">
+    <h2>Repeat many times</h2>
+    <p>Rerun both methods on these projects with fresh judgments each time.</p>
+    <p><button id="mc" class="primary">Run 2000 trials</button></p>
+    <table id="mctbl"></table>
+  </div>
+</div>
+
+<footer>
+  <p>Each judgment is the project's true quality plus Gaussian noise with standard deviation σ
+    (higher scores are better). Intervals are mean ± 1.96·σ/√<i>m</i> for <i>m</i> judgments. Both
+    methods draw from the same sequence of judgments for each project, so differences come from how
+    the budget is allocated, not from luck. Uniform allocation is shown spending its budget at the
+    same rate as successive halving, round by round. In each round, successive halving gives every
+    surviving project <i>r<sub>k</sub></i> more judgments and ranks projects by the average of all
+    their judgments so far.</p>
+  <p>Science-fair framing after Kevin Jamieson's slides; algorithm from Li, Jamieson, DeSalvo,
+    Rostamizadeh and Talwalkar, <i>Hyperband: A Novel Bandit-Based Approach to Hyperparameter
+    Optimization</i> (JMLR 2018), which runs successive halving several times with different
+    <i>n</i>.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+let S = {n: 16, B: 256, sigma: 2.0, pseed: 7, jseed: 11};
+
+// ===== randomness ===========================================================
+function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const gauss = rnd => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+
+// ===== the two methods ======================================================
+const rounds = n => Math.ceil(Math.log2(n));
+// per-round successive-halving schedule: survivors |S_k| and judgments r_k each
+function schedule(n, B){
+  const R = rounds(n), out = [];
+  for (let k = 0, size = n; k < R; k++, size = Math.floor(size / 2))
+    out.push({size, r: Math.floor(B / (size * R))});
+  return out;
+}
+// Sum and count of judgments for each project. judge(i) returns project i's next judgment.
+// Returns the state after each half-step: [{u: {m, sum}, s: {m, sum, out}, ...}]
+function simulate(mu, n, B, judgeU, judgeS){
+  const R = rounds(n), sched = schedule(n, B), per = Math.floor(B / n);
+  const u = mu.map(() => ({m: 0, sum: 0})), s = mu.map(() => ({m: 0, sum: 0, out: null}));
+  const snap = (extra) => ({u: u.map(x => ({...x})), s: s.map(x => ({...x})), ...extra});
+  const states = [snap({phase: 'start'})];
+  for (let k = 0; k < R; k++){
+    // judge: SH gives each survivor r_k more; uniform tops every project up to its share so far
+    const target = Math.floor((k + 1) * per / R);
+    u.forEach((x, i) => { while (x.m < target){ x.sum += judgeU(i); x.m++; } });
+    const alive = s.map((x, i) => i).filter(i => s[i].out === null);
+    for (const i of alive) for (let j = 0; j < sched[k].r; j++){ s[i].sum += judgeS(i); s[i].m++; }
+    states.push(snap({phase: 'judge', k}));
+    // eliminate: keep the best floor(|S_k| / 2) by average score
+    alive.sort((a, b) => s[b].sum / s[b].m - s[a].sum / s[a].m);
+    for (const i of alive.slice(Math.max(1, Math.floor(alive.length / 2)))) s[i].out = k;
+    states.push(snap({phase: 'cut', k}));
+  }
+  return states;
+}
+const argmaxMean = arr => arr.reduce((b, x, i) => (x.out == null && x.m && (b < 0 || x.sum / x.m > arr[b].sum / arr[b].m)) ? i : b, -1);
+
+// ===== state ================================================================
+let mu = [], states = [], step = 0;
+function rebuild(){
+  const rp = mulberry32(S.pseed);
+  mu = Array.from({length: S.n}, () => 1 + 4 * rp());          // true qualities in [1, 5]
+  // one fixed stream of judgments per project, shared by both methods
+  const rj = mulberry32(S.jseed), streams = mu.map(() => []);
+  const draw = i => mu[i] + S.sigma * gauss(rj);
+  const cursorU = mu.map(() => 0), cursorS = mu.map(() => 0);
+  const next = (i, cur) => { while (streams[i].length <= cur[i]) streams[i].push(draw(i)); return streams[i][cur[i]++]; };
+  states = simulate(mu, S.n, S.B, i => next(i, cursorU), i => next(i, cursorS));
+  step = Math.min(step, states.length - 1);
+}
+
+// ===== drawing ==============================================================
+const SVGW = 600, ROWH = 22, TOP = 26, LABW = 50, PULLW = 120, GAP = 26;
+const SCX0 = LABW + PULLW + GAP, SCX1 = SVGW - 88;
+const LO = -1, HI = 7;                          // score axis range
+const sx = v => SCX0 + (Math.min(HI, Math.max(LO, v)) - LO) / (HI - LO) * (SCX1 - SCX0);
+const best = () => mu.indexOf(Math.max(...mu));
+
+function drawPanel(svg, rows, prevRows, maxM, opts){
+  const n = rows.length, H = TOP + n * ROWH + 8;
+  let h = `<g class="axis">`;
+  for (let v = 0; v <= 6; v++)
+    h += `<line class="grid" x1="${sx(v)}" x2="${sx(v)}" y1="${TOP - 4}" y2="${H - 6}" stroke-dasharray="2 3"/>
+          <text x="${sx(v)}" y="${TOP - 9}" text-anchor="middle">${v}</text>`;
+  h += `<text x="${LABW}" y="${TOP - 9}">judgments</text><text x="${SCX1 + 8}" y="${TOP - 9}">avg score</text></g>`;
+  const showTruth = $('truth').checked, b = best();
+  rows.forEach((x, i) => {
+    const y = TOP + i * ROWH, cy = y + ROWH / 2, out = x.out != null;
+    const cls = ['row', out ? 'out' : '', i === opts.winner ? 'win' : '', opts.doomed && opts.doomed.has(i) ? 'doomed' : ''].join(' ');
+    h += `<g class="${cls}"><rect class="band" x="0" y="${y + 1}" width="${SVGW}" height="${ROWH - 2}" rx="3"/>`;
+    h += `<text x="4" y="${cy + 4}"${showTruth && i === b ? ' style="font-weight:700;fill:var(--ink)"' : ''}>P${i + 1}${showTruth && i === b ? '★' : ''}</text>`;
+    // judgments bar: grey for earlier rounds, teal for this round's new judgments
+    const w = m => maxM ? m / maxM * PULLW : 0, old = prevRows ? prevRows[i].m : x.m;
+    if (x.m) h += `<rect class="pull" x="${LABW}" y="${y + 5}" width="${Math.max(1, w(old))}" height="${ROWH - 10}"/>`;
+    if (x.m > old) h += `<rect class="pull new" x="${LABW + w(old)}" y="${y + 5}" width="${w(x.m) - w(old)}" height="${ROWH - 10}"/>`;
+    if (x.m) h += `<text x="${LABW + w(x.m) + 4}" y="${cy + 4}" style="font-size:10px">${x.m}</text>`;
+    if (showTruth) h += `<line class="truth" x1="${sx(mu[i])}" x2="${sx(mu[i])}" y1="${y + 3}" y2="${y + ROWH - 3}"/>`;
+    if (x.m){
+      const m = x.sum / x.m, half = 1.96 * S.sigma / Math.sqrt(x.m);
+      h += `<line class="ci" x1="${sx(m - half)}" x2="${sx(m + half)}" y1="${cy}" y2="${cy}"/>
+            <circle class="mean" cx="${sx(m)}" cy="${cy}" r="3.6"/>
+            <text x="${SCX1 + 8}" y="${cy + 4}" style="font-family:var(--mono);font-size:10.5px">${m.toFixed(2)} ± ${half.toFixed(2)}</text>`;
+    }
+    if (out){
+      const cx = LABW - 9;
+      h += `<path class="x" d="M${cx - 4},${cy - 4} L${cx + 4},${cy + 4} M${cx + 4},${cy - 4} L${cx - 4},${cy + 4}"/>`;
+    }
+    h += '</g>';
+  });
+  svg.setAttribute('viewBox', `0 0 ${SVGW} ${H}`);
+  svg.innerHTML = h;
+}
+
+function drawGrid(curK){
+  const sched = schedule(S.n, S.B), W = 520, rh = 22, pad = 4, maxRow = Math.max(...sched.map(r => r.size * r.r));
+  const H = sched.length * (rh + 6) + 4;
+  let h = '';
+  sched.forEach((row, k) => {
+    const y = 2 + k * (rh + 6), cw = row.r / maxRow * (W - 150);
+    for (let j = 0; j < row.size; j++)
+      h += `<rect x="${60 + j * cw}" y="${y}" width="${Math.max(.5, cw - (cw > 3 ? 1 : 0))}" height="${rh}" rx="${cw > 6 ? 2 : 0}"
+              style="fill:${k === curK ? 'var(--mem-soft)' : 'var(--surface-sunk)'};stroke:${k === curK ? 'var(--mem)' : 'var(--line)'};stroke-width:${cw > 3 ? 1 : 0}"/>`;
+    h += `<text x="0" y="${y + rh / 2 + 4}">round ${k}</text>
+          <text x="${60 + row.size * cw + 8}" y="${y + rh / 2 + 4}" style="font-family:var(--mono)">${row.size} × ${row.r} = ${row.size * row.r}</text>`;
+  });
+  $('gsvg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  $('gsvg').innerHTML = h;
+}
+
+function drawAlgo(st){
+  const R = rounds(S.n), k = st.k, sched = schedule(S.n, S.B);
+  const cls = c => c ? ' class="cur"' : '';
+  const sz = k != null ? sched[k].size : null;
+  $('algo').innerHTML = `
+    <div class="top"><span class="sc">SuccessiveHalving</span></div>
+    <div class="top"><b>Input:</b> budget <i>B</i> = ${S.B}, <i>n</i> = ${S.n} arms</div>
+    <div class="top"><b>Initialize:</b> <i>S</i><sub>0</sub> = [<i>n</i>]</div>
+    <div class="top"><b>For</b> <i>k</i> = 0, 1, …, ⌈log<sub>2</sub> <i>n</i>⌉ − 1 = ${R - 1}${k != null ? ` &nbsp;(now <i>k</i> = ${k})` : ''}</div>
+    <div${cls(st.phase === 'judge')}>Pull each arm in <i>S<sub>k</sub></i> for
+      <i>r<sub>k</sub></i> = ⌊<i>B</i> / (|<i>S<sub>k</sub></i>| ⌈log<sub>2</sub> <i>n</i>⌉)⌋
+      ${k != null ? `= ⌊${S.B} / (${sz} · ${R})⌋ = ${sched[k].r}` : ''} times.</div>
+    <div${cls(st.phase === 'cut')}>Keep the best ⌊|<i>S<sub>k</sub></i>|/2⌋${k != null ? ` = ${Math.max(1, Math.floor(sz / 2))}` : ''} arms as <i>S</i><sub><i>k</i>+1</sub>.</div>
+    <div class="top"><b>Output:</b> the single arm left in <i>S</i><sub>⌈log<sub>2</sub> <i>n</i>⌉</sub></div>`;
+}
+
+// ===== rendering ============================================================
+function render(){
+  const st = states[step], prev = step > 0 ? states[step - 1] : null, R = rounds(S.n);
+  const last = step === states.length - 1, sched = schedule(S.n, S.B);
+  $('k').max = states.length - 1; $('k').value = step; $('kv').textContent = `${step} / ${states.length - 1}`;
+  $('back').disabled = $('reset').disabled = step === 0; $('step').disabled = last;
+
+  const used = rows => rows.reduce((a, x) => a + x.m, 0);
+  const uw = last ? argmaxMean(st.u) : -1, sw = last ? argmaxMean(st.s) : -1;
+  // projects about to be cut are shaded on the judge step before the cut
+  const nxt = states[step + 1], doomed = nxt && nxt.phase === 'cut'
+    ? new Set(nxt.s.map((x, i) => x.out === nxt.k ? i : -1).filter(i => i >= 0)) : null;
+  const maxM = Math.max(...states[states.length - 1].s.map(x => x.m), ...states[states.length - 1].u.map(x => x.m));
+  drawPanel($('usvg'), st.u, st.phase === 'judge' ? prev.u : null, maxM, {winner: uw});
+  drawPanel($('ssvg'), st.s, st.phase === 'judge' ? prev.s : null, maxM, {winner: sw, doomed});
+  $('usub').textContent = `${Math.floor(S.B / S.n)} judgments per project in total · ${used(st.u)} used so far`;
+  $('ssub').textContent = `${sched.map(r => r.size).join(' → ')} → 1 projects · ${used(st.s)} used so far`;
+
+  const alive = st.s.filter(x => x.out == null).length;
+  if (st.phase === 'start')
+    $('status').innerHTML = `No judgments yet. Successive halving will run ${R} rounds of judging and halving; uniform allocation will give every project ${Math.floor(S.B / S.n)} judgments.`;
+  else if (st.phase === 'judge')
+    $('status').innerHTML = `<b>Round ${st.k}, judge:</b> successive halving gives each of the ${sched[st.k].size} surviving projects
+      ${sched[st.k].r} more judgments (${sched[st.k].size * sched[st.k].r} in this round, new ones in teal); uniform allocation gives every
+      project ${st.u[0].m - prev.u[0].m} more.${doomed ? ` Shaded rows are in the worse half and will be cut.` : ''}`;
+  else
+    $('status').innerHTML = `<b>Round ${st.k}, eliminate:</b> keep the ${alive} project${alive > 1 ? 's' : ''} with the highest average and drop the rest (✕).`;
+
+  const verdict = (w, rows) => {
+    if (w < 0) return '';
+    const m = rows[w], half = 1.96 * S.sigma / Math.sqrt(m.m), ok = w === best();
+    // how many others have intervals overlapping the winner's
+    const close = rows.filter((x, i) => i !== w && x.m && x.out == null &&
+      x.sum / x.m + 1.96 * S.sigma / Math.sqrt(x.m) >= m.sum / m.m - half).length;
+    return `Picks <b>P${w + 1}</b> (average ${(m.sum / m.m).toFixed(2)} ± ${half.toFixed(2)}, true ${mu[w].toFixed(2)}):
+      <span class="${ok ? 'good' : 'bad'}">${ok ? 'the true best' : `not the best (P${best() + 1}, true ${mu[best()].toFixed(2)})`}</span>.
+      ${rows === st.u ? `${close} other project${close === 1 ? ' has an interval' : 's have intervals'} overlapping it.` : ''}`;
+  };
+  $('uverdict').innerHTML = verdict(uw, st.u);
+  $('sverdict').innerHTML = verdict(sw, st.s);
+  drawGrid(st.k);
+  drawAlgo(st);
+}
+
+// ===== Monte Carlo ==========================================================
+function monteCarlo(trials){
+  const rnd = mulberry32((S.jseed * 7919) ^ 0x9e3779b9), b = best();
+  const draw = i => mu[i] + S.sigma * gauss(rnd);
+  const res = {u: {hit: 0, gap: 0}, s: {hit: 0, gap: 0}};
+  for (let t = 0; t < trials; t++){
+    const sts = simulate(mu, S.n, S.B, draw, draw), fin = sts[sts.length - 1];
+    for (const key of ['u', 's']){
+      const w = argmaxMean(fin[key]);
+      res[key].hit += w === b; res[key].gap += mu[b] - mu[w];
+    }
+  }
+  const pct = x => (100 * x / trials).toFixed(1) + '%';
+  $('mctbl').innerHTML = `<tr><th></th><th style="white-space:normal">Picks the true best</th><th style="white-space:normal">Avg. quality lost</th></tr>
+    <tr><td>Uniform</td><td>${pct(res.u.hit)}</td><td>${(res.u.gap / trials).toFixed(3)}</td></tr>
+    <tr><td>Successive halving</td><td>${pct(res.s.hit)}</td><td>${(res.s.gap / trials).toFixed(3)}</td></tr>
+    <tr><td colspan="3" style="font-family:var(--sans);color:var(--ink-faint);font-size:12.5px;text-align:left;white-space:normal">
+      ${trials} trials, <i>n</i> = ${S.n}, <i>B</i> = ${S.B}, σ = ${S.sigma}; quality lost = best true quality − chosen project's true quality.</td></tr>`;
+}
+
+// ===== wiring ===============================================================
+const NS = [2, 4, 8, 16, 32, 64];
+$('n').innerHTML = NS.map(v => `<option>${v}</option>`).join('');
+function syncControls(){
+  const minB = S.n * rounds(S.n);   // so that r_0 >= 1
+  if (S.B < minB) S.B = minB;
+  $('n').value = S.n; $('B').min = Math.max(16, minB); $('B').value = S.B; $('Bv').textContent = S.B;
+  $('sigma').value = S.sigma; $('sigmav').textContent = S.sigma.toFixed(1);
+}
+function update(){ syncControls(); rebuild(); render(); $('mctbl').innerHTML = ''; }
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+const go = k => { step = Math.max(0, Math.min(states.length - 1, k)); render(); };
+$('n').addEventListener('change', e => { S.n = +e.target.value; step = 0; update(); });
+$('B').addEventListener('input', e => { S.B = +e.target.value; update(); });
+$('sigma').addEventListener('input', e => { S.sigma = +e.target.value; update(); });
+$('newproj').addEventListener('click', () => { S.pseed = Math.floor(Math.random() * 1e9); update(); });
+$('newjudge').addEventListener('click', () => { S.jseed = Math.floor(Math.random() * 1e9); update(); });
+$('truth').addEventListener('change', render);
+$('step').addEventListener('click', () => { stop(); go(step + 1); });
+$('back').addEventListener('click', () => { stop(); go(step - 1); });
+$('reset').addEventListener('click', () => { stop(); go(0); });
+$('k').addEventListener('input', e => { stop(); go(+e.target.value); });
+$('play').addEventListener('click', () => {
+  if (timer) return stop();
+  if (step === states.length - 1) go(0);
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (step >= states.length - 1) stop(); else go(step + 1); }, 1300);
+});
+$('mc').addEventListener('click', () => monteCarlo(2000));
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, select, textarea')) return;
+  if (e.key === 'ArrowRight'){ stop(); go(step + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ stop(); go(step - 1); e.preventDefault(); }
+  else if (e.key === 'Home'){ stop(); go(0); }
+});
+update();
+</script>
+</body>
+</html>

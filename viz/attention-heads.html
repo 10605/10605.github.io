@@ -79,7 +79,7 @@
   header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
   h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
        line-height: 1.1; margin: 0 0 8px; }
-  header p { margin: 0; color: var(--ink-soft); max-width: 90ch; }
+  header p { margin: 0; color: var(--ink-soft); }
   h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
        text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
@@ -159,7 +159,7 @@
 <div class="wrap">
 
 <header>
-  <h1>Multi-head, grouped-query, multi-query and latent attention</h1>
+  <h1>Multi-head, multi-query, grouped-query and latent attention</h1>
   <p>Each bar is one head's vector for a single token (bar height ∝ head dimension
     <i>d<sub>h</sub></i>). Dashed lines show which key/value head each query head attends with.
     The variants differ in how many key/value heads they keep, which changes both the
@@ -215,8 +215,8 @@
 
 <footer>
   <p><b>Parameters per layer.</b> Every variant has <code>W_Q</code> (<i>d<sub>model</sub></i> × <i>H·d<sub>h</sub></i>) and
-    <code>W_O</code> (<i>H·d<sub>h</sub></i> × <i>d<sub>model</sub></i>). MHA, GQA and MQA have <code>W_K</code> and
-    <code>W_V</code> of size <i>d<sub>model</sub></i> × <i>G·d<sub>h</sub></i>, with <i>G</i> = <i>H</i>, the chosen <i>G</i>, and 1
+    <code>W_O</code> (<i>H·d<sub>h</sub></i> × <i>d<sub>model</sub></i>). MHA, MQA and GQA have <code>W_K</code> and
+    <code>W_V</code> of size <i>d<sub>model</sub></i> × <i>G·d<sub>h</sub></i>, with <i>G</i> = <i>H</i>, 1, and the chosen <i>G</i>
     respectively; each caches 2·<i>G·d<sub>h</sub></i> numbers per token per layer. MLA has a shared down-projection
     <code>W_DKV</code> (<i>d<sub>model</sub></i> × <i>d<sub>c</sub></i>) and per-head up-projections <code>W_UK</code>,
     <code>W_UV</code> (<i>d<sub>c</sub></i> × <i>H·d<sub>h</sub></i>), and caches only the <i>d<sub>c</sub></i>-dimensional
@@ -264,8 +264,8 @@ function variants(){
     mats: [q, ['W_K', dm, g*dh], ['W_V', dm, g*dh], o], cache: 2*g*dh });
   return [
     std(H, 'Multi-head (MHA)', `${H} query, ${H} key and ${H} value heads`),
-    std(G, 'Grouped-query (GQA)', `${G} key/value head${G>1?'s':''}, each shared by ${H/G} query head${H/G>1?'s':''}`),
     std(1, 'Multi-query (MQA)', `one key/value head shared by all ${H} query heads`),
+    std(G, 'Grouped-query (GQA)', `${G} key/value head${G>1?'s':''}, each shared by ${H/G} query head${H/G>1?'s':''}`),
     { name: 'Multi-head latent (MLA)', sub: `${H} key/value heads reconstructed from a cached ${dc}-dim latent`,
       kv: H, latent: true, cache: dc,
       mats: [q, ['W_DKV', dm, dc], ['W_UK', dc, H*dh], ['W_UV', dc, H*dh], o] },
@@ -337,16 +337,16 @@ const EQS = [
     ['h', 'Attention'], ['m', softmax('Q_i', 'K_i', 'V_i')], ...OUT,
     ['h', 'KV cache per token'], ['m', R`k_{t,i},\ v_{t,i}\ \text{for } i = 1..H:\quad 2 H d_h`] ],
   [ SETUP, ['h', 'Projections'], ['m', QPROJ],
+    ['m', R`K = X W^K,\quad V = X W^V,\quad W^K, W^V \in \mathbb{R}^{d_{model}\times d_h}`],
+    ['h', 'Attention'], ['p', 'Every query head attends with the same keys and values:'],
+    ['m', softmax('Q_i', 'K', 'V')], ...OUT,
+    ['h', 'KV cache per token'], ['m', R`k_t,\ v_t:\quad 2 d_h`] ],
+  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
     ['m', R`K_j = X W^K_j,\quad V_j = X W^V_j,\quad j = 1..G`],
     ['p', 'Query head <i>i</i> uses key/value head <i>g</i>(<i>i</i>), so each group of <i>H/G</i> consecutive query heads shares one:'],
     ['m', R`g(i) = \big\lceil i\, G / H \big\rceil`],
     ['h', 'Attention'], ['m', softmax('Q_i', 'K_{g(i)}', 'V_{g(i)}')], ...OUT,
     ['h', 'KV cache per token'], ['m', R`k_{t,j},\ v_{t,j}\ \text{for } j = 1..G:\quad 2 G d_h`] ],
-  [ SETUP, ['h', 'Projections'], ['m', QPROJ],
-    ['m', R`K = X W^K,\quad V = X W^V,\quad W^K, W^V \in \mathbb{R}^{d_{model}\times d_h}`],
-    ['h', 'Attention'], ['p', 'Every query head attends with the same keys and values:'],
-    ['m', softmax('Q_i', 'K', 'V')], ...OUT,
-    ['h', 'KV cache per token'], ['m', R`k_t,\ v_t:\quad 2 d_h`] ],
   [ SETUP, ['h', 'Projections'], ['m', QPROJ],
     ['p', 'Keys and values are compressed jointly into a low-rank latent:'],
     ['m', R`C = X W^{DKV},\quad W^{DKV} \in \mathbb{R}^{d_{model}\times d_c}`],
