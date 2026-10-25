@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hyperband</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;   /* configurations still running at the end of a bracket */
+    --mem-soft:    #d3e7ec;
+    --hit:         #a4530c;   /* Hyperband's pick, eliminations */
+    --hit-soft:    #f0dfc9;
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --hit:         #e09a4d;
+      --hit-soft:    #3a2a15;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --hit:         #e09a4d;
+    --hit-soft:    #3a2a15;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 56px; }
+  code { font-family: var(--mono); font-size: .9em; }
+  a { color: var(--mem); }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
+       line-height: 1.1; margin: 0 0 8px; }
+  header p { margin: 0; color: var(--ink-soft); }
+  h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+       text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+          box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+  .card p { margin: 0 0 6px; font-size: 13.5px; color: var(--ink-soft); }
+  button { font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+           border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--mem); background: var(--mem-soft); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { border-color: var(--mem); }
+
+  /* ---- controls ---- */
+  .controls { display: grid; gap: 10px 22px; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+  .ctl { display: grid; grid-template-columns: 10em 1fr 4.2em; align-items: center; gap: 8px; }
+  .ctl label { font-size: 13.5px; color: var(--ink-soft); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; text-align: right; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--mem); }
+  .ctl select { grid-column: 2 / 4; font: 13px var(--mono); color: var(--ink); background: var(--surface-sunk);
+                border: 1px solid var(--line); border-radius: 3px; padding: 3px 6px; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink-soft); }
+  .btnrow label { display: inline-flex; gap: 6px; align-items: center; }
+
+  /* ---- player ---- */
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0 6px; }
+  .player .k { font-family: var(--mono); font-size: 13px; }
+  .status { font-size: 14px; color: var(--ink-soft); min-height: 3em; margin: 0 0 12px; }
+  .status b { color: var(--ink); }
+
+  .main { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); }
+  @media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+  .col { display: grid; gap: 14px; align-content: start; min-width: 0; }
+  #plot { width: 100%; height: auto; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+  .legend svg { vertical-align: middle; margin-right: 4px; }
+
+  svg text { font-family: var(--sans); fill: var(--ink-soft); font-size: 11px; }
+  .gridl { stroke: var(--line); }
+  .curve { fill: none; stroke: var(--ink-faint); stroke-width: 1; opacity: .55; }
+  .curve.live { stroke: var(--mem); stroke-width: 2; opacity: 1; }
+  .curve.pick { stroke: var(--hit); stroke-width: 2.6; opacity: 1; }
+  .truec { fill: none; stroke: var(--ink-faint); stroke-width: .8; stroke-dasharray: 2 3; opacity: .5; }
+  .pt { fill: var(--ink-faint); opacity: .7; }
+  .pt.live { fill: var(--mem); opacity: 1; }
+  .pt.pick { fill: var(--hit); opacity: 1; }
+  .x { stroke: var(--ink-faint); stroke-width: 1.2; opacity: .8; }
+  .oracle { stroke: var(--ink); stroke-dasharray: 5 4; stroke-width: 1; }
+
+  /* ---- bracket table ---- */
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 3px 7px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 12.5px; }
+  td { font-family: var(--mono); font-size: 12.5px; }
+  td.rowh, th.rowh { text-align: left; font-family: var(--sans); color: var(--ink-soft); }
+  .cur { background: var(--mem-soft); }
+  .done th button { font-weight: 600; }
+  th button { font: 600 12.5px var(--sans); padding: 1px 8px; }
+  td.pick { color: var(--hit); font-weight: 700; }
+  td.na { color: var(--ink-faint); }
+  .algo { font-family: var(--serif); font-size: 15px; line-height: 1.6; border: 1px solid var(--line);
+          padding: 10px 14px; border-radius: 3px; background: var(--surface-sunk); }
+  .algo div { padding-left: 1.2em; }
+  .algo div.top { padding-left: 0; }
+  .algo div.in2 { padding-left: 2.4em; }
+  .algo .sc { font-variant: small-caps; }
+  .algo .curl { background: var(--mem-soft); outline: 1px solid var(--mem); border-radius: 2px; }
+  .mc td:first-child, .mc th:first-child { text-align: left; font-family: var(--sans); }
+  .mc tr.best td { font-weight: 700; color: var(--mem); }
+  .mc tr.hb td { border-top: 2px solid var(--line); }
+  footer { margin-top: 18px; color: var(--ink-soft); font-size: 13.5px; max-width: 100ch; }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Hyperband</h1>
+  <p>Successive halving needs a choice of <i>n</i>, the number of configurations to start with:
+    with a large <i>n</i> each one gets very little training before the first cut, so early
+    learning curves can mislead and the best configuration may be dropped; with a small <i>n</i>,
+    resources go to configurations that were never promising. <b>Hyperband</b> hedges by running
+    successive halving several times, in <b>brackets</b>, all with about the same budget. Bracket
+    <i>s</i> = <i>s</i><sub>max</sub> starts many configurations with a tiny resource and cuts
+    aggressively; bracket <i>s</i> = 0 is plain random search, training a few configurations with the
+    full resource <i>R</i>. Hyperband returns the configuration with the lowest loss seen in any
+    bracket. Here each configuration is a simulated learning curve: validation loss as a function of
+    resource (e.g. epochs). See <a href="successive-halving.html">successive halving</a> for the
+    subroutine.</p>
+</header>
+
+<div class="card">
+  <h2>Setup</h2>
+  <div class="controls">
+    <div class="ctl"><label for="eta">Cut rate <i>η</i></label><select id="eta"></select></div>
+    <div class="ctl"><label for="R">Max resource <i>R</i></label><select id="R"></select></div>
+    <div class="ctl"><label for="rho">Late bloomers</label>
+      <input id="rho" type="range" min="0" max="1" step="0.05"><span class="val" id="rhov"></span></div>
+    <div class="ctl"><label for="noise">Evaluation noise</label>
+      <input id="noise" type="range" min="0" max="0.1" step="0.005"><span class="val" id="noisev"></span></div>
+  </div>
+  <div class="btnrow">
+    <button id="reseed">New configurations</button>
+    <label><input type="checkbox" id="truec"> Show full learning curves (not visible to the algorithm)</label>
+  </div>
+  <p class="hint" style="margin:8px 0 0;font-size:12.5px;color:var(--ink-faint)">Late bloomers = 0: how fast a
+    configuration learns is unrelated to how good it ends up, so early losses rank configurations well.
+    Late bloomers = 1: the best configurations are also the slowest learners, so early losses are misleading.</p>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Undo one bracket (←)">◀ Back</button>
+  <button id="step" class="primary" title="Run the next bracket (→)">Run bracket ▶</button>
+  <button id="play">Play</button>
+  <span class="k" id="kv"></span>
+</div>
+<p class="status" id="status"></p>
+
+<div class="main">
+  <div class="col">
+    <div class="card">
+      <h2 id="plottitle">Learning curves</h2>
+      <svg id="plot" role="img" aria-label="Learning curves of the configurations in the selected bracket"></svg>
+      <div class="legend">
+        <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" class="curve" style="opacity:1"/></svg>eliminated (✕ marks the last evaluation)</span>
+        <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" class="curve live"/></svg>survived the bracket</span>
+        <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" class="curve pick"/></svg>Hyperband's pick so far</span>
+        <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" class="oracle"/></svg>best full-training loss of any configuration sampled</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Brackets (Table 1 of the paper)</h2>
+      <p>Each bracket is one call to successive halving: rung <i>i</i> trains <i>n<sub>i</sub></i>
+        configurations to resource <i>r<sub>i</sub></i>, then keeps the best 1/<i>η</i>. Click a
+        bracket that has run to view it.</p>
+      <div class="tablewrap"><table id="tbl"></table></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h2>The algorithm (Li et al., 2018)</h2>
+      <div class="algo" id="algo"></div>
+    </div>
+    <div class="card">
+      <h2>Repeat many times</h2>
+      <p>With fresh configurations each time, compare Hyperband with running a single bracket
+        repeatedly with the same total budget. Lower is better.</p>
+      <p><button id="mc" class="primary">Run 300 trials</button></p>
+      <table class="mc" id="mctbl"></table>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><b>Simulated configurations.</b> Configuration <i>c</i> has learning curve
+    <i>L<sub>c</sub></i>(<i>r</i>) = <i>f<sub>c</sub></i> + <i>a<sub>c</sub></i>·exp(−<i>r</i>/<i>τ<sub>c</sub></i>):
+    it converges toward loss <i>f<sub>c</sub></i> on time scale <i>τ<sub>c</sub></i>. Each evaluation adds
+    Gaussian noise. The late-bloomer setting blends a random time scale with one that is longest for the
+    configurations with the lowest <i>f<sub>c</sub></i>. A configuration's quality is its loss after full
+    training, <i>L<sub>c</sub></i>(<i>R</i>). As in the paper's analysis, each rung's evaluation is charged
+    its full resource <i>r<sub>i</sub></i> (no reuse of earlier training), so every bracket uses about
+    <i>B</i> = (<i>s</i><sub>max</sub>+1)<i>R</i> units.</p>
+  <p>Algorithm from Li, Jamieson, DeSalvo, Rostamizadeh and Talwalkar, <i>Hyperband: A Novel Bandit-Based
+    Approach to Hyperparameter Optimization</i>, JMLR 18 (2018).</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+let S = {eta: 3, R: 81, rho: 0.7, noise: 0.02, seed: 5};
+
+// ===== randomness ===========================================================
+function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const gauss = rnd => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+
+// ===== simulated configurations =============================================
+function sampleConfig(rnd){
+  const q = rnd(), u = rnd();                       // q: 0 = best final loss, 1 = worst
+  const f = 0.10 + 0.30 * q, a = 0.5 + 0.2 * rnd();
+  const tau = S.R * 10 ** (-2 + 1.6 * (S.rho * (1 - q) + (1 - S.rho) * u));
+  return {f, a, tau, final: f + a * Math.exp(-S.R / tau)};
+}
+const trueLoss = (c, r) => c.f + c.a * Math.exp(-r / c.tau);
+
+// ===== Hyperband ============================================================
+// the bracket schedule: for s = s_max..0, n configurations starting at resource r
+function plan(R, eta){
+  const smax = Math.round(Math.log(R) / Math.log(eta)), B = (smax + 1) * R, out = [];
+  for (let s = smax; s >= 0; s--){
+    const n = Math.ceil(B / R * eta ** s / (s + 1)), r = Math.round(R / eta ** s);
+    const rungs = [];
+    for (let i = 0; i <= s; i++) rungs.push({n: Math.floor(n / eta ** i), r: r * eta ** i});
+    out.push({s, n, r, rungs, cost: rungs.reduce((t, g) => t + g.n * g.r, 0)});
+  }
+  return {smax, B, brackets: out};
+}
+// SuccessiveHalving on one bracket. Returns every configuration with its evaluations [[r, loss], ...].
+function runBracket(br, rnd){
+  const cfgs = Array.from({length: br.n}, () => ({...sampleConfig(rnd), evals: [], out: null}));
+  let T = cfgs.map((c, i) => i);
+  br.rungs.forEach((g, i) => {
+    for (const t of T) cfgs[t].evals.push([g.r, trueLoss(cfgs[t], g.r) + S.noise * gauss(rnd)]);
+    if (i === br.rungs.length - 1) return;
+    T.sort((x, y) => cfgs[x].evals[i][1] - cfgs[y].evals[i][1]);
+    for (const t of T.slice(Math.floor(g.n / S.eta))) cfgs[t].out = i;
+    T = T.slice(0, Math.floor(g.n / S.eta));
+  });
+  // the bracket's best: smallest loss seen at any rung
+  let best = null;
+  cfgs.forEach((c, i) => c.evals.forEach(([r, l]) => { if (!best || l < best.loss) best = {i, r, loss: l}; }));
+  return {cfgs, best};
+}
+
+// ===== state ================================================================
+let P = null, runs = [], done = 0, view = -1;
+function rebuild(){
+  P = plan(S.R, S.eta);
+  const rnd = mulberry32(S.seed);
+  runs = P.brackets.map(br => runBracket(br, rnd));
+  done = Math.min(done, runs.length); view = done - 1;
+}
+// Hyperband's pick after the first k brackets: [bracket index, config index] or null
+function pickAfter(k){
+  let best = null;
+  for (let b = 0; b < k; b++) if (!best || runs[b].best.loss < runs[best[0]].best.loss) best = [b];
+  return best ? [best[0], runs[best[0]].best.i] : null;
+}
+
+// ===== drawing ==============================================================
+const W = 640, H = 380, ML = 48, MR = 16, MT = 14, MB = 40, YMAX = 0.95;
+function drawPlot(){
+  const svg = $('plot'), R = S.R;
+  const sx = r => ML + Math.log(r) / Math.log(R) * (W - ML - MR);
+  const sy = l => MT + (1 - Math.min(YMAX, Math.max(0, l)) / YMAX) * (H - MT - MB);
+  let h = '';
+  // axes: resource on a log scale, one gridline per power of eta
+  for (let r = 1; r <= R; r *= S.eta)
+    h += `<line class="gridl" x1="${sx(r)}" x2="${sx(r)}" y1="${MT}" y2="${H - MB}"/>
+          <text x="${sx(r)}" y="${H - MB + 15}" text-anchor="middle">${r}</text>`;
+  for (let l = 0; l <= 0.9001; l += 0.1)
+    h += `<line class="gridl" x1="${ML}" x2="${W - MR}" y1="${sy(l)}" y2="${sy(l)}" stroke-dasharray="2 3"/>
+          <text x="${ML - 6}" y="${sy(l) + 4}" text-anchor="end">${l.toFixed(1)}</text>`;
+  h += `<text x="${(ML + W - MR) / 2}" y="${H - 6}" text-anchor="middle">resource r (log scale)</text>
+        <text transform="translate(12,${(MT + H - MB) / 2}) rotate(-90)" text-anchor="middle">validation loss</text>`;
+  if (view < 0){ svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = h +
+    `<text x="${(ML + W) / 2}" y="${H / 2}" text-anchor="middle" style="font-size:13px">Run a bracket to see its learning curves.</text>`; return; }
+
+  const run = runs[view], pick = pickAfter(done), last = P.brackets[view].rungs.length - 1;
+  const oracle = Math.min(...runs.slice(0, done).flatMap(x => x.cfgs.map(c => c.final)));
+  h += `<line class="oracle" x1="${ML}" x2="${W - MR}" y1="${sy(oracle)}" y2="${sy(oracle)}"/>`;
+  if ($('truec').checked) for (const c of run.cfgs){
+    let d = '';
+    for (let j = 0; j <= 60; j++){ const r = R ** (j / 60); d += `${j ? 'L' : 'M'}${sx(r).toFixed(1)},${sy(trueLoss(c, r)).toFixed(1)}`; }
+    h += `<path class="truec" d="${d}"/>`;
+  }
+  // eliminated first, then survivors, then the pick on top
+  const order = run.cfgs.map((c, i) => i).sort((a, b) => rank(a) - rank(b));
+  function rank(i){ return pick && pick[0] === view && pick[1] === i ? 2 : run.cfgs[i].out === null ? 1 : 0; }
+  for (const i of order){
+    const c = run.cfgs[i], cls = ['', 'live', 'pick'][rank(i)];
+    const pts = c.evals.map(([r, l]) => [sx(r), sy(l)]);
+    if (pts.length > 1) h += `<path class="curve ${cls}" d="M${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join('L')}"/>`;
+    pts.forEach(([x, y]) => h += `<circle class="pt ${cls}" cx="${x}" cy="${y}" r="${cls ? 3.2 : 2.2}"/>`);
+    if (c.out !== null){ const [x, y] = pts[pts.length - 1];
+      h += `<path class="x" d="M${x + 3},${y - 3} l5,5 m0,-5 l-5,5"/>`; }
+  }
+  if (pick && pick[0] === view){ const [r, l] = run.cfgs[pick[1]].evals[last];
+    h += `<text x="${sx(r) - 6}" y="${sy(l) - 8}" text-anchor="end" style="fill:var(--hit);font-weight:600">Hyperband's pick</text>`; }
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = h;
+}
+
+function drawTable(){
+  const {smax, brackets} = P, pick = pickAfter(done);
+  const col = b => b === view ? ' class="cur"' : '';
+  let h = '<tr><th class="rowh"></th>' + brackets.map((br, b) =>
+    `<th colspan="2"${col(b)}>${b < done ? `<button data-b="${b}">s = ${br.s}</button>` : `s = ${br.s}`}</th>`).join('') + '</tr>';
+  h += '<tr><th class="rowh">rung i</th>' + brackets.map((br, b) => `<th${col(b)}>n<sub>i</sub></th><th${col(b)}>r<sub>i</sub></th>`).join('') + '</tr>';
+  for (let i = 0; i <= smax; i++)
+    h += `<tr><td class="rowh">${i}</td>` + brackets.map((br, b) => br.rungs[i]
+      ? `<td${col(b)}>${br.rungs[i].n}</td><td${col(b)}>${br.rungs[i].r}</td>` : `<td${col(b)}></td><td${col(b)}></td>`).join('') + '</tr>';
+  h += '<tr><td class="rowh">resource used</td>' + brackets.map((br, b) => `<td colspan="2"${col(b)}>${br.cost}</td>`).join('') + '</tr>';
+  h += '<tr><td class="rowh">best loss seen</td>' + brackets.map((br, b) => b < done
+    ? `<td colspan="2"${col(b)}${pick && pick[0] === b ? ' class="pick"' : ''}>${runs[b].best.loss.toFixed(3)}</td>`
+    : `<td colspan="2" class="na">—</td>`).join('') + '</tr>';
+  h += '<tr><td class="rowh">…its full-training loss</td>' + brackets.map((br, b) => b < done
+    ? `<td colspan="2"${col(b)}>${runs[b].cfgs[runs[b].best.i].final.toFixed(3)}</td>` : `<td colspan="2" class="na">—</td>`).join('') + '</tr>';
+  $('tbl').innerHTML = h;
+  $('tbl').querySelectorAll('[data-b]').forEach(btn => btn.addEventListener('click', () => { view = +btn.dataset.b; render(); }));
+}
+
+function drawAlgo(){
+  const {smax, B} = P, br = view >= 0 ? P.brackets[view] : null, cur = done > 0 && view === done - 1;
+  $('algo').innerHTML = `
+    <div class="top"><span class="sc">Hyperband</span>(<i>R</i> = ${S.R}, <i>η</i> = ${S.eta})</div>
+    <div class="top"><i>s</i><sub>max</sub> = ⌊log<sub><i>η</i></sub> <i>R</i>⌋ = ${smax}, &nbsp;
+      <i>B</i> = (<i>s</i><sub>max</sub> + 1) <i>R</i> = ${B}</div>
+    <div class="top"><b>for</b> <i>s</i> ∈ {${smax}, …, 0}${br ? ` &nbsp;(viewing <i>s</i> = ${br.s})` : ''}</div>
+    <div${cur ? ' class="curl"' : ''}><i>n</i> = ⌈(<i>B</i>/<i>R</i>) · <i>η<sup>s</sup></i> / (<i>s</i> + 1)⌉${br ? ` = ${br.n}` : ''},
+      &nbsp; <i>r</i> = <i>R</i> <i>η</i><sup>−<i>s</i></sup>${br ? ` = ${br.r}` : ''}</div>
+    <div${cur ? ' class="curl"' : ''}><i>T</i> = <i>n</i> random configurations</div>
+    <div${cur ? ' class="curl"' : ''}><span class="sc">SuccessiveHalving</span>(<i>T</i>, <i>r</i>, <i>η</i>):
+      for <i>i</i> = 0..<i>s</i>, train each <i>t</i> ∈ <i>T</i> to <i>r<sub>i</sub></i> = <i>r η<sup>i</sup></i>
+      and keep the best ⌊<i>n<sub>i</sub></i>/<i>η</i>⌋</div>
+    <div class="top"><b>return</b> the configuration with the smallest loss seen so far</div>`;
+}
+
+// ===== rendering ============================================================
+function render(){
+  const nb = P.brackets.length;
+  $('kv').textContent = `${done} / ${nb} brackets`;
+  $('back').disabled = $('reset').disabled = done === 0; $('step').disabled = done === nb;
+  const pick = pickAfter(done);
+  if (done === 0)
+    $('status').innerHTML = `Hyperband will run ${nb} brackets, s = ${P.smax} down to 0, each using about B = ${P.B} units of resource.`;
+  else {
+    const br = P.brackets[view], run = runs[view], p = runs[pick[0]].cfgs[pick[1]];
+    const oracle = Math.min(...runs.slice(0, done).flatMap(x => x.cfgs.map(c => c.final)));
+    $('status').innerHTML = `<b>Bracket s = ${br.s}:</b> ${br.n} configuration${br.n > 1 ? 's' : ''} starting at r = ${br.r}
+      (${br.rungs.map(g => g.n).join(' → ')}); best loss seen ${run.best.loss.toFixed(3)}.
+      <b>Hyperband's pick so far</b> (from bracket s = ${P.brackets[pick[0]].s}): full-training loss ${p.final.toFixed(3)},
+      vs ${oracle.toFixed(3)} for the best configuration sampled.`;
+  }
+  $('plottitle').textContent = view >= 0 ? `Learning curves, bracket s = ${P.brackets[view].s}` : 'Learning curves';
+  drawPlot(); drawTable(); drawAlgo();
+}
+
+// ===== Monte Carlo ==========================================================
+function monteCarlo(trials){
+  const rnd = mulberry32((S.seed * 7919) ^ 0x2545f491), nb = P.brackets.length;
+  const hb = [], single = P.brackets.map(() => []);
+  for (let t = 0; t < trials; t++){
+    const rs = P.brackets.map(br => runBracket(br, rnd));
+    const bestOf = list => list.reduce((a, x) => x.best.loss < a.best.loss ? x : a);
+    const w = bestOf(rs); hb.push(w.cfgs[w.best.i].final);
+    // each bracket alone, repeated nb times so it gets Hyperband's total budget
+    P.brackets.forEach((br, b) => {
+      const reps = [rs[b], ...Array.from({length: nb - 1}, () => runBracket(br, rnd))], w2 = bestOf(reps);
+      single[b].push(w2.cfgs[w2.best.i].final);
+    });
+  }
+  const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+  const rows = [['Hyperband (all brackets once)', mean(hb), 'hb'],
+    ...P.brackets.map((br, b) => [`bracket s = ${br.s} only, ×${nb}${br.s === 0 ? ' (random search)' : br.s === P.smax ? ' (most aggressive)' : ''}`, mean(single[b]), ''])];
+  const lo = Math.min(...rows.map(r => r[1]));
+  $('mctbl').innerHTML = '<tr><th>Method (same total budget)</th><th>Avg. full-training loss of pick</th></tr>' +
+    rows.map(([name, v, cls]) => `<tr class="${cls}${Math.abs(v - lo) < 1e-12 ? ' best' : ''}"><td>${name}</td><td>${v.toFixed(4)}</td></tr>`).join('') +
+    `<tr><td colspan="2" style="font-family:var(--sans);color:var(--ink-faint);font-size:12.5px;text-align:left;white-space:normal">
+      ${trials} trials, R = ${S.R}, η = ${S.eta}, late bloomers = ${S.rho}, noise = ${S.noise}. The lowest possible is 0.100.</td></tr>`;
+}
+
+// ===== wiring ===============================================================
+const RS = {2: [8, 16, 32, 64, 128], 3: [9, 27, 81, 243], 4: [16, 64, 256]};
+$('eta').innerHTML = [2, 3, 4].map(v => `<option>${v}</option>`).join('');
+function syncControls(){
+  if (!RS[S.eta].includes(S.R)) S.R = RS[S.eta].reduce((a, b) => Math.abs(Math.log(b / S.R)) < Math.abs(Math.log(a / S.R)) ? b : a);
+  $('R').innerHTML = RS[S.eta].map(v => `<option${v === S.R ? ' selected' : ''}>${v}</option>`).join('');
+  $('eta').value = S.eta;
+  $('rho').value = S.rho; $('rhov').textContent = S.rho.toFixed(2);
+  $('noise').value = S.noise; $('noisev').textContent = S.noise.toFixed(3);
+}
+function update(resetSteps){ syncControls(); if (resetSteps) done = 0; rebuild(); render(); $('mctbl').innerHTML = ''; }
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+const go = k => { done = Math.max(0, Math.min(P.brackets.length, k)); view = done - 1; render(); };
+$('eta').addEventListener('change', e => { S.eta = +e.target.value; update(true); });
+$('R').addEventListener('change', e => { S.R = +e.target.value; update(true); });
+$('rho').addEventListener('input', e => { S.rho = +e.target.value; update(false); });
+$('noise').addEventListener('input', e => { S.noise = +e.target.value; update(false); });
+$('reseed').addEventListener('click', () => { S.seed = Math.floor(Math.random() * 1e9); update(false); });
+$('truec').addEventListener('change', drawPlot);
+$('step').addEventListener('click', () => { stop(); go(done + 1); });
+$('back').addEventListener('click', () => { stop(); go(done - 1); });
+$('reset').addEventListener('click', () => { stop(); go(0); });
+$('play').addEventListener('click', () => {
+  if (timer) return stop();
+  if (done === P.brackets.length) go(0);
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (done >= P.brackets.length) stop(); else go(done + 1); }, 1500);
+});
+$('mc').addEventListener('click', () => monteCarlo(300));
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, select, textarea')) return;
+  if (e.key === 'ArrowRight'){ stop(); go(done + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ stop(); go(done - 1); e.preventDefault(); }
+  else if (e.key === 'Home'){ stop(); go(0); }
+});
+update(true);
+</script>
+</body>
+</html>
