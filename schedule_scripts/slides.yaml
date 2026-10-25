@@ -1,6 +1,23 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+hyperparam-gp-hyperband.pptx:
+  num_slides: 61
+  summary: hyperparam tuning recap, gaussian processes and vizier, hyperband
+  links: 
+   - https://arxiv.org/abs/2203.15556:
+       Hoffman et al (2022). Training Compute-Optimal LLMs
+   # - https://openreview.net/forum?id=xI71dsS3o4: (Mis)fitting - a study of scaling laws, ICLR 2025
+   - https://www.jmlr.org/papers/v18/16-558.html: Hyperband - A Novel Bandit Based Approach to Hyperparameter Optimization, JMLR 2018
+   - https://drive.google.com/file/d/1T4s3CPBHazGhGFZpBcLa6HtnvS7PRcMT/view?usp=drive_link: PDF full-length talk on Vizier
+
+attention-variants.pptx:
+  num_slides: 4
+  summary: additions to Transformer since 2017, mostly MQA, GQA, MLA
+  links:
+   - https://10605.github.io/viz/attention-heads.html: Visualization of attention variants
+
+
 lsh-multi-index-jmeans.pptx:
   num_slides: 14
   summary: review of lsh count countmin
@@ -239,6 +256,11 @@ quantize-distill.pptx:
 transformer-bpe-short.pptx:
   num_slides: 11
   summary: vision transformers and murag
+  links:
+   - https://10605.github.io/viz/bpe-merge.html: Visualization of BPE
+   - https://10605.github.io/viz/bpe-trie.html: Visualization of BPE with tries
+   - https://arxiv.org/pdf/1508.07909: Neural Machine Translation of Rare Words with Subword Units, Sennrich et al, 2016
+   - https://huggingface.co/docs/transformers/tokenizer_summary: HF blog post on BPE
 vizier.pdf:
   num_slides: 49
   summary: Vizier talk from Greg
@@ -255,20 +277,27 @@ hyperparam.pptx:
 lora-recap.pptx:
   num_slides: 9
   summary: recap of lora, how it's use for transformers/BERT
+lora-short.pptx:
+  num_slides: 9
+  summary: short intro  to lora and PEFT
+  links:
+   - https://arxiv.org/pdf/2106.09685v1/1000: OG LoRA paper, Hu et al, 2021
+   - https://openreview.net/pdf?id=aloEru2qCG: LoRA analysis paper, Bederman et al, 2024
+   - https://www.entrypointai.com/blog/lora-fine-tuning/: PEFT blog post, Mark Hennings
 transformer-kv-intro.pptx:
   num_slides: 10
   summary: why key-value caching works
   links:
     - https://medium.com/@joaolages/kv-caching-explained-276520203249: João Lages blog post
 transformer-bpe.pptx:
-  num_slides: 21
+  num_slides: 18
   summary: BPE, wordpieces, ViT tokenization
   links:
   - https://arxiv.org/pdf/1508.07909: Neural Machine Translation of Rare Words with Subword Units, Sennrich et al 2016
   - https://huggingface.co/docs/transformers/tokenizer_summary: Huggingface's guide to BPE and similar
   - https://arxiv.org/pdf/2010.11929/1000: 
      'An Image is Worth 16x16 Words: Transformers for Image Recognition, ICLR 2021'
-  - https://arxiv.org/abs/2210.02928: MuRag Multimodal Retrieval-Augmented Generation ..., Chen et al 2022
+  # - https://arxiv.org/abs/2210.02928: MuRag Multimodal Retrieval-Augmented Generation ..., Chen et al 2022
 transformer.pptx:
   num_slides: 33
   summary: walkthru of transformers 

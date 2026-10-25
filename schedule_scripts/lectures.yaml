@@ -191,54 +191,54 @@
 ########## Transformers
 
 - title: 'Deep Learning: Background and Architectures'
-  pptx_link: https://docs.google.com/presentation/d/1F43qkTpAoV0CDqjlI1cweC0e6iUnh89H/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1iX5HWdsX9yLgcqavAIGX3eN5yKkmFl43/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1I0PthhFUlurZtJqzKJ6Izj3xZniIrtxl/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1U1zRW8irQWJTROy17rYaf5KWRSc2hC94/view?usp=drive_link
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
+    - '* HW 4 out - LoRA'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
-  pptx_link: https://docs.google.com/presentation/d/1ZFuLHlzKw0m4kWikE1pFEQS-FUVvZno1/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1k4owNPRBGNpZqDVLHUUNGsFTS1vWtm5l/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1_8eblsK_ieS9zsGiqNlowKmqgbZ_vX6G/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1H4Ia8d0k3wYweOJS83Q16TNM8cE1RnTp/view?usp=drive_link
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
-    - lora-recap.pptx
-    - transformer-discussion.pptx
-    - transformer-bpe.pptx
-  content:
-    - '* HW 4 out'
     - '* Miniproject: open-ended miniproject proposals due'
 
-- title: 'No Recitation'
+- title: 'Recitation: PyTorch / HW4'
   type: recitation
-  summary: ''
+  summary: 'Introduction to using PyTorch with a coding demo'
+  notebook_link: https://drive.google.com/file/d/1i52B4KkcU2CUA0Km4bAmXufwcaFRGkyp/view?usp=sharing
 
 ########## Hyperparams, KV, BPE
 
-- title: Hyperparameter Search 
-  pptx_link: https://docs.google.com/presentation/d/1ZS2S-5xvnqcEmI86PoQ8ynRbqctWQ2kb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1FpHW6MpZHlwfKQzrusxzItHVD519O2MO/view?usp=drive_link
+- title: LoRA, BPE, Hyperparameter Search
+  pptx_link: https://docs.google.com/presentation/d/1uv_j_seZBP3v_-aOZ6EWJBYoud9zQL0l/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1fvj9BriQuIeRsUk7_kxO4hD5HFZwbWiX/view?usp=drive_link
   summary: Vizier, Hyperband
   content:
-   - vizier.pdf
-   - hyperparam.pptx 
-   - '* Miniproject: feedback on open-ended miniproject proposals given; open proposals are posted for class'
+    - lora-short.pptx
+    - transformer-discussion.pptx
+    - transformer-bpe.pptx
+    - hyperparam.pptx 
+    - vizier.pdf
+    - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
 
 - title: Embarrassingly Parallel Training
-  pptx_link: https://docs.google.com/presentation/d/167TcvMTMtt9RbHuYenmyckaa-eHFHJmL/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1jFbpVzatVfmBa2P5z37p4m9jW9HCGk6J/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1M91mHh8-rU7EhGRO_6_j6SeP1QRM3H5l/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1alv1I-z_IDDxWc1tFAbtGKVOHgPVvy8a/view?usp=drive_link
   summary: BTM, BTX, FlexOLMO, and Task Vectors
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
+   - '* HW 4 Slot A due'
    - '* HW 5 out - GPT-2 Training'
    - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
 
-
-- title: 'Recitation - HW5'
+- title: Recitation - HW5
   type: recitation
   summary: 
   content: []
@@ -261,10 +261,9 @@
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
-    - '* HW 4 Slot A due'
     - '* Miniproject: structured miniproject survey due'
 
-- title: 'Recitation - Structured miniproject / HW4 Writing Session'
+- title: Recitation - Structured miniproject
   type: recitation
   slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
   content:
@@ -292,7 +291,7 @@
     - contrastive-tricks.pptx
     - contreiver.pptx
 
-- title: 'No recitation'
+- title: HW4 Writing Session
   type: recitation
 
 ########## RAG, Parallel Training, PPI
