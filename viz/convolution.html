@@ -5,10 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Convolution — edge filters on MNIST, visualized</title>
 <style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
   :root {
-    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
-    --line:#3a4568; --accent:#7cc4ff; --green:#8ce99a; --amber:#ffd166;
-    --pos:#ff6b6b; --neg:#5c9dff;
+    --bg:         #eef1f3;
+    --panel:      #fbfcfd;
+    --ink:        #16222b;
+    --muted:      #4a5b67;
+    --faint:      #7b8b96;
+    --line:       #c6d0d8;
+    --accent:     #0b6a7d;
+    --green:      #3d6b3a;
+    --amber:      #a4530c;
+    --btn:        #e3e8ec;
+    --btn-hover:  #d3e7ec;
+    --on-accent:  #fbfcfd;
+    --cur:        #d3e7ec;
+    --done:       #2c3b45;
+    --cell:       #e9eef1;
+    --zero:       #fbfcfd;
+    --pos:        #d64545;
+    --neg:        #2f6fd6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:         #0d1519;
+      --panel:      #141f25;
+      --ink:        #e6eef1;
+      --muted:      #a3b4bd;
+      --faint:      #6d818c;
+      --line:       #2a3a43;
+      --accent:     #4fc0d6;
+      --green:      #86c07e;
+      --amber:      #e09a4d;
+      --btn:        #1e2c33;
+      --btn-hover:  #10333c;
+      --on-accent:  #0d1519;
+      --cur:        #10333c;
+      --done:       #c8d4da;
+      --cell:       #0f181d;
+      --zero:       #141f25;
+      --pos:        #ff6b6b;
+      --neg:        #5c9dff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:         #0d1519;
+    --panel:      #141f25;
+    --ink:        #e6eef1;
+    --muted:      #a3b4bd;
+    --faint:      #6d818c;
+    --line:       #2a3a43;
+    --accent:     #4fc0d6;
+    --green:      #86c07e;
+    --amber:      #e09a4d;
+    --btn:        #1e2c33;
+    --btn-hover:  #10333c;
+    --on-accent:  #0d1519;
+    --cur:        #10333c;
+    --done:       #c8d4da;
+    --cell:       #0f181d;
+    --zero:       #141f25;
+    --pos:        #ff6b6b;
+    --neg:        #5c9dff;
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
@@ -31,12 +89,12 @@
   .row label { color:var(--muted); }
   input[type=range] { width:130px; accent-color:var(--accent); }
   .val { font-variant-numeric:tabular-nums; min-width:56px; text-align:right; }
-  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+  button { background:var(--btn); color:var(--ink); border:1px solid var(--line);
            border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
-  button:hover { background:#303c60; }
-  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+  button:hover { background:var(--btn-hover); }
+  button.primary { background:var(--accent); color:var(--on-accent); border-color:var(--accent);
                    font-weight:600; }
-  button.sel { background:var(--green); color:#0a2417; border-color:var(--green); font-weight:600; }
+  button.sel { background:var(--green); color:var(--on-accent); border-color:var(--green); font-weight:600; }
   .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
   #digits button { padding:6px 0; width:38px; font-variant-numeric:tabular-nums; }
   #filters button { flex:1 1 40%; }
@@ -105,7 +163,7 @@
 
     <div class="card legend">
       <h2>Legend</h2>
-      <div><span class="sw" style="background:#fff"></span><b>input pixel</b> — intensity scaled to [0, 1]</div>
+      <div><span class="sw" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"></span><b>input pixel</b> — intensity scaled to [0, 1]</div>
       <div><span class="sw" style="background:var(--amber)"></span><b>window</b> — the 3×3 patch the filter is over</div>
       <div><span class="sw" style="background:var(--pos)"></span><b>positive</b> output (pattern matches)</div>
       <div><span class="sw" style="background:var(--neg)"></span><b>negative</b> output (reverse pattern)</div>
@@ -169,9 +227,16 @@ function fitDPI(){
 }
 fitDPI(); window.addEventListener('resize', fitDPI);
 
-const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', panel:'#191d2e',
-              cell:'#141827', amber:'#ffd166', cyan:'#7cc4ff',
-              pos:[255,107,107], neg:[92,157,255], zero:[20,24,39] };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rgbOf = v => { const h = css(v).slice(1); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); };
+let COL;
+function readTheme(){
+  COL = { ink:css('--ink'), muted:css('--muted'), line:css('--line'), panel:css('--panel'),
+          cell:css('--cell'), amber:css('--amber'), cyan:css('--accent'),
+          pos:rgbOf('--pos'), neg:rgbOf('--neg'), zero:rgbOf('--zero') };
+}
+readTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', readTheme);
 const MONO = '"SFMono-Regular",Menlo,Consolas,monospace';
 
 // geometry
@@ -279,10 +344,10 @@ function draw(){
 
   // ---- window, target cell, and connector lines ----
   const wx=IX+c*IC, wy=IY+r*IC, ox=OX+c*OC, oy=IYo+r*OC;
-  ctx.strokeStyle='rgba(255,209,102,0.35)'; ctx.lineWidth=1; ctx.beginPath();
+  ctx.strokeStyle=COL.amber; ctx.globalAlpha=0.45; ctx.lineWidth=1; ctx.beginPath();
   ctx.moveTo(wx+K*IC, wy); ctx.lineTo(ox, oy);
   ctx.moveTo(wx+K*IC, wy+K*IC); ctx.lineTo(ox, oy+OC);
-  ctx.stroke();
+  ctx.stroke(); ctx.globalAlpha=1;
   // mini filter in the gap (drawn over the connector lines)
   const mc=MID.c, mx=MID.cx-K*mc/2, my=MID.cy-K*mc/2;
   ctx.fillStyle=COL.panel; ctx.fillRect(mx-6,my-30,K*mc+12,K*mc+40);
@@ -308,7 +373,7 @@ function draw(){
     }
   }
   const x1=30, x2=x1+K*CC+50, x3=x2+K*CC+50, x4=x3+K*CC+60;
-  grid3(x1, CY, patch, gray, v=>v>0.55?'#111':COL.ink, 'patch at ('+r+', '+c+')', true);
+  grid3(x1, CY, patch, gray, v=>v>0.55?'#111':'#eee', 'patch at ('+r+', '+c+')', true);
   symbol('⊙', x1+K*CC+25);
   grid3(x2, CY, w, v=>signedColor(v,1.6), ()=>COL.ink, 'filter', false);
   symbol('=', x2+K*CC+25);

@@ -5,9 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>psgd.py — parameter mixing, visualized</title>
 <style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
   :root {
-    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
-    --line:#3a4568; --accent:#7cc4ff; --shared:#ffd166;
+    --bg:         #eef1f3;
+    --panel:      #fbfcfd;
+    --ink:        #16222b;
+    --muted:      #4a5b67;
+    --faint:      #7b8b96;
+    --line:       #c6d0d8;
+    --accent:     #0b6a7d;
+    --green:      #3d6b3a;
+    --amber:      #a4530c;
+    --btn:        #e3e8ec;
+    --btn-hover:  #d3e7ec;
+    --on-accent:  #fbfcfd;
+    --cur:        #d3e7ec;
+    --done:       #2c3b45;
+    --shared:     #a4530c;
+    --box:        #e3e8ec;
+    --box-edge:   #9aa8b4;
+    --w-lo:       #2f6fd6;
+    --w-mid:      #e3e8ec;
+    --w-hi:       #c77a12;
+    --wk0:        #0b6a7d;
+    --wk1:        #3d6b3a;
+    --wk2:        #b3266e;
+    --wk3:        #6a3d8f;
+    --wk4:        #a4530c;
+    --wk5:        #2f5fb3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:         #0d1519;
+      --panel:      #141f25;
+      --ink:        #e6eef1;
+      --muted:      #a3b4bd;
+      --faint:      #6d818c;
+      --line:       #2a3a43;
+      --accent:     #4fc0d6;
+      --green:      #86c07e;
+      --amber:      #e09a4d;
+      --btn:        #1e2c33;
+      --btn-hover:  #10333c;
+      --on-accent:  #0d1519;
+      --cur:        #10333c;
+      --done:       #c8d4da;
+      --shared:     #e09a4d;
+      --box:        #1e2c33;
+      --box-edge:   #3a4e59;
+      --w-lo:       #4678dc;
+      --w-mid:      #1e2c33;
+      --w-hi:       #ffd166;
+      --wk0:        #4fc0d6;
+      --wk1:        #86c07e;
+      --wk2:        #ff8fbf;
+      --wk3:        #b98ae0;
+      --wk4:        #e09a4d;
+      --wk5:        #7fa8ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:         #0d1519;
+    --panel:      #141f25;
+    --ink:        #e6eef1;
+    --muted:      #a3b4bd;
+    --faint:      #6d818c;
+    --line:       #2a3a43;
+    --accent:     #4fc0d6;
+    --green:      #86c07e;
+    --amber:      #e09a4d;
+    --btn:        #1e2c33;
+    --btn-hover:  #10333c;
+    --on-accent:  #0d1519;
+    --cur:        #10333c;
+    --done:       #c8d4da;
+    --shared:     #e09a4d;
+    --box:        #1e2c33;
+    --box-edge:   #3a4e59;
+    --w-lo:       #4678dc;
+    --w-mid:      #1e2c33;
+    --w-hi:       #ffd166;
+    --wk0:        #4fc0d6;
+    --wk1:        #86c07e;
+    --wk2:        #ff8fbf;
+    --wk3:        #b98ae0;
+    --wk4:        #e09a4d;
+    --wk5:        #7fa8ff;
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
@@ -30,10 +113,10 @@
   .row label { color:var(--muted); }
   input[type=range] { width:116px; accent-color:var(--accent); }
   .val { font-variant-numeric:tabular-nums; min-width:30px; text-align:right; }
-  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+  button { background:var(--btn); color:var(--ink); border:1px solid var(--line);
            border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
-  button:hover { background:#303c60; }
-  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+  button:hover { background:var(--btn-hover); }
+  button.primary { background:var(--accent); color:var(--on-accent); border-color:var(--accent);
                    font-weight:600; }
   .btns { display:flex; gap:8px; flex-wrap:wrap; }
   .chk { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--muted); }
@@ -152,9 +235,17 @@ function fitDPI(){
 fitDPI(); window.addEventListener('resize', fitDPI);
 
 // ---- palette --------------------------------------------------------------
-const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', box:'#222a44',
-              boxEdge:'#3b466b', accent:'#7cc4ff', shared:'#ffd166' };
-const WORKER = ['#7cc4ff','#8ce99a','#ffa3c9','#b197fc','#ffb27a','#66d9e8'];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rgbOf = v => { const h = css(v).slice(1); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); };
+let COL, WORKER;
+function readTheme(){
+  COL = { ink:css('--ink'), muted:css('--muted'), line:css('--line'), box:css('--box'),
+          boxEdge:css('--box-edge'), accent:css('--accent'), shared:css('--shared'),
+          faint:css('--faint'), wlo:rgbOf('--w-lo'), wmid:rgbOf('--w-mid'), whi:rgbOf('--w-hi') };
+  WORKER = [0,1,2,3,4,5].map(i=>css('--wk'+i));
+}
+readTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', readTheme);
 
 // ---- constants / state ----------------------------------------------------
 const NW = 14;          // number of weights
@@ -271,7 +362,7 @@ function roundRect(x,y,w,h,r){
   ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
 }
 function wcolor(v){
-  const t=clamp((v+1.2)/2.4,0,1), lo=[70,120,220], mid=[38,46,78], hi=[255,209,102];
+  const t=clamp((v+1.2)/2.4,0,1), lo=COL.wlo, mid=COL.wmid, hi=COL.whi;
   let c; if(t<0.5){const u=t/0.5; c=lo.map((x,i)=>lerp(x,mid[i],u));}
   else {const u=(t-0.5)/0.5; c=mid.map((x,i)=>lerp(x,hi[i],u));}
   return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
@@ -325,7 +416,7 @@ function drawStream(name, raw){
   for(let i=0;i<cells;i++){
     const inWin=i>=sw.start && i<sw.start+sw.winCells;
     ctx.globalAlpha = inWin ? (name==='scatter'?0.85:0.9) : 0.4;
-    ctx.fillStyle = inWin ? COL.accent : '#39456e';
+    ctx.fillStyle = inWin ? COL.accent : COL.faint;
     ctx.fillRect(x+i*cw+0.5, y, cw-1.5, h);
   }
   ctx.globalAlpha=1;

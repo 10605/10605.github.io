@@ -5,9 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>autodiff.py — reverse-mode autodifferentiation, visualized</title>
 <style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
   :root {
-    --bg:#0f1220; --panel:#191d2e; --ink:#e8ecf5; --muted:#9aa3bd;
-    --line:#3a4568; --accent:#7cc4ff; --green:#8ce99a; --amber:#ffd166;
+    --bg:         #eef1f3;
+    --panel:      #fbfcfd;
+    --ink:        #16222b;
+    --muted:      #4a5b67;
+    --faint:      #7b8b96;
+    --line:       #c6d0d8;
+    --accent:     #0b6a7d;
+    --green:      #3d6b3a;
+    --amber:      #a4530c;
+    --btn:        #e3e8ec;
+    --btn-hover:  #d3e7ec;
+    --on-accent:  #fbfcfd;
+    --cur:        #d3e7ec;
+    --done:       #2c3b45;
+    --node:       #eef3f6;
+    --input:      #e3e8ec;
+    --edge:       #9aa8b4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:         #0d1519;
+      --panel:      #141f25;
+      --ink:        #e6eef1;
+      --muted:      #a3b4bd;
+      --faint:      #6d818c;
+      --line:       #2a3a43;
+      --accent:     #4fc0d6;
+      --green:      #86c07e;
+      --amber:      #e09a4d;
+      --btn:        #1e2c33;
+      --btn-hover:  #10333c;
+      --on-accent:  #0d1519;
+      --cur:        #10333c;
+      --done:       #c8d4da;
+      --node:       #1a272e;
+      --input:      #1e2c33;
+      --edge:       #3a4e59;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:         #0d1519;
+    --panel:      #141f25;
+    --ink:        #e6eef1;
+    --muted:      #a3b4bd;
+    --faint:      #6d818c;
+    --line:       #2a3a43;
+    --accent:     #4fc0d6;
+    --green:      #86c07e;
+    --amber:      #e09a4d;
+    --btn:        #1e2c33;
+    --btn-hover:  #10333c;
+    --on-accent:  #0d1519;
+    --cur:        #10333c;
+    --done:       #c8d4da;
+    --node:       #1a272e;
+    --input:      #1e2c33;
+    --edge:       #3a4e59;
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
@@ -31,12 +87,12 @@
   .row label { color:var(--muted); }
   input[type=range] { width:130px; accent-color:var(--accent); }
   .val { font-variant-numeric:tabular-nums; min-width:26px; text-align:right; }
-  button { background:#26304d; color:var(--ink); border:1px solid var(--line);
+  button { background:var(--btn); color:var(--ink); border:1px solid var(--line);
            border-radius:8px; padding:8px 12px; cursor:pointer; font-size:14px; }
-  button:hover { background:#303c60; }
-  button.primary { background:var(--accent); color:#06223a; border-color:var(--accent);
+  button:hover { background:var(--btn-hover); }
+  button.primary { background:var(--accent); color:var(--on-accent); border-color:var(--accent);
                    font-weight:600; }
-  button.sel { background:var(--green); color:#0a2417; border-color:var(--green); font-weight:600; }
+  button.sel { background:var(--green); color:var(--on-accent); border-color:var(--green); font-weight:600; }
   .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
   .chk { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--muted); font-size:13px; }
   .chk input { accent-color:var(--accent); width:16px; height:16px; }
@@ -45,14 +101,14 @@
   .metric b { color:var(--accent); font-weight:600; }
   .wl { font:12.5px/1.55 "SFMono-Regular", Menlo, Consolas, monospace; color:var(--muted); }
   .wl div { padding:1px 6px; border-radius:5px; white-space:pre; }
-  .wl div.cur { background:#243052; color:var(--ink); }
-  .wl div.done { color:#c4ccdf; }
+  .wl div.cur { background:var(--cur); color:var(--ink); }
+  .wl div.done { color:var(--done); }
   ol.trace { margin:2px 0 0; padding-left:22px; color:var(--muted); font-size:12.5px;
              max-height:230px; overflow:auto; font-variant-numeric:tabular-nums; }
   ol.trace li { margin:2px 0; cursor:pointer; padding:1px 4px; border-radius:4px; }
-  ol.trace li:hover { background:#222a44; }
-  ol.trace li.done { color:#c4ccdf; }
-  ol.trace li.cur { color:var(--ink); font-weight:600; background:#243052; }
+  ol.trace li:hover { background:var(--btn-hover); }
+  ol.trace li.done { color:var(--done); }
+  ol.trace li.cur { color:var(--ink); font-weight:600; background:var(--cur); }
   ol.trace li.fwd::marker { color:var(--green); }
   ol.trace li.bwd::marker { color:var(--accent); }
   .hd { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em;
@@ -116,7 +172,7 @@
     </div>
 
     <div class="card">
-      <h2>Trace <span style="text-transform:none;letter-spacing:0;color:#66708c">(click to jump)</span></h2>
+      <h2>Trace <span style="text-transform:none;letter-spacing:0;color:var(--faint)">(click to jump)</span></h2>
       <ol class="trace" id="trace"></ol>
     </div>
 
@@ -187,9 +243,16 @@ function fitDPI(){
 }
 fitDPI(); window.addEventListener('resize', fitDPI);
 
-const COL = { ink:'#e8ecf5', muted:'#9aa3bd', line:'#3a4568', panel:'#191d2e',
-              node:'#1c2337', input:'#232a40', edge:'#46527a',
-              green:'#8ce99a', cyan:'#7cc4ff', amber:'#ffd166' };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rgbOf = v => { const h = css(v).slice(1); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); };
+let COL;
+function readTheme(){
+  COL = { ink:css('--ink'), muted:css('--muted'), line:css('--line'), panel:css('--panel'),
+          node:css('--node'), input:css('--input'), edge:css('--edge'),
+          green:css('--green'), cyan:css('--accent'), amber:css('--amber') };
+}
+readTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', readTheme);
 
 // ===== small helpers ========================================================
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
