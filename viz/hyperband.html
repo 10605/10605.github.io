@@ -152,7 +152,8 @@
 
 <header>
   <h1>Hyperband</h1>
-  <p>Successive halving needs a choice of <i>n</i>, the number of configurations to start with:
+  <p><b>Hyperband</b> builds on <a href="successive-halving.html">successive halving</a>, which
+    needs a choice of <i>n</i>, the number of configurations to start with:
     with a large <i>n</i> each one gets very little training before the first cut, so early
     learning curves can mislead and the best configuration may be dropped; with a small <i>n</i>,
     resources go to configurations that were never promising. <b>Hyperband</b> hedges by running
@@ -161,8 +162,7 @@
     aggressively; bracket <i>s</i> = 0 is plain random search, training a few configurations with the
     full resource <i>R</i>. Hyperband returns the configuration with the lowest loss seen in any
     bracket. Here each configuration is a simulated learning curve: validation loss as a function of
-    resource (e.g. epochs). See <a href="successive-halving.html">successive halving</a> for the
-    subroutine.</p>
+    resource (e.g. epochs).</p>
 </header>
 
 <div class="card">
@@ -246,7 +246,7 @@
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
-let S = {eta: 3, R: 81, rho: 0.7, noise: 0.02, seed: 5};
+let S = {eta: 2, R: 64, rho: 0.7, noise: 0.02, seed: 5};
 
 // ===== randomness ===========================================================
 function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
@@ -325,7 +325,7 @@ function drawPlot(){
   if (view < 0){ svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = h +
     `<text x="${(ML + W) / 2}" y="${H / 2}" text-anchor="middle" style="font-size:13px">Run a bracket to see its learning curves.</text>`; return; }
 
-  const run = runs[view], pick = pickAfter(done), last = P.brackets[view].rungs.length - 1;
+  const run = runs[view], pick = pickAfter(done);
   const oracle = Math.min(...runs.slice(0, done).flatMap(x => x.cfgs.map(c => c.final)));
   h += `<line class="oracle" x1="${ML}" x2="${W - MR}" y1="${sy(oracle)}" y2="${sy(oracle)}"/>`;
   if ($('truec').checked) for (const c of run.cfgs){
@@ -344,7 +344,7 @@ function drawPlot(){
     if (c.out !== null){ const [x, y] = pts[pts.length - 1];
       h += `<path class="x" d="M${x + 3},${y - 3} l5,5 m0,-5 l-5,5"/>`; }
   }
-  if (pick && pick[0] === view){ const [r, l] = run.cfgs[pick[1]].evals[last];
+  if (pick && pick[0] === view){ const {r, loss: l} = run.best;   // may be at an early rung
     h += `<text x="${sx(r) - 6}" y="${sy(l) - 8}" text-anchor="end" style="fill:var(--hit);font-weight:600">Hyperband's pick</text>`; }
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = h;
