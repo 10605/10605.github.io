@@ -196,7 +196,6 @@
   summary: 'Transformers, instability, ...'
   content: #idea history of DL
     - evolution-of-transformers.pptx 
-    - '* HW 4 out - LoRA'
 
 - title: 'Deep Learning: Transformers'
   summary: 'Annotated transformer'
@@ -205,12 +204,12 @@
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
-    - '* Miniproject: open-ended miniproject proposals due'
+    - '* HW 4 out - LoRA'
+    - '* Miniproject: open-ended miniproject proposals due Thu Oct 22'
 
-- title: 'Recitation: PyTorch / HW4'
+- title: 'No Recitation'
   type: recitation
-  summary: 'Introduction to using PyTorch with a coding demo'
-  notebook_link: https://drive.google.com/file/d/1i52B4KkcU2CUA0Km4bAmXufwcaFRGkyp/view?usp=sharing
+  summary: ''
 
 ########## Hyperparams, KV, BPE
 
@@ -224,7 +223,6 @@
     - transformer-bpe.pptx
     - hyperparam.pptx 
     - vizier.pdf
-    - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
 
 - title: Embarrassingly Parallel Training
@@ -234,9 +232,7 @@
   content:
    - branch-train-merge.pptx
    - task-vectors.pptx
-   - '* HW 4 Slot A due'
-   - '* HW 5 out - GPT-2 Training'
-   - '* Miniproject: Structured miniproject details released, project teams formed, and declaration form due'
+   - '* Miniproject: feedback on open-ended miniproject proposals given; proposals are posted for class'
 
 - title: Recitation - HW5
   type: recitation
@@ -253,6 +249,7 @@
    - quantize-distill.pptx
    - cats-and-sentiment.pptx 
    - pruning.pptx
+   - '* Miniproject: Project teams formed and declaration form due'
 
 - title: KV-Caching for LLMs
   summary: overview, H2O, StreamLLM
@@ -261,13 +258,12 @@
   content:
     - kv-cache-transformer-1.pptx
     - kv-cache-transformer-2.pptx
-    - '* Miniproject: structured miniproject survey due'
+    - '* HW 4 Slot A due'
+    - '* HW 5 out - GPT-2 Training'
+    - '* Miniproject: Structured miniproject details released'
 
-- title: Recitation - Structured miniproject
+- title: HW4 Writing Session
   type: recitation
-  slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
-  content:
-   - '* HW 4 Grading deadline: Nov 5' 
 
 
 ########## Caching and RAG
@@ -280,7 +276,7 @@
    - kv-cache-transformer-2-short.pptx
    - model-compression-recap.pptx
    - kv-cache-recent-2025.pptx
-   - '* HW4 Slot B Deadline (tentative)'
+   - '* HW4 Slot B due Tue Nov 10 (tentative)'
 
 - title: Contrastive learning and retrieval
   summary: Overvier of contrastive learning, neural retrieval, and RAG
@@ -290,9 +286,11 @@
     - contrastive-dpr.pptx
     - contrastive-tricks.pptx
     - contreiver.pptx
+    - '* Miniproject: structured miniproject survey due'
 
-- title: HW4 Writing Session
+- title: Recitation - Structured miniproject
   type: recitation
+  slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
 
 ########## RAG, Parallel Training, PPI
 
@@ -303,10 +301,10 @@
     - rag-genllm.pptx
     - michiel-guest-lecture.pptx #fake file
     - fido-etc.pptx
-    - '* HW5 Slot A Due'
 
 - title: Guest Lecture - Leo Boytsov - Robustness, Generalization, and Practical Limits of Deep Learning, A Practitioner’s Perspective
   content:
+   - '* HW5 Slot A due'
    - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
   
 
@@ -318,7 +316,7 @@
   pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - ppi.pptx
-    - '* HW5 slot B deadline (tentative)'
+    - '* HW5 Slot B due Tue Nov 24 (tentative)'
 
 ########## Exam
 
@@ -327,6 +325,6 @@
   slide_link: https://drive.google.com/file/d/17stAkgMmAyCLGUpMoj0JkhwDBXcabPA5/view?usp=drive_link
   pptx_link: https://docs.google.com/presentation/d/1X_Omjw-bNofrmqc2hQbpsofFV9RMJG7J/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
-  - '* Miniprojects due'
+  - '* Miniproject due'
 
 - title: Exam 2
