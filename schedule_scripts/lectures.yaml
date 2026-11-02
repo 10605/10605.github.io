@@ -244,8 +244,8 @@
 ########## Caching and Pruning
 
 - title: Model compression
-  pptx_link: https://docs.google.com/presentation/d/1iLa1ifT5CpK__dxBzX9mlezp7O82DcgX/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
-  slide_link: https://drive.google.com/file/d/1B5nLCqT3DBh5UnmNVfsvNaD20sEAQe_y/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1fRo5GkwKXkZ80XKJzdtrKD6GiFKLzqJv/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1KC3hmmY7FWocHL7cExLizgulpBcdDFdW/view?usp=drive_link
   summary: 'Quantization, Pruning, and Distillation'
   content:
    - quantize-distill.pptx
