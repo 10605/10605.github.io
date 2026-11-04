@@ -197,7 +197,6 @@ structured-pruning.pptx:
     - https://openreview.net/forum?id=18VGxuOdpu: Shortened Llama, ... Kim et al 2024
     - https://arxiv.org/pdf/2310.06694: Sheared LLama ... , Xia et al, 2024
     - https://arxiv.org/pdf/1510.00149: Han et al 2016
-    - https://arxiv.org/pdf/2407.14679: Minitron paper, 2025
 
 kv-cache-transformer-2-short.pptx:
   num_slides: 28
@@ -231,6 +230,7 @@ cats-and-sentiment.pptx:
   links:
     - https://static.googleusercontent.com/media/research.google.com/en//archive/unsupervised_icml2012.pdf: The cat neuron paper
     - https://arxiv.org/pdf/1704.01444: Learning to Generate Reviews and Discovering Sentiment, Radford et al 2017
+
 pruning.pptx:
   num_slides: 42
   summary: summary of a number of pruning papers
@@ -240,8 +240,9 @@ pruning.pptx:
     - https://arxiv.org/abs/2104.08378: Accelerating Sparse Deep Neural Networks, Mishra et al 2021
     - https://proceedings.neurips.cc/paper_files/paper/2023/file/44956951349095f74492a5471128a7e0-Paper-Conference.pdf: LLM Pruner, 2023
     - https://openreview.net/forum?id=18VGxuOdpu: Shortened Llama, ... Kim et al 2024
-    - https://arxiv.org/pdf/2310.06694: Sheared LLama ... , Xia et al, 2024
     - https://arxiv.org/pdf/1510.00149: Han et al 2016
+    - https://arxiv.org/pdf/2407.14679: Minitron paper, 2025
+
 quantize.pptx:
   num_slides: 17
   summary: quantization and distillation
