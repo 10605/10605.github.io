@@ -1,6 +1,12 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+kv-cache-transformer-start.pptx:
+  num_slides: 35
+  links:
+   - https://10605.github.io/viz/attention-heads.html: Visualization of attention variants
+   - https://10605.github.io/viz/kv-cache.html: Visualization of decoder-only KV cache use
+
 hyperparam-gp-hyperband.pptx:
   num_slides: 61
   summary: hyperparam tuning recap, gaussian processes and vizier, hyperband
@@ -182,6 +188,7 @@ contriever.pptx:
 model-compression-recap.pptx:
   num_slides: 35
   summary: looking back at pruning, quantization, and kv-caching as "learning"
+
 structured-pruning.pptx:
   num_slides: 20
   summary: summary of a number of pruning papers
@@ -190,6 +197,7 @@ structured-pruning.pptx:
     - https://openreview.net/forum?id=18VGxuOdpu: Shortened Llama, ... Kim et al 2024
     - https://arxiv.org/pdf/2310.06694: Sheared LLama ... , Xia et al, 2024
     - https://arxiv.org/pdf/1510.00149: Han et al 2016
+    - https://arxiv.org/pdf/2407.14679: Minitron paper, 2025
 
 kv-cache-transformer-2-short.pptx:
   num_slides: 28
@@ -216,6 +224,7 @@ kv-cache-transformer-2.pptx:
 kv-cache-transformer-1.pptx:
   num_slides: 25 # some long animations
   summary: motivating and explaining kv-caches
+
 cats-and-sentiment.pptx:
   num_slides: 19
   summary: cat neuron and face detector neuron from Ng, sentiment neuron from OpenAI
