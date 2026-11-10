@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TurboQuant: SimHash Review</title>
+<link rel="stylesheet" href="tq.css">
+<script src="tq.js"></script>
+<style>
+  #plane { max-width: 460px; margin: 0 auto; overflow: hidden; }
+  table.t tr.differ td { background: var(--hit-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="tq"></nav>
+
+<header>
+  <h1>SimHash review: random hyperplanes estimate angles</h1>
+  <p>SimHash draws <i>m</i> random Gaussian vectors <b>s</b><sub>1</sub>, …, <b>s</b><sub><i>m</i></sub> and stores one bit per
+    vector, sign(<b>s</b><sub><i>i</i></sub>·<b>x</b>): which side of the hyperplane perpendicular to <b>s</b><sub><i>i</i></sub> the
+    vector <b>x</b> is on. Two vectors <b>x</b> and <b>y</b> get different bits exactly when the hyperplane passes between them,
+    that is, when sign(<b>s</b><sub><i>i</i></sub>·<b>x</b> · <b>s</b><sub><i>i</i></sub>·<b>y</b>) = −1.</p>
+  <p>The direction of a random hyperplane is uniform, and it separates <b>x</b> from <b>y</b> when it falls in the angle θ
+    between them (or the opposite angle), so Pr[bits differ] = θ/π. If <i>H</i> of the <i>m</i> bits differ, then
+    θ̂ = π·<i>H</i>/<i>m</i> is an unbiased estimate of θ, with standard deviation π√(<i>p</i>(1−<i>p</i>)/<i>m</i>) where
+    <i>p</i> = θ/π. Only the angle survives: the lengths of <b>x</b> and <b>y</b> are lost.</p>
+</header>
+
+<p class="lede">Drag the tips of <b style="color:var(--mem)">x</b> and <b style="color:var(--third)">y</b>. The
+  <span style="background:var(--hit-soft);padding:0 3px">orange wedges</span> are the directions a hyperplane can take and still
+  separate them: θ/π of all directions. Things to try: put <b>y</b> on top of <b>x</b> (no bits ever differ), opposite
+  <b>x</b> (all differ), or perpendicular (about half differ); then change the lengths and see that nothing else changes.</p>
+<div class="controls">
+  <button id="add1" class="primary">Add 1 row</button><button id="add10">Add 10</button><button id="add100">Add 100</button>
+  <button id="play">Play</button><button id="reset">New S (start over)</button>
+  <span>rows <i>m</i> = <span class="v" id="mval"></span></span>
+</div>
+<p class="status" id="stat"></p>
+<div class="g2">
+  <div class="card"><h2>The plane</h2><svg class="chart" id="plane"></svg>
+    <div class="legend">
+      <span><span class="ln" style="border-color:var(--mem)"></span><b>x</b></span>
+      <span><span class="ln" style="border-color:var(--third)"></span><b>y</b></span>
+      <span><span class="ln" style="border-color:var(--ink-soft)"></span>latest <b>s</b><sub><i>i</i></sub> and its hyperplane
+        (<b>x</b>'s side shaded)</span>
+      <span><span class="sw" style="background:var(--hit-soft)"></span>separating directions</span>
+    </div></div>
+  <div style="display:grid;gap:14px;align-content:start;min-width:0">
+    <div class="card"><h2>Estimated angle as rows are added</h2><svg class="chart" id="run"></svg>
+      <div class="legend">
+        <span><span class="ln" style="border-color:var(--hit)"></span>θ̂ = 180°·<i>H</i>/<i>m</i></span>
+        <span><span class="ln dash" style="border-color:var(--ink-soft)"></span>true θ</span>
+        <span><span class="sw" style="background:var(--line)"></span>θ ± one standard deviation</span>
+      </div></div>
+    <div class="card"><h2>Latest rows</h2><table class="t" id="rows"></table>
+      <p class="note">Highlighted rows are hyperplanes that separate <b>x</b> and <b>y</b>: their bits differ.</p></div>
+  </div>
+</div>
+
+<footer>
+  <p>Angles are shown in degrees. This is the bit-level view of the SimHash used for LSH earlier in the course
+    (<a href="simhash.html">SimHash bitstrings</a>). The next page keeps these bits for <b>x</b> but uses the query <b>y</b>
+    at full precision.</p>
+  <p>Charikar, <i>Similarity estimation techniques from rounding algorithms</i> (2002); Goemans and Williamson (1995) for
+    Pr[bits differ] = θ/π.</p>
+  <p class="nextpage" id="nextpage"></p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const DEG = 180 / Math.PI;
+let r = TQ.rng(TQ.newSeed());
+const angle = (a, b) => Math.acos(Math.max(-1, Math.min(1, TQ.dot(a, b) / (TQ.norm(a) * TQ.norm(b)))));
+
+// the wedge between x and y and its mirror image: every hyperplane through them separates x and y
+function wedges(c){
+  const {X, Y} = P, ax = Math.atan2(X[1], X[0]);
+  let da = Math.atan2(Y[1], Y[0]) - ax;
+  if (da > Math.PI) da -= 2 * Math.PI; else if (da < -Math.PI) da += 2 * Math.PI;
+  const sector = (a0, R) => `M${c.X(0)},${c.Y(0)}` + Array.from({length: 41}, (_, k) => {
+    const a = a0 + da * k / 40; return `L${c.X(R * Math.cos(a)).toFixed(1)},${c.Y(R * Math.sin(a)).toFixed(1)}`; }).join('') + 'Z';
+  const mid = ax + da / 2;
+  return `<path d="${sector(ax, 6)}" style="fill:var(--hit-soft);opacity:.75"/><path d="${sector(ax + Math.PI, 6)}" style="fill:var(--hit-soft);opacity:.75"/>` +
+    `<path d="${sector(ax, .32)}" style="fill:none;stroke:var(--hit);stroke-width:1.5"/>` +
+    `<text x="${c.X(.45 * Math.cos(mid))}" y="${c.Y(.45 * Math.sin(mid)) + 4}" text-anchor="middle" style="font:600 13px var(--sans);fill:var(--hit)">θ</text>`;
+}
+const P = TQ.plane($('plane'), {onDrag: () => render(), under: wedges});
+
+function render(){
+  P.draw();
+  const {X, Y, S} = P, m = S.length, theta = angle(X, Y), p = theta / Math.PI, mmax = Math.max(20, m);
+  // running estimate
+  const est = []; let H = 0;
+  S.forEach((s, i) => { if (TQ.sign(TQ.dot(s, X)) !== TQ.sign(TQ.dot(s, Y))) H++; est.push([i + 1, 180 * H / (i + 1)]); });
+  const c = TQ.chart({h: 230, x: [0, mmax], y: [0, 180], yticks: [0, 45, 90, 135, 180], xlabel: 'rows m', ylabel: 'angle (degrees)',
+                      yfmt: v => v + '°'});
+  const band = Array.from({length: 101}, (_, k) => 1 + (mmax - 1) * k / 100).map(n => [n, 180 * Math.sqrt(p * (1 - p) / n)]);
+  const poly = [...band.map(([n, s]) => [n, Math.min(180, theta * DEG + s)]), ...band.reverse().map(([n, s]) => [n, Math.max(0, theta * DEG - s)])];
+  TQ.svgOut($('run'), c, c.axes() +
+    `<polygon points="${poly.map(([a, b]) => `${c.X(a).toFixed(1)},${c.Y(b).toFixed(1)}`).join(' ')}" style="fill:var(--line);opacity:.45"/>` +
+    c.hline(theta * DEG, 'stroke:var(--ink-soft);stroke-dasharray:5 4;stroke-width:1.5') +
+    c.line(est, 'stroke:var(--hit);stroke-width:2'));
+  $('mval').textContent = m;
+  $('stat').innerHTML = `True θ = <b>${TQ.fmt(theta * DEG, 1)}°</b>, so each bit differs with probability θ/π = ${TQ.fmt(p)}. ` +
+    (m ? `<i>H</i> = <b>${H}</b> of ${m} bits differ: θ̂ = 180°·${H}/${m} = <b>${TQ.fmt(180 * H / m, 1)}°</b>` +
+         ` (standard deviation ${TQ.fmt(180 * Math.sqrt(p * (1 - p) / m), 1)}°).` : 'Add some rows.');
+  // latest rows
+  $('rows').innerHTML = '<tr><th>i</th><th>s<sub>i</sub></th><th>s<sub>i</sub>·x</th><th>s<sub>i</sub>·y</th><th>sign(s<sub>i</sub>·x · s<sub>i</sub>·y)</th></tr>' +
+    S.slice(-8).map((s, k) => {
+      const i = m - Math.min(8, m) + k, a = TQ.dot(s, X), b = TQ.dot(s, Y), g = TQ.sign(a * b);
+      return `<tr class="${g < 0 ? 'differ' : ''}"><td>${i + 1}</td><td>(${TQ.fmt(s[0], 2)}, ${TQ.fmt(s[1], 2)})</td>` +
+        `<td>${TQ.fmt(a, 2)}</td><td>${TQ.fmt(b, 2)}</td><td>${g > 0 ? '+1 (same)' : '−1 (differ)'}</td></tr>`;
+    }).reverse().join('');
+}
+
+const addRows = n => { for (let i = 0; i < n; i++) P.S.push(TQ.gaussVec(r, 2)); render(); };
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+$('add1').onclick = () => { stop(); addRows(1); };
+$('add10').onclick = () => { stop(); addRows(10); };
+$('add100').onclick = () => { stop(); addRows(100); };
+$('reset').onclick = () => { stop(); P.S = []; render(); };
+$('play').onclick = () => {
+  if (timer) return stop();
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (P.S.length >= 2000) return stop(); addRows(P.S.length < 30 ? 1 : 5); }, 250);
+};
+addRows(12);
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TurboQuant: Lloyd–Max Quantizer</title>
+<link rel="stylesheet" href="tq.css">
+<script src="tq.js"></script>
+<style>
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 10px; }
+  .player input[type=range] { flex: 1 1 160px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="tq"></nav>
+
+<header>
+  <h1>The Lloyd–Max quantizer: J-means in one dimension</h1>
+  <p>After the random rotation, TurboQuant replaces each coordinate <i>t</i> by one of <i>J</i> = 2<sup><i>b</i></sup>
+    values <i>c</i><sub>1</sub> &lt; … &lt; <i>c<sub>J</sub></i> and stores only its index (<i>b</i> bits). The best
+    values, the ones minimizing E[(<i>t</i> − <i>c</i><sub>nearest</sub>)<sup>2</sup>], are found by Lloyd's algorithm,
+    which is J-means (k-means) run on a 1-D distribution instead of a dataset:</p>
+  <p><b>Assign</b>: each <i>t</i> goes to its nearest centroid. In 1-D every cell is an interval, and the boundaries are the
+    midpoints (<i>c<sub>k</sub></i> + <i>c</i><sub><i>k</i>+1</sub>)/2. &nbsp;
+    <b>Update</b>: each centroid moves to the mean of its cell, <i>c<sub>k</sub></i> = ∫<sub>cell</sub> <i>t f</i>(<i>t</i>) d<i>t</i> /
+    ∫<sub>cell</sub> <i>f</i>(<i>t</i>) d<i>t</i>; with a sample instead of a density this is the ordinary average of the points in the cell.</p>
+  <p>Because the rotation makes the density <i>f<sub>d</sub></i> known in advance (it depends only on <i>d</i>), TurboQuant
+    runs this once, offline, and uses the same codebook for every coordinate of every vector: no training data, and
+    nothing to update as new vectors arrive.</p>
+</header>
+
+<div class="controls">
+  <span class="grp">distribution
+    <button data-dist="beta">rotated coordinate <i>f<sub>d</sub></i></button>
+    <button data-dist="gauss">Gaussian</button><button data-dist="bumps">two bumps</button></span>
+  <label class="grp" id="dwrap">d <select id="d"></select></label>
+  <label class="grp">bits <i>b</i> <select id="b"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+</div>
+<div class="controls">
+  <span class="grp">fit to
+    <button data-mode="density">the density (Lloyd–Max)</button>
+    <button data-mode="sample">a sample of n = 60 points (J-means)</button></span>
+  <span class="grp">start from
+    <button data-init="uniform">evenly spaced (uniform quantizer)</button><button data-init="random">random points</button></span>
+  <button id="again">New random start / sample</button>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Back one half-step (←)">◀ Back</button>
+  <button id="step" class="primary" title="One half-step (→)">Step ▶</button>
+  <button id="play">Play</button>
+  <button id="end">Converge ⏭</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Half-step">
+  <span class="v" id="kv"></span>
+</div>
+<p class="status" id="status"></p>
+
+<div class="g21">
+  <div class="card">
+    <h2>Density, cells and centroids</h2>
+    <svg class="chart" id="main"></svg>
+    <div class="legend">
+      <span><span class="ln" style="border-color:var(--ink-soft)"></span>density <i>f</i></span>
+      <span><span class="sw" style="background:var(--mem-soft);border:1px solid var(--line)"></span><span class="sw" style="background:var(--hit-soft);border:1px solid var(--line)"></span>cells</span>
+      <span><span class="ln dash" style="border-color:var(--ink-faint)"></span>cell boundaries</span>
+      <span><span class="sw" style="background:var(--hit);border-radius:50%"></span>centroids</span>
+      <span id="oldleg"><span class="sw" style="border:2px solid var(--hit);border-radius:50%;box-sizing:border-box"></span>before update</span>
+    </div>
+  </div>
+  <div style="display:grid;gap:14px;align-content:start;min-width:0">
+    <div class="card"><h2>Mean squared error per coordinate</h2><svg class="chart" id="msechart"></svg>
+      <p class="note" id="msenote"></p></div>
+    <div class="card"><h2>Codebook</h2><table class="t" id="cells"></table><p class="note" id="cellnote"></p></div>
+  </div>
+</div>
+
+<div class="card" id="refcard">
+  <h2>Check against the paper</h2>
+  <p class="sub">For large <i>d</i>, the converged codebooks for <i>f<sub>d</sub></i>, scaled by √<i>d</i>, are the optimal quantizers of a
+    standard Gaussian, and <i>d</i> × (MSE per coordinate) is the expected ‖<b>x</b> − <b>x̃</b>‖<sup>2</sup> for a unit vector.
+    The TurboQuant paper reports ≈ 0.36, 0.117, 0.03, 0.009 for <i>b</i> = 1, 2, 3, 4, within a factor of about 2.7 of the
+    information-theoretic lower bound 4<sup>−<i>b</i></sup>.</p>
+  <table class="t" id="reftab"></table>
+</div>
+
+<footer>
+  <p>The density is handled as 6000 weighted grid points, so the update integrals are sums. A cell with no mass (possible with
+    a bad random start on a sample) keeps its centroid. Lloyd's algorithm only finds a local optimum in general; for
+    log-concave densities like <i>f<sub>d</sub></i> (<i>d</i> ≥ 3) and the Gaussian it is the global one, but try a random start
+    on “two bumps”.</p>
+  <p>S. Lloyd, <i>Least squares quantization in PCM</i> (1957, published 1982); J. Max, <i>Quantizing for minimum distortion</i> (1960).</p>
+  <p class="nextpage" id="nextpage"></p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const DIMS = [2, 3, 4, 8, 16, 32, 64, 128, 256];
+$('d').innerHTML = DIMS.map(v => `<option ${v === 64 ? 'selected' : ''}>${v}</option>`).join('');
+let dist = 'beta', mode = 'density', init = 'uniform', seed = 3;
+let f, lo, hi, pts, samples, hist = [], k = 0;
+
+function setupDist(){
+  const d = +$('d').value;
+  if (dist === 'beta'){
+    f = TQ.coordDensity(d); hi = Math.min(1, 4.2 / Math.sqrt(d)); lo = -hi;
+  } else if (dist === 'gauss'){
+    f = TQ.gaussDensity(.25); lo = -1; hi = 1;
+  } else {
+    const g1 = TQ.gaussDensity(.12), g2 = TQ.gaussDensity(.18);
+    f = t => .6 * g1(t + .35) + .4 * g2(t - .4); lo = -1; hi = 1;
+  }
+  const R = dist === 'beta' ? Math.min(1, 12 / Math.sqrt(d)) : 1;
+  const grid = TQ.densityGrid(f, -R, R, 6000);
+  // a sample of 60 points by inverse CDF on the grid
+  const r = TQ.rng(seed), cum = []; let acc = 0;
+  grid.ws.forEach(w => cum.push(acc += w));
+  const xs = Array.from({length: 60}, () => { const u = r(); let i = cum.findIndex(c => c >= u); return grid.xs[i < 0 ? cum.length - 1 : i]; }).sort((a, b) => a - b);
+  samples = {xs, ws: xs.map(() => 1)};
+  pts = mode === 'density' ? grid : samples;
+}
+function startCentroids(J){
+  if (init === 'uniform') return Array.from({length: J}, (_, j) => lo + (j + .5) * (hi - lo) / J);
+  const r = TQ.rng(seed * 7 + 1);        // J distinct random points of the sample
+  const pool = samples.xs.slice(), out = [];
+  while (out.length < J && pool.length) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
+  return out.sort((a, b) => a - b);
+}
+// history of half-steps: init, then (assign, update) pairs until converged
+function build(){
+  setupDist();
+  const J = 2 ** +$('b').value;
+  let c = startCentroids(J);
+  hist = [{phase: 'init', c, mse: null}];
+  for (let it = 0; it < 150; it++){
+    const bnds = TQ.boundaries(c), st = TQ.cellStats(pts, bnds, c);
+    hist.push({phase: 'assign', c, bnds, mse: st.mse, it: it + 1});
+    const n = TQ.lloydUpdate(pts, c, bnds), st2 = TQ.cellStats(pts, bnds, n);
+    hist.push({phase: 'update', c: n, prev: c, bnds, mse: st2.mse, it: it + 1});
+    const moved = Math.max(...n.map((v, j) => Math.abs(v - c[j])));
+    c = n;
+    if (moved < 1e-5 * (hi - lo)) break;
+  }
+  k = 0; render();
+}
+
+function render(){
+  const s = hist[k], d = +$('d').value, J = s.c.length;
+  $('k').max = hist.length - 1; $('k').value = k;
+  $('kv').textContent = `${k} / ${hist.length - 1}`;
+  $('back').disabled = $('reset').disabled = k === 0;
+  $('step').disabled = $('end').disabled = k === hist.length - 1;
+  $('dwrap').style.display = dist === 'beta' ? '' : 'none';
+  document.querySelectorAll('[data-dist]').forEach(b => b.classList.toggle('on', b.dataset.dist === dist));
+  document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+  document.querySelectorAll('[data-init]').forEach(b => b.classList.toggle('on', b.dataset.init === init));
+  $('oldleg').style.display = s.phase === 'update' ? '' : 'none';
+
+  const last = k === hist.length - 1;
+  $('status').innerHTML = s.phase === 'init'
+    ? `Start: ${J} centroids ${init === 'uniform' ? 'evenly spaced, as in an ordinary uniform quantizer' : 'at randomly chosen points'}. Step to assign.`
+    : s.phase === 'assign'
+    ? `Iteration ${s.it}, <b>assign</b>: cell boundaries at the midpoints between neighboring centroids. MSE ${TQ.fmt(s.mse, 5)}.`
+    : `Iteration ${s.it}, <b>update</b>: each centroid moves to the mean of its cell. MSE ${TQ.fmt(s.mse, 5)}` +
+      (last ? '. <b>Converged</b>: the centroids no longer move.' : '.');
+
+  // ---- main chart ----
+  const xs = TQ.ticks(lo, hi, 6), ymaxF = Math.max(...Array.from({length: 201}, (_, i) => f(lo + (hi - lo) * i / 200)));
+  const ymax = (dist === 'beta' && d === 2 ? 1.2 : ymaxF * 1.1);
+  const c = TQ.chart({w: 760, h: 330, m: {l: 44, r: 12, t: 10, b: mode === 'sample' ? 74 : 44}, x: [lo, hi], y: [0, ymax],
+                      xticks: xs, xlabel: 't', ylabel: 'density'});
+  let out = '';
+  if (s.bnds){
+    const edges = [lo, ...s.bnds.map(v => Math.max(lo, Math.min(hi, v))), hi];
+    for (let j = 0; j < J; j++)
+      out += `<rect x="${c.X(edges[j])}" y="${c.m.t}" width="${Math.max(0, c.X(edges[j + 1]) - c.X(edges[j]))}" height="${c.h - c.m.b - c.m.t}" style="fill:var(${j % 2 ? '--hit-soft' : '--mem-soft'})"/>`;
+  }
+  out += c.axes();
+  out += c.fn(f, 'stroke:var(--ink-soft);stroke-width:2', Math.max(lo, -.9999), Math.min(hi, .9999), 600);
+  if (s.bnds) out += s.bnds.filter(v => v > lo && v < hi).map(v => c.vline(v, 'stroke:var(--ink-faint);stroke-dasharray:4 3;stroke-width:1.2')).join('');
+  const base = c.h - c.m.b;
+  if (mode === 'sample'){
+    const r = TQ.rng(99), bnds = s.bnds || TQ.boundaries(s.c);
+    out += samples.xs.map(v => {
+      const j = TQ.cellIndex(v, bnds);
+      return `<circle cx="${c.X(v)}" cy="${base + 26 + (r() - .5) * 18}" r="3.2" style="fill:var(${s.bnds ? (j % 2 ? '--hit' : '--mem') : '--ink-faint'});opacity:.7"><title>${TQ.fmt(v)}</title></circle>`;
+    }).join('');
+    out += `<text class="lab" x="${c.m.l}" y="${base + 50}">sample points${s.bnds ? ', colored by cell' : ''}</text>`;
+  }
+  if (s.prev) out += s.prev.map((v, j) => {
+    const nv = s.c[j];
+    return `<circle cx="${c.X(v)}" cy="${base}" r="6" style="fill:var(--surface);stroke:var(--hit);stroke-width:2"/>` +
+      (Math.abs(c.X(nv) - c.X(v)) > 8 ? `<line x1="${c.X(v)}" x2="${c.X(nv)}" y1="${base - 14}" y2="${base - 14}" style="stroke:var(--hit);stroke-width:1.5" marker-end="url(#arr)"/>` : '');
+  }).join('');
+  out += s.c.map((v, j) => `<line x1="${c.X(v)}" x2="${c.X(v)}" y1="${base}" y2="${c.Y(f(v))}" style="stroke:var(--hit);stroke-width:1.2;opacity:.6"/>` +
+    `<circle cx="${c.X(v)}" cy="${base}" r="6" style="fill:var(--hit);stroke:var(--surface);stroke-width:2"><title>c${j + 1} = ${TQ.fmt(v, 4)}</title></circle>`).join('');
+  out = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--hit)"/></marker></defs>` + out;
+  TQ.svgOut($('main'), c, out);
+
+  // ---- MSE vs iteration: assign half-steps at it − ½, updates at it ----
+  const xOf = h => h.phase === 'assign' ? h.it - .5 : h.it;
+  const all = hist.filter(h => h.mse != null), mmax = Math.max(...all.map(h => h.mse)), mmin = Math.min(...all.map(h => h.mse));
+  const m = TQ.chart({h: 180, w: 420, x: [0, Math.max(1, all[all.length - 1].it)], y: [0, mmax * 1.08], xlabel: 'iteration', ylabel: 'MSE',
+                      yfmt: v => v.toExponential(0).replace('-', '−')});
+  TQ.svgOut($('msechart'), m, m.axes() + m.line(all.map(h => [xOf(h), h.mse]), 'stroke:var(--line);stroke-width:2') +
+    m.line(hist.slice(1, k + 1).map(h => [xOf(h), h.mse]), 'stroke:var(--mem);stroke-width:2') +
+    (s.mse != null ? `<circle cx="${m.X(xOf(s))}" cy="${m.Y(s.mse)}" r="4.5" style="fill:var(--mem);stroke:var(--surface);stroke-width:2"/>` : ''));
+  $('msenote').innerHTML = `Each update can only lower the MSE (and so can each assignment); converged value ${TQ.fmt(mmin, 5)}` +
+    (dist === 'beta' ? `, i.e. <i>d</i> × MSE = ${TQ.fmt(mmin * d)} for the whole unit vector.` : '.');
+
+  // ---- codebook table ----
+  const bnds = s.bnds || TQ.boundaries(s.c), st = TQ.cellStats(pts, bnds, s.c);
+  const scaled = dist === 'beta';
+  $('cells').innerHTML = `<tr><th>index</th><th>cell</th><th>mass</th><th><i>c<sub>k</sub></i></th>${scaled ? '<th><i>c<sub>k</sub></i>√<i>d</i></th>' : ''}</tr>` +
+    s.c.map((v, j) => {
+      const a = j ? TQ.fmt(bnds[j - 1], 3) : '−∞', b2 = j < J - 1 ? TQ.fmt(bnds[j], 3) : '∞';
+      return `<tr><td>${j.toString(2).padStart(Math.log2(J), '0')}</td><td>(${a}, ${b2}]</td><td>${TQ.fmt(st.w[j] / st.tot, 3)}</td>` +
+        `<td>${TQ.fmt(v, 4)}</td>${scaled ? `<td>${TQ.fmt(v * Math.sqrt(d), 3)}</td>` : ''}</tr>`;
+    }).join('');
+  $('cellnote').innerHTML = `Quantizing stores the ${Math.log2(J)}-bit index of the cell; dequantizing looks up <i>c<sub>k</sub></i>.`;
+}
+
+function renderRef(){
+  const d = 1024, paper = [0.36, 0.117, 0.03, 0.009];
+  $('reftab').innerHTML = '<tr><th>bits b</th><th>centroids × √d (d = 1024, positive half)</th><th>d × MSE</th><th>paper</th><th>lower bound 4<sup>−b</sup></th></tr>' +
+    [1, 2, 3, 4].map(b => { const cb = TQ.codebook(d, b);
+      return `<tr><td>${b}</td><td>${cb.c.filter(v => v > 0).map(v => TQ.fmt(v * Math.sqrt(d), 3)).join(', ')}</td>` +
+        `<td>${TQ.fmt(cb.mse * d, 4)}</td><td>${paper[b - 1]}</td><td>${TQ.fmt(4 ** -b, 4)}</td></tr>`; }).join('');
+}
+
+// ---- wiring ----
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+const go = n => { k = Math.max(0, Math.min(hist.length - 1, n)); render(); };
+$('step').onclick = () => { stop(); go(k + 1); };
+$('back').onclick = () => { stop(); go(k - 1); };
+$('reset').onclick = () => { stop(); go(0); };
+$('end').onclick = () => { stop(); go(hist.length - 1); };
+$('k').oninput = e => { stop(); go(+e.target.value); };
+$('play').onclick = () => {
+  if (timer) return stop();
+  if (k === hist.length - 1) go(0);
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (k >= hist.length - 1) stop(); else go(k + 1); }, 700);
+};
+const rebuild = () => { stop(); build(); };
+document.querySelectorAll('[data-dist]').forEach(b => b.onclick = () => { dist = b.dataset.dist; rebuild(); });
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { mode = b.dataset.mode; rebuild(); });
+document.querySelectorAll('[data-init]').forEach(b => b.onclick = () => { init = b.dataset.init; rebuild(); });
+$('again').onclick = () => { seed++; rebuild(); };
+$('d').onchange = $('b').onchange = rebuild;
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, select')) return;
+  if (e.key === 'ArrowRight'){ stop(); go(k + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ stop(); go(k - 1); e.preventDefault(); }
+  else if (e.key === 'Home'){ stop(); go(0); }
+});
+build(); renderRef();
+</script>
+</body>
+</html>

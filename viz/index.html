@@ -230,6 +230,40 @@
   </a>
 </div>
 
+<h2>TurboQuant: vector quantization for the KV cache</h2>
+<div class="grid">
+  <a class="card" href="tq-rotation.html">
+    <h3>1 · Random rotations</h3>
+    <p>After a random rotation every coordinate of a unit vector follows the same Beta density, whatever the
+      vector was, so outlier channels disappear and one codebook fits all coordinates.</p>
+    <span class="file">tq-rotation.html</span>
+  </a>
+  <a class="card" href="tq-lloyd-max.html">
+    <h3>2 · The Lloyd–Max quantizer</h3>
+    <p>J-means in one dimension, run on a density instead of a dataset: step through assign and update to
+      find the optimal <i>b</i>-bit scalar codebook.</p>
+    <span class="file">tq-lloyd-max.html</span>
+  </a>
+  <a class="card" href="tq-simhash.html">
+    <h3>3 · SimHash review</h3>
+    <p>Drag two vectors and add random hyperplanes one at a time: the fraction of differing sign bits
+      estimates the angle between them.</p>
+    <span class="file">tq-simhash.html</span>
+  </a>
+  <a class="card" href="tq-qjl.html">
+    <h3>4 · QJL</h3>
+    <p>SimHash bits of the key times the exact projections of the query give an unbiased inner-product
+      estimate, and a reconstruction x̃ that converges to x.</p>
+    <span class="file">tq-qjl.html</span>
+  </a>
+  <a class="card" href="tq-pipeline.html">
+    <h3>5 · TurboQuant end to end</h3>
+    <p>Rotate, quantize, rotate back, then QJL on the residual: every stage on one key vector, and the
+      error and bias over many keys and queries.</p>
+    <span class="file">tq-pipeline.html</span>
+  </a>
+</div>
+
 <h2>Hyperparameter search</h2>
 <div class="grid">
   <a class="card" href="successive-halving.html">

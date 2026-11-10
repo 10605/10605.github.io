@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TurboQuant: QJL Trick</title>
+<link rel="stylesheet" href="tq.css">
+<script src="tq.js"></script>
+<style>
+  #plane { max-width: 460px; margin: 0 auto; overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="tq"></nav>
+
+<header>
+  <h1>QJL: SimHash bits that give unbiased inner products</h1>
+  <p>SimHash (reviewed on <a href="tq-simhash.html">the previous page</a>) stores the sign bits sign(<b>s</b><sub><i>i</i></sub>·<b>x</b>) for <i>m</i> random Gaussian vectors
+    <b>s</b><sub>1</sub>, …, <b>s</b><sub><i>m</i></sub> (the rows of a matrix <i>S</i>). Comparing the bits of two vectors
+    estimates the angle between them: they disagree on a bit with probability θ/π. That needs <i>both</i> vectors quantized.</p>
+  <p>In a KV cache the keys <b>x</b> are stored, but each query <b>y</b> arrives later at full precision. The
+    <b>quantized Johnson–Lindenstrauss</b> (QJL) trick stores the same SimHash bits for <b>x</b>, plus the single number
+    ‖<b>x</b>‖, and multiplies them by the <i>unquantized</i> projections of <b>y</b>:</p>
+  <p style="text-align:center;font-size:16px;margin:8px 0">
+    ⟨<b>y</b>, <b>x</b>⟩ ≈ ‖<b>x</b>‖ · √(π/2) · (1/<i>m</i>) Σ<sub><i>i</i></sub> (<b>s</b><sub><i>i</i></sub>·<b>y</b>) sign(<b>s</b><sub><i>i</i></sub>·<b>x</b>)
+    &nbsp;=&nbsp; ⟨<b>y</b>, <b>x̃</b>⟩, &nbsp; where &nbsp;
+    <b>x̃</b> = ‖<b>x</b>‖ √(π/2) (1/<i>m</i>) <i>S</i><sup>T</sup> sign(<i>S</i><b>x</b>).</p>
+  <p>This is <b>unbiased</b>. Write <b>y</b> = α<b>x̂</b> + <b>y</b><sub>⊥</sub> with <b>x̂</b> = <b>x</b>/‖<b>x</b>‖. The Gaussian
+    <b>s</b>·<b>y</b><sub>⊥</sub> is independent of <b>s</b>·<b>x̂</b> and has mean zero, so it averages away; what is left is
+    α E|<b>s</b>·<b>x̂</b>| = α√(2/π). Hence E[(<b>s</b>·<b>y</b>) sign(<b>s</b>·<b>x</b>)] = √(2/π) ⟨<b>y</b>, <b>x̂</b>⟩, and the
+    √(π/2) cancels it. Equivalently, <b>x̃</b> is an unbiased estimate of <b>x</b> itself.</p>
+</header>
+
+<h3 class="section">In two dimensions</h3>
+<p class="lede">Drag the tips of <b style="color:var(--mem)">x</b> (the stored key) and <b style="color:var(--third)">y</b> (the query).
+  Each random <b>s</b><sub><i>i</i></sub> defines a SimHash hyperplane (a line here, perpendicular to <b>s</b><sub><i>i</i></sub>); the bit
+  says which side <b>x</b> is on. The reconstruction <b style="color:var(--hit)">x̃</b> adds up ±<b>s</b><sub><i>i</i></sub>, pointing each one
+  toward <b>x</b>'s side of its hyperplane.</p>
+<div class="controls">
+  <button id="add1" class="primary">Add 1 row</button><button id="add10">Add 10</button><button id="add100">Add 100</button>
+  <button id="play2">Play</button><button id="reset2">New S (start over)</button>
+  <span>rows <i>m</i> = <span class="v" id="mval"></span></span>
+</div>
+<p class="status" id="stat2"></p>
+<div class="g2">
+  <div class="card"><h2>The plane</h2><svg class="chart" id="plane"></svg>
+    <div class="legend">
+      <span><span class="ln" style="border-color:var(--mem)"></span><b>x</b></span>
+      <span><span class="ln" style="border-color:var(--third)"></span><b>y</b></span>
+      <span><span class="ln" style="border-color:var(--hit)"></span><b>x̃</b> (QJL reconstruction)</span>
+      <span><span class="ln" style="border-color:var(--ink-soft)"></span>latest <b>s</b><sub><i>i</i></sub> and its hyperplane</span>
+    </div></div>
+  <div style="display:grid;gap:14px;align-content:start;min-width:0">
+    <div class="card"><h2>Estimates of ⟨y, x⟩ as rows are added</h2><svg class="chart" id="run"></svg>
+      <div class="legend">
+        <span><span class="ln" style="border-color:var(--hit)"></span>QJL (bits of <b>x</b>, exact <b>y</b>)</span>
+        <span><span class="ln" style="border-color:var(--third)"></span>SimHash ‖x‖‖y‖cos(π·H/<i>m</i>) (bits of both)</span>
+        <span><span class="ln dash" style="border-color:var(--ink-soft)"></span>true ⟨<b>y</b>, <b>x</b>⟩</span>
+      </div></div>
+    <div class="card"><h2>Latest rows</h2><table class="t" id="rows"></table></div>
+  </div>
+</div>
+
+<footer>
+  <p>Zandieh, Daliri and Han, <i>QJL: 1-Bit Quantized JL Transform for KV Cache Quantization with Zero Overhead</i> (2024);
+    Charikar, <i>Similarity estimation techniques from rounding algorithms</i> (2002) for SimHash.</p>
+  <p class="nextpage" id="nextpage"></p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const C2 = Math.sqrt(Math.PI / 2);
+
+// ===== the plane =====
+let r = TQ.rng(TQ.newSeed());
+const P = TQ.plane($('plane'), {onDrag: () => render1(), arrows: () => [{v: xTilde(), col: 'var(--hit)'}]});
+function estimates(m){                        // QJL and SimHash estimates using the first m rows
+  const {X, Y, S} = P, nx = TQ.norm(X), ny = TQ.norm(Y); let q = 0, H = 0;
+  for (let i = 0; i < m; i++){
+    const a = TQ.dot(S[i], X), b = TQ.dot(S[i], Y);
+    q += b * TQ.sign(a); if (TQ.sign(a) !== TQ.sign(b)) H++;
+  }
+  return {qjl: nx * C2 * q / m, sim: nx * ny * Math.cos(Math.PI * H / m)};
+}
+function xTilde(){
+  const {X, S} = P, nx = TQ.norm(X), t = [0, 0];
+  S.forEach(s => { const g = TQ.sign(TQ.dot(s, X)); t[0] += g * s[0]; t[1] += g * s[1]; });
+  return S.length ? TQ.scale(t, nx * C2 / S.length) : [0, 0];
+}
+function renderRun(){
+  const {X, Y, S} = P, m = S.length, truth = TQ.dot(X, Y), mmax = Math.max(20, m);
+  const q = [], sm = [];
+  // recompute the running estimates (cheap: m ≤ a few thousand, 2-D)
+  const nx = TQ.norm(X), ny = TQ.norm(Y); let qs = 0, H = 0;
+  S.forEach((s, i) => {
+    const a = TQ.dot(s, X), b = TQ.dot(s, Y);
+    qs += b * TQ.sign(a); if (TQ.sign(a) !== TQ.sign(b)) H++;
+    q.push([i + 1, nx * C2 * qs / (i + 1)]); sm.push([i + 1, nx * ny * Math.cos(Math.PI * H / (i + 1))]);
+  });
+  const lim = Math.max(1.2 * nx * ny, ...q.map(p => Math.abs(p[1])).slice(Math.min(3, q.length)));
+  const c = TQ.chart({h: 230, x: [0, mmax], y: [-lim, lim], xlabel: 'rows m', ylabel: 'estimate'});
+  TQ.svgOut($('run'), c, c.axes() + c.hline(truth, 'stroke:var(--ink-soft);stroke-dasharray:5 4;stroke-width:1.5') +
+    c.line(sm, 'stroke:var(--third);stroke-width:2') + c.line(q, 'stroke:var(--hit);stroke-width:2'));
+  $('mval').textContent = m;
+  const e = m ? estimates(m) : null;
+  $('stat2').innerHTML = `True ⟨<b>y</b>, <b>x</b>⟩ = <b>${TQ.fmt(truth)}</b>` + (e ?
+    `; QJL estimate ⟨<b>y</b>, <b>x̃</b>⟩ = <b>${TQ.fmt(e.qjl)}</b>; SimHash estimate <b>${TQ.fmt(e.sim)}</b>. ` +
+    `The stored code for <b>x</b> is ${m} bit${m > 1 ? 's' : ''} plus ‖<b>x</b>‖ = ${TQ.fmt(nx)}.` : '. Add some rows.');
+  $('rows').innerHTML = '<tr><th>i</th><th>s<sub>i</sub></th><th>bit sign(s·x)</th><th>s·y</th><th>(s·y)·bit</th></tr>' +
+    S.slice(-6).map((s, k) => { const i = S.length - Math.min(6, S.length) + k, g = TQ.sign(TQ.dot(s, X)), b = TQ.dot(s, Y);
+      return `<tr><td>${i + 1}</td><td>(${TQ.fmt(s[0], 2)}, ${TQ.fmt(s[1], 2)})</td><td>${g > 0 ? '+1' : '−1'}</td><td>${TQ.fmt(b, 2)}</td><td>${TQ.fmt(g * b, 2)}</td></tr>`; }).reverse().join('');
+}
+const render1 = () => { P.draw(); renderRun(); };
+const addRows = n => { for (let i = 0; i < n; i++) P.S.push(TQ.gaussVec(r, 2)); render1(); };
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play2').textContent = 'Play'; }
+$('add1').onclick = () => { stop(); addRows(1); };
+$('add10').onclick = () => { stop(); addRows(10); };
+$('add100').onclick = () => { stop(); addRows(100); };
+$('reset2').onclick = () => { stop(); P.S = []; render1(); };
+$('play2').onclick = () => {
+  if (timer) return stop();
+  $('play2').textContent = 'Pause';
+  timer = setInterval(() => { if (P.S.length >= 2000) return stop(); addRows(P.S.length < 30 ? 1 : 5); }, 250);
+};
+addRows(12);
+</script>
+</body>
+</html>

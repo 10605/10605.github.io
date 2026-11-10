@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TurboQuant: Random Rotation</title>
+<link rel="stylesheet" href="tq.css">
+<script src="tq.js"></script>
+</head>
+<body>
+<div class="wrap">
+<nav class="tq"></nav>
+
+<header>
+  <h1>Random rotations make every coordinate look the same</h1>
+  <p>TurboQuant quantizes a vector <b>x</b> one coordinate at a time, so it would like every coordinate to have the
+    same, known distribution and to be independent of the others. Real vectors (for example keys in a KV cache)
+    are nothing like that: a few “outlier channels” are much larger than the rest. The fix is to store
+    ‖<b>x</b>‖ separately and multiply the unit vector <b>x</b>/‖<b>x</b>‖ by a random rotation Π (an orthogonal
+    matrix, so lengths and inner products are unchanged and Π<sup>T</sup> undoes it).</p>
+  <p>Π<b>x</b> is then a uniformly random point on the unit sphere, so each coordinate <i>t</i> = (Π<b>x</b>)<sub><i>j</i></sub>
+    has density <i>f<sub>d</sub></i>(<i>t</i>) ∝ (1 − <i>t</i><sup>2</sup>)<sup>(<i>d</i>−3)/2</sup> on [−1, 1]:
+    a <b>Beta</b> distribution, ((<i>t</i>+1)/2 ~ Beta((<i>d</i>−1)/2, (<i>d</i>−1)/2)), with variance 1/<i>d</i>, which approaches
+    the Gaussian <i>N</i>(0, 1/<i>d</i>) as <i>d</i> grows. This holds whatever <b>x</b> was.</p>
+</header>
+
+<h3 class="section">One vector, many random rotations</h3>
+<p class="lede">Pick a unit vector <b>x</b> and draw many rotations. The histogram collects coordinate <i>i</i> of Π<b>x</b>
+  over all the rotations drawn; the scatter plots coordinate <i>i</i> against coordinate <i>j</i>.</p>
+<div class="controls">
+  <label class="grp">dimension <i>d</i> <select id="d1"></select></label>
+  <span class="grp">x =
+    <button data-x="spike">spike e₁</button><button data-x="outlier">outlier key</button>
+    <button data-x="flat">flat ±1/√d</button><button data-x="random">random</button></span>
+  <label class="grp">coords <i>i</i> <input id="ci" type="number" min="1" value="1" style="width:4.5em">
+    <i>j</i> <input id="cj" type="number" min="1" value="2" style="width:4.5em"></label>
+</div>
+<div class="controls">
+  <button id="rot1" class="primary">New rotation</button>
+  <span class="grp">Add <button data-add="10">10</button><button data-add="100">100</button><button data-add="500">500</button> rotations</span>
+  <button id="anim">Animate</button>
+  <button id="clear">Clear</button>
+  <span id="nrot"></span>
+</div>
+<div class="g2">
+  <div class="card"><h2>Input <b style="text-transform:none">x</b> (unit length)</h2><svg class="chart" id="xbar"></svg></div>
+  <div class="card"><h2>Π<b>x</b> for the latest rotation</h2><svg class="chart" id="pxbar"></svg></div>
+</div>
+<div class="g2">
+  <div class="card"><h2 id="h1title">Coordinate i of Πx over rotations</h2>
+    <svg class="chart" id="hist1"></svg>
+    <div class="legend"><span><span class="sw" style="background:var(--mem)"></span>samples</span>
+      <span><span class="ln" style="border-color:var(--hit)"></span>Beta density <i>f<sub>d</sub></i></span>
+      <span><span class="ln dash" style="border-color:var(--ink-soft)"></span>Gaussian <i>N</i>(0, 1/<i>d</i>)</span></div>
+  </div>
+  <div class="card"><h2 id="sctitle">Coordinate i vs j</h2>
+    <svg class="chart" id="scat1" style="max-width:380px;margin:0 auto"></svg>
+    <p class="note" id="corr1"></p>
+  </div>
+</div>
+<p class="lede">Things to try: the histogram is the same for every choice of <b>x</b>. At <i>d</i> = 2 the density is
+  U-shaped and the scatter is a circle: the two coordinates are <i>uncorrelated</i> but completely
+  <i>dependent</i> (<i>t</i><sub>1</sub><sup>2</sup> + <i>t</i><sub>2</sub><sup>2</sup> = 1). At <i>d</i> = 3 the density is
+  flat (Archimedes' hat-box theorem). As <i>d</i> grows the scatter becomes a round Gaussian blob: the constraint
+  Σ<i>t</i><sub><i>j</i></sub><sup>2</sup> = 1 is spread over many coordinates, so any two are nearly independent.</p>
+
+<h3 class="section">One rotation, many vectors</h3>
+<p class="lede">TurboQuant draws Π once and applies it to every vector. Below, <i>N</i> = 256 unit vectors before and after a
+  single fixed rotation. The heat maps show the first 48 vectors (rows) by coordinate (columns).</p>
+<div class="controls">
+  <span class="grp">data
+    <button data-ds="outlier">outlier channels</button><button data-ds="lowrank">low rank (2-D subspace)</button>
+    <button data-ds="iso">isotropic</button></span>
+  <label class="grp">dimension <i>d</i> <select id="d2"></select></label>
+  <label class="grp">codebook bits <i>b</i> <select id="b2"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+  <button id="rot2" class="primary">New rotation</button>
+  <button id="data2">New data</button>
+</div>
+<p class="status" id="stat2"></p>
+<div class="g2">
+  <div class="card"><h2>Before: vectors <b>x</b></h2>
+    <svg class="chart" id="heatA"></svg><p class="note" id="heatAn"></p>
+    <svg class="chart" id="errA" style="margin-top:8px"></svg><p class="note" id="errAn"></p>
+    <svg class="chart" id="histA" style="margin-top:8px"></svg><p class="note" id="histAn"></p></div>
+  <div class="card"><h2>After: rotated vectors Π<b>x</b></h2>
+    <svg class="chart" id="heatB"></svg><p class="note" id="heatBn"></p>
+    <svg class="chart" id="errB" style="margin-top:8px"></svg><p class="note" id="errBn"></p>
+    <svg class="chart" id="histB" style="margin-top:8px"></svg><p class="note" id="histBn"></p></div>
+</div>
+<p class="lede">The middle charts quantize every coordinate with the <i>b</i>-bit Lloyd–Max codebook designed for
+  <i>f<sub>d</sub></i> (next page) and show each vector's squared error ‖<b>x</b> − <i>Q</i>(<b>x</b>)‖<sup>2</sup>. Before
+  rotating, the outlier coordinates fall far outside the codebook's range and dominate the error; after rotating, every
+  vector's coordinates look like draws from <i>f<sub>d</sub></i>, and the error is close to the value the codebook was
+  designed for (dashed line).</p>
+<p class="lede">Note what a fixed rotation does <i>not</i> do: it does not decorrelate the coordinates <i>across a dataset</i>.
+  The covariance of the rotated data is ΠΣΠ<sup>T</sup>, the same matrix in a different basis, so correlation between
+  coordinates can go up as well as down (compare the numbers above, and try the low-rank data, where all the vectors share
+  a 2-D subspace). Vectors that resemble each other still resemble each other after rotating, so columns of the heat map can
+  still show a pattern. The guarantee is per vector, over the random choice of Π, and that is all TurboQuant's error bounds
+  need.</p>
+
+<footer>
+  <p>Coordinates are 1-indexed. For speed, the histogram and scatter in the first section sample Π<b>x</b> directly as a
+    uniform random unit vector (which is exactly its distribution) instead of building a <i>d</i>×<i>d</i> rotation for each
+    sample. The bar chart and the second section use a real random rotation: a uniformly random orthogonal matrix, made by
+    orthonormalizing the rows of a matrix of independent Gaussians (Gram–Schmidt, equivalently the Q of its QR decomposition).</p>
+  <p>Zandieh, Daliri, Hadian and Mirrokni, <i>TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate</i>
+    (2025), Lemma 1.</p>
+  <p class="nextpage" id="nextpage"></p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const DIMS = [2, 3, 4, 8, 16, 32, 64, 128, 256];
+$('d1').innerHTML = DIMS.map(d => `<option ${d === 16 ? 'selected' : ''}>${d}</option>`).join('');
+let d = 16, xKind = 'outlier', x, samples = [], latest = null, r = TQ.rng(TQ.newSeed());
+const MAXS = 20000;
+
+// ---- input vectors (unit length) ----
+function makeX(kind, d, rr = TQ.rng(7)){
+  let v;
+  if (kind === 'spike') v = Array.from({length: d}, (_, i) => i ? 0 : 1);
+  else if (kind === 'flat') v = Array.from({length: d}, (_, i) => (i % 3 ? 1 : -1));
+  else if (kind === 'random') v = TQ.gaussVec(r, d);
+  else v = outlierVec(d, rr, outlierChannels(d));
+  return TQ.unit(v);
+}
+const outlierChannels = d => d <= 4 ? [d - 1] : [1, Math.floor(d / 2), d - 2];
+function outlierVec(d, rr, chans){        // LLM keys: a few channels with large, consistent values
+  const v = TQ.gaussVec(rr, d);
+  chans.forEach((c, k) => v[c] = (k % 2 ? -1 : 1) * (8 + 2 * TQ.gauss(rr)));
+  return v;
+}
+
+// ---- section 1 ----
+const R1 = () => Math.min(1.05, 4.5 / Math.sqrt(d));
+function coordIdx(){
+  const clamp = id => { const e = $(id); e.max = d; let v = Math.max(1, Math.min(d, +e.value || 1)); e.value = v; return v - 1; };
+  let i = clamp('ci'), j = clamp('cj');
+  if (i === j){ j = (i + 1) % d; $('cj').value = j + 1; }
+  return [i, j];
+}
+function newRotation(){
+  latest = TQ.matVec(TQ.rotation(d, r), x);
+  samples.push(latest);
+}
+function addSamples(n){
+  for (let k = 0; k < n && samples.length < MAXS; k++) samples.push(TQ.unitVec(r, d));
+}
+function render1(){
+  const [i, j] = coordIdx();
+  TQ.vecChart($('xbar'), [{v: x, color: 'var(--hit)', name: 'x'}], {ymax: 1.05, h: 170});
+  if (latest) TQ.vecChart($('pxbar'), [{v: latest, color: 'var(--mem)', name: 'Πx'}], {ymax: 1.05, h: 170});
+  $('nrot').textContent = `${samples.length} rotation${samples.length === 1 ? '' : 's'} drawn`;
+
+  const R = R1(), f = TQ.coordDensity(d), g = TQ.gaussDensity(1 / Math.sqrt(d));
+  const ti = samples.map(s => s[i]), tj = samples.map(s => s[j]);
+  const nb = Math.max(12, Math.min(60, Math.round(Math.sqrt(ti.length) * 1.5)));
+  const H = TQ.hist(ti, -R, R, nb);
+  const ymax = Math.max(f(0) * 1.6, ...H.dens) * 1.08;
+  $('h1title').innerHTML = `Coordinate ${i + 1} of Π<b>x</b> over rotations`;
+  const c = TQ.chart({x: [-R, R], y: [0, ymax], xlabel: `(Πx)${sub(i + 1)}`, ylabel: 'density'});
+  TQ.svgOut($('hist1'), c, c.axes() + c.hist(H, 'fill:var(--mem);opacity:.75') +
+    c.fn(g, 'stroke:var(--ink-soft);stroke-width:1.5;stroke-dasharray:5 4', -R, R) +
+    c.fn(f, 'stroke:var(--hit);stroke-width:2', Math.max(-R, -0.9999), Math.min(R, 0.9999), 600));
+
+  $('sctitle').innerHTML = `Coordinate ${i + 1} vs coordinate ${j + 1}`;
+  const s = TQ.chart({h: 300, w: 340, x: [-R, R], y: [-R, R], xlabel: `(Πx)${sub(i + 1)}`, ylabel: `(Πx)${sub(j + 1)}`});
+  const pts = ti.slice(-4000).map((v, k) => `<circle cx="${s.X(v).toFixed(1)}" cy="${s.Y(tj[tj.length - Math.min(4000, tj.length) + k]).toFixed(1)}" r="1.6"/>`).join('');
+  TQ.svgOut($('scat1'), s, s.axes() + `<g style="fill:var(--mem);opacity:${samples.length > 1500 ? .35 : .7}">${pts}</g>`);
+  $('corr1').innerHTML = samples.length > 2
+    ? `Sample correlation ${TQ.fmt(TQ.corr(ti, tj))} over ${samples.length} rotations (exact value: 0). ` +
+      `Correlation of the squares ${TQ.fmt(TQ.corr(ti.map(v => v * v), tj.map(v => v * v)))} ` +
+      `(exact value −1/(<i>d</i>−1) = ${TQ.fmt(-1 / (d - 1))}; nonzero means the coordinates are not independent).`
+    : 'Draw some rotations.';
+}
+const sub = n => String(n).split('').map(ch => '₀₁₂₃₄₅₆₇₈₉'[ch]).join('');
+function reset1(){
+  d = +$('d1').value; x = makeX(xKind, d); samples = []; latest = null;
+  newRotation(); addSamples(499); render1();
+  document.querySelectorAll('[data-x]').forEach(b => b.classList.toggle('on', b.dataset.x === xKind));
+}
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('anim').textContent = 'Animate'; }
+$('rot1').onclick = () => { stop(); newRotation(); render1(); };
+document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => { addSamples(+b.dataset.add - 1); newRotation(); render1(); });
+$('clear').onclick = () => { stop(); samples = []; newRotation(); render1(); };
+$('anim').onclick = () => {
+  if (timer) return stop();
+  $('anim').textContent = 'Pause';
+  timer = setInterval(() => { if (samples.length >= MAXS) return stop(); newRotation(); addSamples(30); render1(); }, 120);
+};
+document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { xKind = b.dataset.x; stop(); reset1(); });
+$('d1').onchange = () => { stop(); reset1(); };
+$('ci').onchange = $('cj').onchange = render1;
+
+// ---- section 2 ----
+const N = 256, SHOW = 48;
+let d2 = 64;
+$('d2').innerHTML = DIMS.map(v => `<option ${v === d2 ? 'selected' : ''}>${v}</option>`).join('');
+let ds = 'outlier', X = [], PX = [], dataSeed = 11;
+function makeData(){
+  const rr = TQ.rng(dataSeed), chans = outlierChannels(d2);
+  const U = [TQ.unitVec(rr, d2), TQ.unitVec(rr, d2)];
+  X = Array.from({length: N}, () => {
+    if (ds === 'outlier') return TQ.unit(outlierVec(d2, rr, chans));
+    if (ds === 'lowrank') return TQ.unit(TQ.add(TQ.add(TQ.scale(U[0], TQ.gauss(rr)), TQ.scale(U[1], .6 * TQ.gauss(rr))),
+                                                 TQ.scale(TQ.gaussVec(rr, d2), .03)));
+    return TQ.unitVec(rr, d2);
+  });
+}
+function rotateData(){ const P = TQ.rotation(d2, r); PX = X.map(v => TQ.matVec(P, v)); }
+function meanAbsCorr(V){
+  const cols = Array.from({length: d2}, (_, j) => V.map(v => v[j]));
+  let s = 0, n = 0;
+  for (let a = 0; a < d2; a++) for (let b = a + 1; b < d2; b++){ s += Math.abs(TQ.corr(cols[a], cols[b])); n++; }
+  return s / n;
+}
+function heat(el, note, V){
+  const rows = V.slice(0, SHOW), vmax = Math.max(...rows.flatMap(v => v.map(Math.abs)));
+  const w = 520, cw = (w - 8) / d2, ch = 3.6, h = rows.length * ch;
+  let s = '';
+  rows.forEach((v, i) => v.forEach((t, j) => {
+    if (Math.abs(t) < vmax * .02) return;
+    s += `<rect x="${(4 + j * cw).toFixed(2)}" y="${(i * ch).toFixed(2)}" width="${(cw + .3).toFixed(2)}" height="${ch + .2}" ` +
+         `style="fill:var(${t > 0 ? '--mem' : '--hit'});opacity:${(Math.abs(t) / vmax).toFixed(3)}"><title>vector ${i + 1}, coord ${j + 1}: ${TQ.fmt(t)}</title></rect>`;
+  }));
+  TQ.svgOut(el, {w, h}, `<rect x="4" y="0" width="${w - 8}" height="${h}" style="fill:var(--surface-sunk)"/>` + s);
+  $(note).innerHTML = `<span style="color:var(--mem)">■</span> positive, <span style="color:var(--hit)">■</span> negative; full color = ±${TQ.fmt(vmax)}`;
+}
+// per-vector squared error after quantizing each coordinate with the b-bit codebook for f_d
+const qerr = (v, cb) => v.reduce((s, t) => s + (t - cb.c[TQ.cellIndex(t, cb.b)]) ** 2, 0);
+function errCharts(){
+  const cb = TQ.codebook(d2, +$('b2').value), design = cb.mse * d2;
+  const EA = X.map(v => qerr(v, cb)), EB = PX.map(v => qerr(v, cb));
+  const xmax = Math.max(...EA, ...EB, design * 2) * 1.02;
+  [['errA', 'errAn', EA, 'var(--hit)'], ['errB', 'errBn', EB, 'var(--mem)']].forEach(([id, note, E, col]) => {
+    const H = TQ.hist(E, 0, xmax, 40), c = TQ.chart({h: 150, x: [0, xmax], y: [0, Math.max(...H.dens) * 1.1],
+      ylabel: 'density', xlabel: 'per-vector squared error ‖x − Q(x)‖²'});
+    TQ.svgOut($(id), c, c.axes() + c.hist(H, `fill:${col};opacity:.75`) +
+      c.vline(design, 'stroke:var(--ink-soft);stroke-width:1.5;stroke-dasharray:5 3', 'design'));
+    $(note).innerHTML = `Mean squared error <b>${TQ.fmt(TQ.mean(E))}</b>; the codebook's design value is ${TQ.fmt(design)}.`;
+  });
+}
+function pooledHist(el, note, V){
+  const R = Math.min(1.05, 4.5 / Math.sqrt(d2)), all = V.flat(), H = TQ.hist(all, -R, R, 50), f = TQ.coordDensity(d2);
+  const c = TQ.chart({h: 180, x: [-R, R], y: [0, Math.max(f(0) * 1.6, ...H.dens) * 1.05], ylabel: 'density', xlabel: 'all coordinates, pooled'});
+  TQ.svgOut(el, c, c.axes() + c.hist(H, 'fill:var(--ink-soft);opacity:.55') +
+    c.fn(f, 'stroke:var(--hit);stroke-width:2', Math.max(-R, -.9999), Math.min(R, .9999), 600));
+  const out = H.under + H.over;
+  $(note).innerHTML = (out ? `<b>${out}</b> of ${all.length} values (${TQ.fmt(100 * out / all.length, 1)}%) are off the chart, beyond ±${TQ.fmt(R, 2)}. ` : '') +
+    `Orange curve: Beta density <i>f<sub>d</sub></i>.`;
+}
+function render2(){
+  heat($('heatA'), 'heatAn', X); heat($('heatB'), 'heatBn', PX);
+  errCharts();
+  pooledHist($('histA'), 'histAn', X); pooledHist($('histB'), 'histBn', PX);
+  if (d2 > 2){
+    const a = meanAbsCorr(X), b = meanAbsCorr(PX);
+    $('stat2').innerHTML = `Mean |correlation| between pairs of coordinates (over the ${N} vectors): before <b>${TQ.fmt(a)}</b>, after <b>${TQ.fmt(b)}</b>.`;
+  } else $('stat2').textContent = '';
+  document.querySelectorAll('[data-ds]').forEach(b => b.classList.toggle('on', b.dataset.ds === ds));
+}
+function reset2(newData){ if (newData) makeData(); rotateData(); render2(); }
+document.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => { ds = b.dataset.ds; reset2(true); });
+$('rot2').onclick = () => reset2(false);
+$('d2').onchange = () => { d2 = +$('d2').value; reset2(true); };
+$('b2').onchange = errCharts;
+$('data2').onclick = () => { dataSeed++; reset2(true); };
+
+reset1(); reset2(true);
+</script>
+</body>
+</html>
