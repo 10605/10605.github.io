@@ -24,7 +24,7 @@
     the Gaussian <i>N</i>(0, 1/<i>d</i>) as <i>d</i> grows. This holds whatever <b>x</b> was.</p>
 </header>
 
-<h3 class="section">One vector, many random rotations</h3>
+<h3 class="section">For fixed <b>x</b>, random rotations of <b>x</b> decorrelate coordinates of <b>x</b></h3>
 <p class="lede">Pick a unit vector <b>x</b> and draw many rotations. The histogram collects coordinate <i>i</i> of Π<b>x</b>
   over all the rotations drawn; the scatter plots coordinate <i>i</i> against coordinate <i>j</i>.</p>
 <div class="controls">
@@ -64,7 +64,7 @@
   flat (Archimedes' hat-box theorem). As <i>d</i> grows the scatter becomes a round Gaussian blob: the constraint
   Σ<i>t</i><sub><i>j</i></sub><sup>2</sup> = 1 is spread over many coordinates, so any two are nearly independent.</p>
 
-<h3 class="section">One rotation, many vectors</h3>
+<h3 class="section">For a fixed rotation, correlation between coordinates across vectors is not removed</h3>
 <p class="lede">TurboQuant draws Π once and applies it to every vector. Below, <i>N</i> = 256 unit vectors before and after a
   single fixed rotation. The heat maps show the first 48 vectors (rows) by coordinate (columns).</p>
 <div class="controls">
@@ -115,7 +115,7 @@
 const $ = id => document.getElementById(id);
 const DIMS = [2, 3, 4, 8, 16, 32, 64, 128, 256];
 $('d1').innerHTML = DIMS.map(d => `<option ${d === 16 ? 'selected' : ''}>${d}</option>`).join('');
-let d = 16, xKind = 'outlier', x, samples = [], latest = null, r = TQ.rng(TQ.newSeed());
+let d = 16, xKind = 'outlier', x, samples = [], latest = null, latestP = null, latestK = -1, r = TQ.rng(TQ.newSeed());
 const MAXS = 20000;
 
 // ---- input vectors (unit length) ----
@@ -143,8 +143,8 @@ function coordIdx(){
   return [i, j];
 }
 function newRotation(){
-  latest = TQ.matVec(TQ.rotation(d, r), x);
-  samples.push(latest);
+  latestP = TQ.rotation(d, r); latest = TQ.matVec(latestP, x);
+  latestK = samples.push(latest) - 1;
 }
 function addSamples(n){
   for (let k = 0; k < n && samples.length < MAXS; k++) samples.push(TQ.unitVec(r, d));
@@ -180,8 +180,15 @@ const sub = n => String(n).split('').map(ch => '₀₁₂₃₄₅₆₇₈₉'[
 function reset1(){
   d = +$('d1').value; x = makeX(xKind, d); samples = []; latest = null;
   newRotation(); addSamples(499); render1();
-  document.querySelectorAll('[data-x]').forEach(b => b.classList.toggle('on', b.dataset.x === xKind));
+  showX();
 }
+// switching x keeps the rotations drawn so far: Πx is uniform on the sphere for every unit x
+function changeX(){
+  x = makeX(xKind, d); latest = TQ.matVec(latestP, x);
+  if (latestK >= 0) samples[latestK] = latest;
+  render1(); showX();
+}
+const showX = () => document.querySelectorAll('[data-x]').forEach(b => b.classList.toggle('on', b.dataset.x === xKind));
 let timer = null;
 function stop(){ clearInterval(timer); timer = null; $('anim').textContent = 'Animate'; }
 $('rot1').onclick = () => { stop(); newRotation(); render1(); };
@@ -192,7 +199,7 @@ $('anim').onclick = () => {
   $('anim').textContent = 'Pause';
   timer = setInterval(() => { if (samples.length >= MAXS) return stop(); newRotation(); addSamples(30); render1(); }, 120);
 };
-document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { xKind = b.dataset.x; stop(); reset1(); });
+document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { xKind = b.dataset.x; changeX(); });
 $('d1').onchange = () => { stop(); reset1(); };
 $('ci').onchange = $('cj').onchange = render1;
 
