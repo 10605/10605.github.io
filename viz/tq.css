@@ -13,6 +13,8 @@
   --hit:         #a4530c;   /* series B: before rotation / MSE quantizer */
   --hit-soft:    #f0dfc9;
   --third:       #6b4fa0;   /* series C: SimHash */
+  --neg:         #c8302c;   /* lines: negative / positive subsets */
+  --pos:         #2a5fc4;
   --focus:       #a4530c;
   --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
 }
@@ -30,6 +32,8 @@
     --hit:         #e09a4d;
     --hit-soft:    #3a2a15;
     --third:       #b49be6;
+    --neg:         #f07470;
+    --pos:         #7ea6f2;
     --focus:       #e09a4d;
     --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
   }
@@ -47,6 +51,8 @@
   --hit:         #e09a4d;
   --hit-soft:    #3a2a15;
   --third:       #b49be6;
+  --neg:         #f07470;
+  --pos:         #7ea6f2;
   --focus:       #e09a4d;
   --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
 }

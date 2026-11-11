@@ -6,15 +6,6 @@
 <title>TurboQuant End to End</title>
 <link rel="stylesheet" href="tq.css">
 <script src="tq.js"></script>
-<style>
-  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 10px; }
-  .player input[type=range] { flex: 1 1 160px; }
-  .stages { display: grid; gap: 12px; margin-bottom: 14px; }
-  .stage h2 .n { color: var(--hit); margin-right: 6px; }
-  .stage .eq { font-size: 14px; color: var(--ink); margin: 0 0 6px; }
-  .codes { font: 13px var(--mono); color: var(--ink); background: var(--surface-sunk); border: 1px solid var(--line);
-           border-radius: 3px; padding: 4px 8px; overflow-wrap: anywhere; margin-top: 6px; }
-</style>
 </head>
 <body>
 <div class="wrap">
@@ -22,47 +13,33 @@
 
 <header>
   <h1>TurboQuant end to end</h1>
-  <p>Putting the pieces together on one key vector <b>x</b> from a KV cache, with <i>b</i> bits per coordinate.
+  <p>Putting the pieces together on many key vectors <b>x</b> from a KV cache, with <i>b</i> bits per coordinate.
     <b>TurboQuant<sub>mse</sub></b> rotates, quantizes every coordinate with the <i>b</i>-bit Lloyd–Max codebook, and rotates
     back. It minimizes ‖<b>x</b> − <b>x̃</b>‖<sup>2</sup>, but its inner products ⟨<b>y</b>, <b>x̃</b>⟩ are biased toward zero.
     <b>TurboQuant<sub>prod</sub></b> spends <i>b</i> − 1 bits on TurboQuant<sub>mse</sub> and the last bit on QJL applied to the
     residual <b>r</b> = <b>x</b> − <b>x̃</b><sub>mse</sub>, which makes ⟨<b>y</b>, <b>x̃</b>⟩ an unbiased estimate of ⟨<b>y</b>, <b>x</b>⟩
-    for every query <b>y</b>. The rotation Π and the Gaussian matrix <i>S</i> are drawn once and shared by all vectors.</p>
+    for every query <b>y</b>.</p>
 </header>
 
-<div class="controls">
-  <span class="grp">variant
-    <button data-v="mse">TurboQuant<sub>mse</sub></button><button data-v="prod">TurboQuant<sub>prod</sub></button></span>
-  <label class="grp">bits per coordinate <i>b</i> <select id="b"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
-  <label class="grp">dimension <i>d</i> <select id="d"><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label>
-  <button id="newx">New key and query</button>
-  <button id="newpi">New Π and S</button>
-</div>
-<div class="player">
-  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
-  <button id="back" title="Previous stage (←)">◀ Back</button>
-  <button id="step" class="primary" title="Next stage (→)">Next ▶</button>
-  <button id="all">Show all</button>
-  <input id="k" type="range" min="0" value="0" aria-label="Stage">
-  <span class="v" id="kv"></span>
-</div>
-
-<div class="stages" id="stages"></div>
-
-<div class="g2">
-  <div class="card"><h2>Storage for this vector</h2><div id="storage"></div></div>
-  <div class="card"><h2>Inner product with the query</h2><div id="ip"></div></div>
-</div>
-
 <h3 class="section">Over many keys and queries</h3>
-<p class="lede">300 random key/query pairs (keys with outlier channels, normalized to unit length; queries at random angles to them).
+<p class="lede">Random key/query pairs (keys with outlier channels, normalized to unit length; queries at random angles to them).
   Each dot is one pair, quantized with its own random Π and <i>S</i>: TurboQuant's guarantees are expectations over that
   randomness. (In a real cache one Π and <i>S</i> are shared, and across many <i>different</i> keys the errors average out the same
   way; our synthetic keys are all dominated by the same outlier channels, so with one shared draw they would mostly see the same
   luck, good or bad.)</p>
+<div class="controls">
+  <label class="grp">bits per coordinate <i>b</i> <select id="b"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+  <label class="grp">dimension <i>d</i> <select id="d"><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label>
+  <label class="grp">pairs <select id="n"><option>100</option><option selected>300</option><option>1000</option><option>3000</option></select></label>
+  <button id="resample" class="primary">Resample</button>
+</div>
 <div class="g2">
   <div class="card"><h2 id="sc1t">TurboQuant mse</h2><svg class="chart" id="sc1"></svg><p class="note" id="sc1n"></p></div>
   <div class="card"><h2 id="sc2t">TurboQuant prod</h2><svg class="chart" id="sc2"></svg><p class="note" id="sc2n"></p></div>
+</div>
+<div class="g2">
+  <div class="card"><h2 id="h1t">TurboQuant mse errors</h2><svg class="chart" id="h1"></svg><p class="note" id="h1n"></p></div>
+  <div class="card"><h2 id="h2t">TurboQuant prod errors</h2><svg class="chart" id="h2"></svg><p class="note" id="h2n"></p></div>
 </div>
 <div class="card">
   <h2>All bit widths</h2>
@@ -71,11 +48,19 @@
     upper bounds on E‖<b>x</b> − <b>x̃</b>‖² for TurboQuant<sub>mse</sub>: √3π/2 · 4<sup>−<i>b</i></sup> ≈ 0.68, 0.17, 0.043, 0.011, with
     actual values ≈ 0.36, 0.117, 0.03, 0.009. For TurboQuant<sub>prod</sub> at <i>b</i> = 1 the whole budget goes to QJL.</p>
 </div>
+<div class="card">
+  <h2>Inner-product residuals ⟨<b>y</b>, <b>x̃</b>⟩ − ⟨<b>y</b>, <b>x</b>⟩</h2>
+  <table class="t" id="resid"></table>
+  <p class="note">The true inner products are spread symmetrically around 0, so shrinkage toward zero cancels in
+    the plain mean; the "toward 0" column multiplies each residual by sign⟨<b>y</b>, <b>x</b>⟩, so negative values mean the
+    estimates are pulled toward zero (bias). TurboQuant<sub>mse</sub> is biased but has lower variance; TurboQuant<sub>prod</sub>
+    is unbiased but has higher variance.</p>
+</div>
 
 <footer>
-  <p>The single example uses <i>d</i> ≤ 64 so each coordinate is visible; the guarantees improve as <i>d</i> grows (real heads use
-    <i>d</i> = 64 to 128). QJL here uses <i>m</i> = <i>d</i> rows, so <i>S</i> is <i>d</i>×<i>d</i>. Norms are counted as 16-bit floats.
-    The paper also handles outlier channels by giving them more bits (e.g. 2.5 or 3.5 bits on average); that refinement is not shown.</p>
+  <p>Real attention heads use <i>d</i> = 64 to 128; the guarantees improve as <i>d</i> grows. QJL here uses <i>m</i> = <i>d</i> rows,
+    so <i>S</i> is <i>d</i>×<i>d</i>. The paper also handles outlier channels by giving them more bits (e.g. 2.5 or 3.5 bits on
+    average); that refinement is not shown.</p>
   <p>Zandieh, Daliri, Hadian and Mirrokni, <i>TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate</i> (2025),
     Algorithms 1 and 2.</p>
   <p class="nextpage" id="nextpage"></p>
@@ -86,26 +71,21 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const C2 = Math.sqrt(Math.PI / 2);
-let variant = 'prod', d, b, P, S, x, y, k = 0, seedX = 1, seedP = 1;
+let d, b, seed = 1, rows = [];
 
-// ===== the two quantizers =====
-// TurboQuant_mse with `bits` bits: returns the pieces needed to draw each stage
-// T = {P, S} is the rotation and QJL matrix to use (default: the shared ones drawn in setup)
-function tqMse(v, bits, T = {P, S}){
+// ===== the two quantizers (T = {P, S}: the rotation and QJL matrix for this vector) =====
+function tqMse(v, bits, T){
   const nx = TQ.norm(v), u = TQ.matVec(T.P, TQ.scale(v, 1 / nx));
-  if (bits === 0) return {nx, u, cb: null, idx: null, q: null, xt: v.map(() => 0)};
-  const cb = TQ.codebook(d, bits), idx = u.map(t => TQ.cellIndex(t, cb.b)), q = idx.map(j => cb.c[j]);
-  return {nx, u, cb, idx, q, xt: TQ.scale(TQ.matTVec(T.P, q), nx)};
+  if (bits === 0) return v.map(() => 0);
+  const cb = TQ.codebook(d, bits), q = u.map(t => cb.c[TQ.cellIndex(t, cb.b)]);
+  return TQ.scale(TQ.matTVec(T.P, q), nx);
 }
 // QJL with m = d rows: x̃ = √(π/2)/d · ‖r‖ · Sᵀ sign(S r)
-function qjl(r, T = {P, S}){
-  const nr = TQ.norm(r), bits = TQ.matVec(T.S, r).map(TQ.sign);
-  return {nr, bits, xt: TQ.scale(TQ.matTVec(T.S, bits), C2 / d * nr)};
+function qjl(r, T){
+  const bits = TQ.matVec(T.S, r).map(TQ.sign);
+  return TQ.scale(TQ.matTVec(T.S, bits), C2 / d * TQ.norm(r));
 }
-function tqProd(v, bits, T = {P, S}){
-  const m = tqMse(v, bits - 1, T), r = TQ.sub(v, m.xt), j = qjl(r, T);
-  return {m, r, j, xt: TQ.add(m.xt, j.xt)};
-}
+function tqProd(v, bits, T){ const m = tqMse(v, bits - 1, T); return TQ.add(m, qjl(TQ.sub(v, m), T)); }
 
 // ===== data =====
 function keyVec(rr){                      // a key with a few large, consistent "outlier" channels
@@ -118,139 +98,73 @@ function queryNear(rr, v, rho){           // unit query with cosine rho to v
   const zp = TQ.unit(z.map((t, i) => t - zv * vh[i]));
   return TQ.add(TQ.scale(vh, rho), TQ.scale(zp, Math.sqrt(1 - rho * rho)));
 }
-function setup(){
-  d = +$('d').value; b = +$('b').value;
-  const rp = TQ.rng(seedP * 31 + d); P = TQ.rotation(d, rp); S = TQ.gaussMatrix(d, d, rp);
-  const rx = TQ.rng(seedX * 17 + d); x = keyVec(rx); y = TQ.scale(queryNear(rx, x, .5), 3);
-}
 
-// ===== stages =====
-const vbar = (el, series, opts = {}) => TQ.vecChart(el, series, {w: 1100, h: 210, ...opts});
-const binary = (j, bits) => j.toString(2).padStart(bits, '0');
-function stages(){
-  const st = [], mb = variant === 'mse' ? b : b - 1;
-  const R = variant === 'mse' ? tqMse(x, b) : tqProd(x, b);
-  const M = variant === 'mse' ? R : R.m, small = d <= 32;
-  const urange = Math.max(...M.u.map(Math.abs), ...(M.cb ? M.cb.c.map(Math.abs) : [0])) * 1.1;
-  st.push({t: 'Input key', eq: `<b>x</b> ∈ ℝ<sup>${d}</sup>, ‖<b>x</b>‖ = ${TQ.fmt(M.nx)}. Store ‖<b>x</b>‖ as one float and continue with <b>x</b>/‖<b>x</b>‖.`,
-    draw: el => vbar(el, [{v: x, color: 'var(--hit)', name: 'x'}]),
-    note: 'Note the outlier channels: a fixed codebook for these coordinates would waste most of its levels.'});
-  st.push({t: 'Rotate', eq: `<b>u</b> = Π <b>x</b>/‖<b>x</b>‖. Every coordinate now has the density <i>f</i><sub>${d}</sub> (page 1)` +
-      (mb ? `; dashed lines are the ${mb}-bit Lloyd–Max centroids for it (page 2).` : '.'),
-    draw: el => vbar(el, [{v: M.u, color: 'var(--mem)', name: 'u'}], {ymax: urange, levels: M.cb ? M.cb.c : []})});
-  if (mb){
-    st.push({t: `Quantize each coordinate (${mb} bit${mb > 1 ? 's' : ''})`,
-      eq: `idx<sub><i>j</i></sub> = index of the centroid nearest to <i>u<sub>j</sub></i>. Ticks show the centroid each coordinate is replaced by.`,
-      draw: el => vbar(el, [{v: M.u, color: 'var(--mem)', name: 'u'}, {v: M.q, color: 'var(--hit)', name: 'centroid'}],
-                                {ymax: urange, levels: M.cb.c, labels: small ? M.idx.map(j => j) : null}),
-      code: `stored indices: ${M.idx.map(j => binary(j, mb)).join(' ')}`});
-    st.push({t: 'Dequantize and rotate back', eq: `<b>x̃</b><sub>mse</sub> = ‖<b>x</b>‖ Π<sup>T</sup> (<i>c</i><sub>idx<sub>1</sub></sub>, …, <i>c</i><sub>idx<sub><i>d</i></sub></sub>).` +
-        ` Error ‖<b>x</b> − <b>x̃</b><sub>mse</sub>‖² / ‖<b>x</b>‖² = <b>${TQ.fmt(TQ.dot(TQ.sub(x, M.xt), TQ.sub(x, M.xt)) / M.nx ** 2)}</b>` +
-        ` (expected about ${TQ.fmt(TQ.codebook(d, mb).mse * d)}).`,
-      draw: el => vbar(el, [{v: x, color: 'var(--hit)', name: 'x', opacity: .45}, {v: M.xt, color: 'var(--mem)', name: 'x̃ mse'}]),
-      note: 'Bars: the original x. Ticks: the reconstruction.' + (variant === 'mse' ? ' This is the output of TurboQuant<sub>mse</sub>.' : '')});
-  }
-  if (variant === 'prod'){
-    const rmax = Math.max(...R.r.map(Math.abs), ...R.j.xt.map(Math.abs)) * 1.08;
-    st.push({t: 'Residual', eq: `<b>r</b> = <b>x</b> − <b>x̃</b><sub>mse</sub>, ‖<b>r</b>‖ = ${TQ.fmt(R.j.nr)}` +
-        (mb ? ` (${TQ.fmt(100 * R.j.nr / M.nx, 1)}% of ‖<b>x</b>‖). Store ‖<b>r</b>‖ as a second float.` : ': with b = 1 there are no MSE bits, so <b>r</b> = <b>x</b>.'),
-      draw: el => vbar(el, [{v: R.r, color: 'var(--third)', name: 'r'}], {ymax: rmax})});
-    st.push({t: 'QJL on the residual (1 bit)', eq: `Store sign(<i>S</i><b>r</b>), <i>d</i> bits. Dequantize:` +
-        ` <b>x̃</b><sub>qjl</sub> = √(π/2)/<i>d</i> · ‖<b>r</b>‖ · <i>S</i><sup>T</sup> sign(<i>S</i><b>r</b>), an unbiased (but noisy) estimate of <b>r</b> (page 4).`,
-      draw: el => vbar(el, [{v: R.r, color: 'var(--third)', name: 'r', opacity: .45}, {v: R.j.xt, color: 'var(--hit)', name: 'x̃ qjl'}],
-                                {ymax: rmax}),
-      code: `stored sign bits: ${R.j.bits.map(s => s > 0 ? '+' : '−').join('')}`,
-      note: 'Bars: the residual r. Ticks: its QJL reconstruction.'});
-    st.push({t: 'Combine', eq: `<b>x̃</b> = <b>x̃</b><sub>mse</sub> + <b>x̃</b><sub>qjl</sub>. Error ‖<b>x</b> − <b>x̃</b>‖² / ‖<b>x</b>‖² = <b>${TQ.fmt(TQ.dot(TQ.sub(x, R.xt), TQ.sub(x, R.xt)) / M.nx ** 2)}</b>` +
-        ` (larger than TurboQuant<sub>mse</sub> with the same ${b} bits would give, the price of unbiasedness).`,
-      draw: el => vbar(el, [{v: x, color: 'var(--hit)', name: 'x', opacity: .45}, {v: R.xt, color: 'var(--mem)', name: 'x̃'}]),
-      note: 'Bars: the original x. Ticks: the final reconstruction.'});
-  }
-  return {st, R, M, mb};
-}
-
-function render(){
-  const {st, R, M, mb} = stages();
-  k = Math.min(k, st.length - 1);
-  $('k').max = st.length - 1; $('k').value = k; $('kv').textContent = `${k + 1} / ${st.length}`;
-  $('back').disabled = $('reset').disabled = k === 0;
-  $('step').disabled = $('all').disabled = k === st.length - 1;
-  document.querySelectorAll('[data-v]').forEach(e => e.classList.toggle('on', e.dataset.v === variant));
-  $('stages').innerHTML = st.slice(0, k + 1).map((s, i) =>
-    `<div class="card stage${i === k ? ' current' : ''}"><h2><span class="n">${i + 1}</span>${s.t}</h2><p class="eq">${s.eq}</p>` +
-    `<svg class="chart" id="sv${i}"></svg>${s.code ? `<div class="codes">${s.code}</div>` : ''}${s.note ? `<p class="note">${s.note}</p>` : ''}</div>`).join('');
-  st.slice(0, k + 1).forEach((s, i) => s.draw($('sv' + i)));
-  $('stages').lastElementChild.scrollIntoView({block: 'nearest'});
-
-  // storage and the inner product (shown once the reconstruction exists)
-  const nfloat = variant === 'mse' ? 1 : 2, bitsTot = b * d + 16 * nfloat;
-  $('storage').innerHTML = `<p class="eq">${variant === 'mse' ? `${b}·${d} index bits` : `${mb}·${d} index bits + ${d} sign bits`} + ${nfloat}×16-bit norm${nfloat > 1 ? 's' : ''}` +
-    ` = <b>${bitsTot}</b> bits, vs ${16 * d} bits in fp16: <b>${TQ.fmt(16 * d / bitsTot, 1)}×</b> smaller.</p>`;
-  const done = k === st.length - 1, xt = R.xt, truth = TQ.dot(y, x);
-  $('ip').innerHTML = done
-    ? `<table class="t"><tr><th></th><th>⟨y, ·⟩</th><th>error</th></tr><tr><td>true ⟨y, x⟩</td><td>${TQ.fmt(truth)}</td><td></td></tr>` +
-      (variant === 'prod' && mb ? `<tr><td>MSE part only, ⟨y, x̃<sub>mse</sub>⟩</td><td>${TQ.fmt(TQ.dot(y, M.xt))}</td><td>${TQ.fmt(TQ.dot(y, M.xt) - truth)}</td></tr>` : '') +
-      `<tr><td>${variant === 'mse' ? 'TurboQuant<sub>mse</sub>' : 'TurboQuant<sub>prod</sub>'} ⟨y, x̃⟩</td><td>${TQ.fmt(TQ.dot(y, xt))}</td><td>${TQ.fmt(TQ.dot(y, xt) - truth)}</td></tr></table>` +
-      `<p class="note">One pair can come out either way; the chart below shows the bias over many pairs.</p>`
-    : '<p class="note">Step to the last stage to see the estimate.</p>';
-}
-
-// ===== aggregate over many pairs =====
-function aggregate(){
+// ===== statistics for every bit width =====
+const fit = pts => { const mx = TQ.mean(pts.map(p => p[0])), my = TQ.mean(pts.map(p => p[1]));
+  let sxy = 0, sxx = 0; pts.forEach(([a, c]) => { sxy += (a - mx) * (c - my); sxx += (a - mx) ** 2; }); return sxy / sxx; };
+function compute(){
+  d = +$('d').value;
   // each pair gets its own Π and S: the guarantees are averages over these random draws
-  const rr = TQ.rng(seedX * 101 + d), pairs = Array.from({length: 300}, () => {
+  const rr = TQ.rng(seed * 101 + d), pairs = Array.from({length: +$('n').value}, () => {
     const kx = TQ.unit(keyVec(rr));
     return [kx, queryNear(rr, kx, 2 * rr() - 1), {P: TQ.rotation(d, rr), S: TQ.gaussMatrix(d, d, rr)}]; });
-  const fit = pts => { const mx = TQ.mean(pts.map(p => p[0])), my = TQ.mean(pts.map(p => p[1]));
-    let sxy = 0, sxx = 0; pts.forEach(([a, c]) => { sxy += (a - mx) * (c - my); sxx += (a - mx) ** 2; }); return sxy / sxx; };
-  const rows = [];
-  let cur = null;
-  for (let bb = 1; bb <= 4; bb++){
+  rows = [1, 2, 3, 4].map(bb => {
     const out = {};
     for (const v of ['mse', 'prod']){
       let err = 0; const pts = [];
       for (const [kx, q, T] of pairs){
-        const xt = v === 'mse' ? tqMse(kx, bb, T).xt : tqProd(kx, bb, T).xt, e = TQ.sub(kx, xt);
+        const xt = v === 'mse' ? tqMse(kx, bb, T) : tqProd(kx, bb, T), e = TQ.sub(kx, xt);
         err += TQ.dot(e, e); pts.push([TQ.dot(q, kx), TQ.dot(q, xt)]);
       }
-      out[v] = {mse: err / pairs.length, slope: fit(pts), rmse: Math.sqrt(TQ.mean(pts.map(([a, c]) => (c - a) ** 2))), pts};
+      const res = pts.map(([a, c]) => c - a);
+      out[v] = {mse: err / pairs.length, slope: fit(pts), rmse: Math.sqrt(TQ.mean(res.map(e => e * e))), pts, res,
+                rmean: TQ.mean(res), rzero: TQ.mean(res.map((e, i) => e * TQ.sign(pts[i][0]))), rvar: TQ.variance(res)};
     }
-    rows.push(out); if (bb === b) cur = out;
-  }
-  $('agg').innerHTML = `<tr><th>bits b</th><th>mse: E‖x−x̃‖²</th><th>mse: slope</th><th>mse: RMS ip error</th>` +
-    `<th>prod: E‖x−x̃‖²</th><th>prod: slope</th><th>prod: RMS ip error</th></tr>` +
-    rows.map((o, i) => `<tr style="${i + 1 === b ? 'font-weight:600' : ''}"><td>${i + 1}</td><td>${TQ.fmt(o.mse.mse)}</td><td>${TQ.fmt(o.mse.slope)}</td><td>${TQ.fmt(o.mse.rmse)}</td>` +
-      `<td>${TQ.fmt(o.prod.mse)}</td><td>${TQ.fmt(o.prod.slope)}</td><td>${TQ.fmt(o.prod.rmse)}</td></tr>`).join('');
-  [['sc1', 'mse', 'var(--ink-soft)'], ['sc2', 'prod', 'var(--mem)']].forEach(([id, v, col]) => {
-    const o = cur[v], c = TQ.chart({w: 420, h: 320, x: [-1, 1], y: [-1.2, 1.2], xlabel: 'true ⟨y, x⟩', ylabel: 'estimate ⟨y, x̃⟩'});
-    TQ.svgOut($(id), c, c.axes() + c.line([[-1, -1], [1, 1]], 'stroke:var(--ink-faint);stroke-dasharray:5 4;stroke-width:1.5') +
-      o.pts.map(([a, e]) => `<circle cx="${c.X(a).toFixed(1)}" cy="${c.Y(Math.max(-1.2, Math.min(1.2, e))).toFixed(1)}" r="2.2" style="fill:${col};opacity:.55"/>`).join('') +
-      c.line([[-1, -o.slope], [1, o.slope]], `stroke:var(--hit);stroke-width:2`));
-    $(id + 't').innerHTML = `TurboQuant<sub>${v}</sub>, b = ${b}, d = ${d}`;
-    $(id + 'n').innerHTML = `Orange: fitted line, slope ${TQ.fmt(o.slope)}. Dashed: estimate = truth. E‖x − x̃‖² = ${TQ.fmt(o.mse)}.`;
+    return out;
   });
+  draw();
 }
 
-// ===== wiring =====
-const full = () => { setup(); render(); aggregate(); };
-const go = n => { k = Math.max(0, n); render(); };
-$('step').onclick = () => go(k + 1);
-$('back').onclick = () => go(k - 1);
-$('reset').onclick = () => go(0);
-$('all').onclick = () => go(99);
-$('k').oninput = e => go(+e.target.value);
-document.querySelectorAll('[data-v]').forEach(e => e.onclick = () => { variant = e.dataset.v; render(); });
-$('b').onchange = () => { b = +$('b').value; render(); aggregate(); };
-$('d').onchange = full;
-$('newx').onclick = () => { seedX++; full(); };
-$('newpi').onclick = () => { seedP++; full(); };
-document.addEventListener('keydown', e => {
-  if (e.target.matches('input, select')) return;
-  if (e.key === 'ArrowRight'){ go(k + 1); e.preventDefault(); }
-  else if (e.key === 'ArrowLeft'){ go(k - 1); e.preventDefault(); }
-  else if (e.key === 'Home') go(0);
-});
-full();
+// ===== charts and tables for the chosen b =====
+const VS = [['mse', 'var(--ink-soft)'], ['prod', 'var(--mem)']];
+function draw(){
+  b = +$('b').value;
+  const cur = rows[b - 1], n = cur.mse.pts.length;
+  VS.forEach(([v, col], k) => {
+    const o = cur[v], c = TQ.chart({w: 420, h: 320, x: [-1, 1], y: [-1.2, 1.2], xlabel: 'true ⟨y, x⟩', ylabel: 'estimate ⟨y, x̃⟩'});
+    TQ.svgOut($('sc' + (k + 1)), c, c.axes() + c.line([[-1, -1], [1, 1]], 'stroke:var(--ink-faint);stroke-dasharray:5 4;stroke-width:1.5') +
+      o.pts.map(([a, e]) => `<circle cx="${c.X(a).toFixed(1)}" cy="${c.Y(Math.max(-1.2, Math.min(1.2, e))).toFixed(1)}" r="${n > 1000 ? 1.5 : 2.2}" style="fill:${col};opacity:${n > 1000 ? .35 : .55}"/>`).join('') +
+      c.line([[-1, -o.slope], [1, o.slope]], 'stroke:var(--hit);stroke-width:2'));
+    $(`sc${k + 1}t`).innerHTML = `TurboQuant<sub>${v}</sub>, b = ${b}, d = ${d}`;
+    $(`sc${k + 1}n`).innerHTML = `Orange: fitted line, slope ${TQ.fmt(o.slope)}. Dashed: estimate = truth. E‖x − x̃‖² = ${TQ.fmt(o.mse)}.`;
+  });
+  // error histograms on a shared scale so the two widths can be compared
+  const R = Math.max(...cur.mse.res.map(Math.abs), ...cur.prod.res.map(Math.abs)) * 1.02;
+  const nb = Math.max(15, Math.min(60, Math.round(Math.sqrt(n) * 1.5)));
+  const H = VS.map(([v]) => TQ.hist(cur[v].res, -R, R, nb)), ymax = Math.max(...H.flatMap(h => h.dens)) * 1.08;
+  VS.forEach(([v, col], k) => {
+    const o = cur[v], side = neg => TQ.mean(o.res.filter((e, i) => (o.pts[i][0] < 0) === neg));
+    const mneg = side(true), mpos = side(false), c = TQ.chart({w: 420, h: 220, x: [-R, R], y: [0, ymax], xlabel: 'error ⟨y, x̃⟩ − ⟨y, x⟩', ylabel: 'density'});
+    TQ.svgOut($('h' + (k + 1)), c, c.axes() + c.hist(H[k], `fill:${col};opacity:.75`) +
+      c.vline(0, 'stroke:var(--ink-faint);stroke-dasharray:5 3;stroke-width:1.5') +
+      c.vline(mneg, 'stroke:var(--neg);stroke-width:2') + c.vline(mpos, 'stroke:var(--pos);stroke-width:2'));
+    $(`h${k + 1}t`).innerHTML = `TurboQuant<sub>${v}</sub> errors, b = ${b}, d = ${d}`;
+    $(`h${k + 1}n`).innerHTML = `<span style="color:var(--neg)">Red</span>: mean error where ⟨y, x⟩ &lt; 0, ${TQ.fmt(mneg)}. ` +
+      `<span style="color:var(--pos)">Blue</span>: mean where ⟨y, x⟩ ≥ 0, ${TQ.fmt(mpos)}. Dashed: 0. Overall mean ${TQ.fmt(o.rmean)}, standard deviation ${TQ.fmt(Math.sqrt(o.rvar))}, RMS ${TQ.fmt(o.rmse)} over ${n} pairs.`;
+  });
+  const bold = i => `<tr style="${i + 1 === b ? 'font-weight:600' : ''}"><td>${i + 1}</td>`;
+  $('agg').innerHTML = `<tr><th>bits b</th><th>mse: E‖x−x̃‖²</th><th>mse: slope</th><th>mse: RMS ip error</th>` +
+    `<th>prod: E‖x−x̃‖²</th><th>prod: slope</th><th>prod: RMS ip error</th></tr>` +
+    rows.map((o, i) => bold(i) + VS.map(([v]) => `<td>${TQ.fmt(o[v].mse)}</td><td>${TQ.fmt(o[v].slope)}</td><td>${TQ.fmt(o[v].rmse)}</td>`).join('') + '</tr>').join('');
+  $('resid').innerHTML = `<tr><th>bits b</th><th>mse: mean</th><th>mse: mean toward 0</th><th>mse: variance</th>` +
+    `<th>prod: mean</th><th>prod: mean toward 0</th><th>prod: variance</th></tr>` +
+    rows.map((o, i) => bold(i) + VS.map(([v]) => `<td>${TQ.fmt(o[v].rmean)}</td><td>${TQ.fmt(o[v].rzero)}</td><td>${TQ.fmt(o[v].rvar)}</td>`).join('') + '</tr>').join('');
+}
+
+$('b').onchange = draw;
+$('d').onchange = $('n').onchange = compute;
+$('resample').onclick = () => { seed++; compute(); };
+compute();
 </script>
 </body>
 </html>
