@@ -57,6 +57,16 @@
     is unbiased but has higher variance.</p>
 </div>
 
+<h3 class="section">Which variant is used in practice?</h3>
+<p class="lede">Mostly TurboQuant<sub>mse</sub>. The paper's downstream experiments (needle-in-a-haystack, LongBench, near-neighbor
+  search) use TurboQuant<sub>prod</sub> but never compare it with TurboQuant<sub>mse</sub> at the same bit budget, and the paper's own
+  Fig. 2a shows prod winning on inner-product error only at low bit widths. Practitioners have generally dropped the QJL stage:
+  vLLM's TurboQuant backend <a href="https://github.com/vllm-project/vllm/pull/38479">omits it</a> because it was found to
+  "hurt attention quality by amplifying variance through softmax", and llama.cpp implementers
+  <a href="https://github.com/ggml-org/llama.cpp/discussions/20969">report the same</a>. A perplexity comparison on Qwen2.5-7B
+  reproduced in <a href="https://arxiv.org/abs/2606.23406">HyperQuant</a> finds the MSE variant better at 2, 3 and 4 bits. Unbiasedness
+  removes the shrinkage of attention scores, but the extra variance it costs (the wider histogram above) matters more.</p>
+
 <footer>
   <p>Real attention heads use <i>d</i> = 64 to 128; the guarantees improve as <i>d</i> grows. QJL here uses <i>m</i> = <i>d</i> rows,
     so <i>S</i> is <i>d</i>×<i>d</i>. The paper also handles outlier channels by giving them more bits (e.g. 2.5 or 3.5 bits on
