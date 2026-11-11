@@ -281,7 +281,10 @@
 
 - title: Contrastive learning and retrieval
   summary: Overvier of contrastive learning, neural retrieval, and RAG
+  pptx_link: https://docs.google.com/presentation/d/1R1YaKHf-3C1wQY2oen4tuUDCpQD5jtWs/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1GQdtxTDTb34HN4B0ycmMhZHbXf2nnCm0/view?usp=drive_link
   content:
+    - turboquant.pptx
     - rag-overview.pptx
     - contrastive-overview.pptx
     - contrastive-dpr.pptx

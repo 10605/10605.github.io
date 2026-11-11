@@ -1,6 +1,19 @@
 # Database of info on slide decks for individual "modules"
 # slides themselves stored on William's Dropbox
 
+turboquant.pptx:
+  num_slides: 11
+  links:
+   - https://arxiv.org/abs/2504.19874:
+       "TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate, Zandieh et al, ICLR 2026"
+   - https://doi.org/10.1609/aaai.v39i24.34773:
+       "QJL: 1-Bit Quantized JL Transform for KV Cache Quantization with Zero Overhead, Zandieh et al, AAAI 2025"
+   - https://10605.github.io/viz/tq-rotation.html: Visualize random rotations
+   - https://10605.github.io/viz/tq-lloyd-max.html: Visualize the Lloyd-Max quantizer
+   - https://10605.github.io/viz/tq-simhash.html: Visualize SimHash (review)
+   - https://10605.github.io/viz/tq-qjl.html: Visualize the QJL trick
+   - https://10605.github.io/viz/tq-pipeline.html: Visualize TurboQuant end to end
+
 kv-cache-transformer-start.pptx:
   num_slides: 35
   links:
