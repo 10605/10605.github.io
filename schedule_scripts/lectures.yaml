@@ -292,9 +292,13 @@
     - contreiver.pptx
     - '* Miniproject: structured miniproject survey due'
 
-- title: Recitation - Structured miniproject
+- title: >-
+    Recitation - Structured miniproject
+    <a href="https://drive.google.com/file/d/1G17k05FiwU1SC4qUsQ-uJSx94J43lICc/view?usp=sharing">/ MapReduce Slides (pdf)</a>
+    <a href="https://docs.google.com/presentation/d/1Dgz5rFe2n9LCQ7PNtRAgWBUo9WR9jd7J/edit?usp=sharing&ouid=112869297892034233698&rtpof=true&sd=true">/ MapReduce Slides (pptx)</a>
+    <a href="https://docs.google.com/presentation/d/1QkHUZO4C57AIlXD5pho-Tu6n07OpKeIADe0tOypptRU/edit?usp=sharing">/ BTM Mini Project Slides (Google Slides)</a>
+    <a href="https://drive.google.com/file/d/1j0NjVDZDkXlcarww0RfnKYNWSeFFazBG/view?usp=sharing">/ BTM Mini Project Slides (pdf)</a>
   type: recitation
-  slide_link: https://docs.google.com/presentation/d/1qFHL2EVemOkPAB7cZSWoGiK3sio4kTD4/edit?usp=sharing&ouid=117812538202789054093&rtpof=true&sd=true
 
 ########## RAG, Parallel Training, PPI
 
