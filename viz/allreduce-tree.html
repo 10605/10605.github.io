@@ -25,6 +25,7 @@
 <div class="card">
   <div class="setup">
     <label>Workers <select id="levels"><option value="3">7 (3 levels)</option><option value="4">15 (4 levels)</option></select></label>
+    <label>Each worker holds <select id="dim"><option value="1">a single number</option><option value="4">a 4-element vector</option></select></label>
     <button id="rand">Random values</button>
     <button id="orig">Values from the slides</button>
   </div>
@@ -59,7 +60,9 @@
 <footer>
   <p>Nodes are numbered bottom-up as on the lecture slides, so with 7 workers they start with 1…7 and
     finish with 1 + 2 + … + 7 = 28. The root is a worker too: it adds its own value to its children's
-    partial sums. A shaded box holds the total.</p>
+    partial sums. A shaded box holds the total. With vectors, everything is elementwise; element 0 is the
+    slide value, and the last element is 1 on every worker, so its total counts the workers (dividing by it turns
+    the sum into an average).</p>
 </footer>
 
 </div>
@@ -67,30 +70,35 @@
 <script>
 "use strict";
 const {$, packet} = AR;
-let L = 3, values = null, states = [];
+let L = 3, D = 1, values = null, states = [];
+const add = (a, b) => a.map((x, j) => x + b[j]);
+const fmt = a => D === 1 ? String(a[0]) : `[${a.join(', ')}]`;
 
 // ===== the algorithm ========================================================
 const kids = i => [2 * i + 1, 2 * i + 2];
 const level = i => Math.floor(Math.log2(i + 1));
 const atLevel = (d, n) => [...Array(n).keys()].filter(i => level(i) === d);
 
-// bottom-up numbering: the deepest level gets 1, 2, ..., then the level above, and so on
+// bottom-up numbering: the deepest level gets 1, 2, ..., then the level above, and so on.
+// Every value is a vector of length D; for D = 4 the extra elements are made up from the node number.
+const vecOf = v => D === 1 ? [v] : [v, v % 4, (2 * v) % 7, 1];
 function slideValues(L){
   const n = 2 ** L - 1, v = Array(n);
   let c = 1;
-  for (let d = L - 1; d >= 0; d--) for (const i of atLevel(d, n)) v[i] = c++;
+  for (let d = L - 1; d >= 0; d--) for (const i of atLevel(d, n)) v[i] = vecOf(c++);
   return v;
 }
+const randValues = () => slideValues(L).map(() => Array.from({length: D}, () => 1 + Math.floor(Math.random() * (D === 1 ? 20 : 9))));
 
 function simulate(v){
-  const n = v.length, total = v.reduce((a, b) => a + b, 0);
+  const n = v.length, total = v.reduce(add);
   let cur = {v: [...v], cov: v.map(() => 1), full: v.map(() => false), msgs: [], phase: 'start'};
   const out = [cur];
   for (let d = L - 2; d >= 0; d--){            // reduce: level d adds in its children's partial sums
     const nx = {v: [...cur.v], cov: [...cur.cov], full: [...cur.full], msgs: [], phase: 'reduce', d};
     for (const i of atLevel(d, n)) for (const c of kids(i)){
       nx.msgs.push({from: c, to: i, v: cur.v[c]});
-      nx.v[i] += cur.v[c]; nx.cov[i] += cur.cov[c];
+      nx.v[i] = add(nx.v[i], cur.v[c]); nx.cov[i] += cur.cov[c];
     }
     nx.full[0] = d === 0;
     out.push(cur = nx);
@@ -108,19 +116,21 @@ function simulate(v){
 }
 
 // ===== drawing ==============================================================
-const BW = 70, BH = 50, LEAFGAP = 86, LEVH = 104, TOP = 16;
+const CELL = 32, BH = 50, LEVH = 104, TOP = 16;
+const bw = () => D === 1 ? 70 : D * CELL + 12, gap = () => bw() + 16;
 function layout(){
+  const BW = bw(), LEAFGAP = gap();
   const n = 2 ** L - 1, leaves = 2 ** (L - 1), pos = Array(n);
-  atLevel(L - 1, n).forEach((i, j) => pos[i] = {x: 50 + j * LEAFGAP, y: TOP + (L - 1) * LEVH});
+  atLevel(L - 1, n).forEach((i, j) => pos[i] = {x: BW / 2 + 15 + j * LEAFGAP, y: TOP + (L - 1) * LEVH});
   for (let d = L - 2; d >= 0; d--) for (const i of atLevel(d, n)){
     const [a, b] = kids(i);
     pos[i] = {x: (pos[a].x + pos[b].x) / 2, y: TOP + d * LEVH};
   }
-  return {pos, W: 100 + (leaves - 1) * LEAFGAP, H: TOP + (L - 1) * LEVH + BH + 16};
+  return {pos, W: BW + 30 + (leaves - 1) * LEAFGAP, H: TOP + (L - 1) * LEVH + BH + 16};
 }
 
 function draw(k, animate){
-  const st = states[k], {pos, W, H} = layout(), n = st.v.length;
+  const st = states[k], {pos, W, H} = layout(), n = st.v.length, BW = bw();
   const got = new Set(st.msgs.map(m => m.to)), sent = new Set(st.msgs.map(m => m.from));
   const on = new Set(st.msgs.map(m => Math.max(m.from, m.to)));          // edge named by its child
   const fresh = animate ? ' arrive' : '';
@@ -133,24 +143,27 @@ function draw(k, animate){
   for (const m of st.msgs){
     const c = pos[Math.max(m.from, m.to)], p = pos[Math.min(m.from, m.to)];
     const mx = (p.x + c.x) / 2, my = (p.y + BH + c.y) / 2, right = c.x > p.x;
-    h += `<text class="msg" x="${mx + (right ? 10 : -10)}" y="${my}" text-anchor="${right ? 'start' : 'end'}">${st.phase === 'reduce' ? '↑' : '↓'} ${m.v}</text>`;
+    h += `<text class="msg" x="${mx + (right ? 10 : -10)}" y="${my}" text-anchor="${right ? 'start' : 'end'}">${st.phase === 'reduce' ? '↑' : '↓'} ${fmt(m.v)}</text>`;
   }
   for (let i = 0; i < n; i++){
     const {x, y} = pos[i], cls = ['box', st.full[i] ? 'full' : '', got.has(i) ? 'got' : '', sent.has(i) ? 'sent' : ''].join(' ');
     const who = st.full[i] ? 'total' : st.cov[i] > 1 ? `sum of ${st.cov[i]}` : '';
     h += `<rect class="${cls}" x="${x - BW / 2}" y="${y}" width="${BW}" height="${BH}" rx="4"/>
-          <text class="val${got.has(i) ? fresh : ''}" x="${x}" y="${y + 25}">${st.v[i]}</text>
+          ${D === 1 ? `<text class="val${got.has(i) ? fresh : ''}" x="${x}" y="${y + 25}">${st.v[i][0]}</text>`
+            : st.v[i].map((u, j) => { const cx = x - BW / 2 + 6 + j * CELL;
+                return `<rect x="${cx}" y="${y + 7}" width="${CELL}" height="24" style="fill:none;stroke:var(--line)"/>
+                  <text class="val${got.has(i) ? fresh : ''}" x="${cx + CELL / 2}" y="${y + 24}" style="font-size:13px">${u}</text>`; }).join('')}
           <text class="who${got.has(i) ? fresh : ''}" x="${x}" y="${y + 41}">${who}</text>`;
   }
   if (animate) for (const m of st.msgs){
     const a = pos[m.from], b = pos[m.to], up = st.phase === 'reduce';
-    h += packet(`M${a.x},${a.y + (up ? 0 : BH)} L${b.x},${b.y + (up ? BH : 0)}`, m.v);
+    h += packet(`M${a.x},${a.y + (up ? 0 : BH)} L${b.x},${b.y + (up ? BH : 0)}`, fmt(m.v));
   }
   $('svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
   $('svg').style.maxWidth = `${1.5 * W}px`; $('svg').style.margin = '0 auto';
   $('svg').innerHTML = h;
 
-  const total = states[0].v.reduce((a, b) => a + b, 0), last = states.length - 1;
+  const total = fmt(states[0].v.reduce(add)), last = states.length - 1;
   const tag = p => `<span class="phase${st.phase === p ? ' on' : ''}">${p}</span>`;
   let msg;
   if (st.phase === 'start')
@@ -182,7 +195,8 @@ const P = AR.player(() => states.length, draw);
 function rebuild(v){ P.stop(); values = v; states = simulate(values); costText(); P.go(0); }
 $('levels').addEventListener('change', e => { L = +e.target.value; rebuild(slideValues(L)); });
 $('orig').addEventListener('click', () => rebuild(slideValues(L)));
-$('rand').addEventListener('click', () => rebuild(slideValues(L).map(() => 1 + Math.floor(Math.random() * 20))));
+$('dim').addEventListener('change', e => { D = +e.target.value; rebuild(slideValues(L)); });
+$('rand').addEventListener('click', () => rebuild(randValues()));
 rebuild(slideValues(L));
 </script>
 </body>
