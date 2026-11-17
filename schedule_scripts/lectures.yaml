@@ -10,7 +10,7 @@
   - density-vs-naive-bayes.pptx
   - chincilla-scaling.pptx
   - bigdata-and-naive-bayes.pptx
-  - '* HW 1 out - Scalable Entity Resolution and Naive Bayes'
+  - '* <a href="https://github.com/10605/F26_HW1/archive/refs/tags/hw1.zip">HW 1 out - Scalable Entity Resolution and Naive Bayes</a>'
 
 - title: 'Map-Reduce and Spark'
   summary: 'Development of Map-Reduce, Spark, and Polars'
@@ -23,11 +23,14 @@
     - spark-overview-short.pptx
     - polars-overview.pptx
 
-- title: 'Recitation 1: Python Polars'
+- title: >-
+    Recitation 1: Python Polars
+    <a href="https://drive.google.com/file/d/14nkg3EnnYxNbca15NpZcxDpftajr-Rnk/view?usp=sharing">/ Polars Essentials (part 2)</a>
+    <a href="https://colab.research.google.com/drive/1zZi9C-Pyr_0Ib5SbWLyhKysSkkvkgvyQ?usp=sharing">/ Colab Notebook</a>
+    <a href="https://colab.research.google.com/drive/1YPBin0bqKKr9ZTX4rFDFOufKdSKGPq60?usp=sharing">/ Colab Notebook Solutions</a>
+    <a href="https://docs.google.com/presentation/d/1bsa8uggmpDp4w6h2pbhiZj8_NQv2cq4W/edit?usp=sharing&ouid=112869297892034233698&rtpof=true&sd=true">/ Slides</a>
   summary: 'An introduction to using Databricks and PySpark, with coding demo.'
   type: recitation
-  content:
-  - polars-recitation-resources
 
 ########## Map/Reduce Workflows
 
@@ -54,11 +57,12 @@
   - iterative-pagerank-in-polars.pptx
 
 
-- title: 'Recitation 2: Linear Algebra Review' #TODO: Torch?
+- title: >-
+    Recitation 2: Linear Algebra Review
+    <a href="https://drive.google.com/file/d/1pm3WcWC0BQjA9xBRboYhl6ACZWl66bOq/view?usp=sharing">/ Slides</a>
+    <a href="https://drive.google.com/file/d/1kSzc7ErlP_oy35s4nolSR4_VWS4g0tg7/view?usp=sharing">/ Notebook</a>
   summary: 'A brief recap of important Linear Algebra Concepts that will be important for the course.'
   type: recitation
-  content:
-  - linear-algebra-recitation-resources
 
 ########## Learning as (Parallel) Optimization
 
@@ -76,13 +80,13 @@
   - hyperparam-intro.pptx
   - linreg-to-logreg-sgd.pptx
   - '* HW 1 Slot A due'
-  - '* HW 2 out - Parallel Linear Regression'
+  - '* <a href="https://github.com/10605/F26_HW2/archive/refs/tags/hw2.zip">HW 2 out - Parallel Linear Regression</a>'
 
-- title: 'Recitation 3: PyTorch<br/>HW1 Writing Session'
+- title: >-
+    Recitation 3: PyTorch<br/>HW1 Writing Session
+    <a href="https://drive.google.com/file/d/1tG6njfD0vf59esz7x4y03efFUzpS0XTl/view?usp=sharing">/ Notebook</a>
   type: recitation
   summary: ''
-  content:
-  - hw1-writing-session-resources
 
 ########## Optimization, Randomized Algs
 
@@ -116,11 +120,12 @@
   - bloom-filter-countmin-recap.pptx
   - '* HW1 Slot B due'
 
-- title: 'Recitation 4: Probability, Evaluation Metrics and Minhashing'
+- title: >-
+    Recitation 4: Probability, Evaluation Metrics and Minhashing
+    <a href="https://docs.google.com/presentation/d/1ofudR_4NZt7WKVnDhqEvbGgBnB0TyYHgBFLVtc48hsQ/edit?usp=sharing">/ Slides</a>
+    <a href="https://drive.google.com/file/d/1xxJQgFe1EcsD-2OvDIRp647URBeCRn4p/view?usp=sharing">/ PDF Handout</a>
   type: recitation
   summary: Review of topics for Homework 3
-  content:
-   - recitation-3.pptx
 
 ########## Randomized Algs
 
@@ -143,7 +148,7 @@
   pptx_link: 
   slide_link: 
   content:
-  - '* HW 3 out - Locality-Sensitive Hashing'
+  - '* <a href="https://github.com/10605/F26_HW3/archive/refs/tags/hw3.zip">HW 3 out - Locality-Sensitive Hashing</a>'
 
 ########## Week Autodiff and GPUs
 
@@ -204,7 +209,7 @@
   content:
     - evolution-of-transformers-summary.pptx
     - transformer.pptx
-    - '* HW 4 out - LoRA'
+    - '* <a href="https://github.com/10605/F26_HW4/archive/refs/tags/hw4v2.zip">HW 4 out - LoRA</a>'
     - '* Miniproject: open-ended miniproject proposals due Thu Oct 22'
 
 - title: 'No Recitation'
@@ -261,7 +266,7 @@
     - pruning.pptx
     - kv-cache-transformer-start.pptx
     - '* HW 4 Slot A due'
-    - '* HW 5 out - GPT-2 Training'
+    - '* <a href="https://github.com/10605/F26_HW5/archive/refs/tags/hw5.zip">HW 5 out - GPT-2 Training</a>'
     - '* Miniproject: Structured miniproject details released'
 
 - title: HW4 Writing Session

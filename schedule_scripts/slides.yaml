@@ -63,13 +63,6 @@ mf-images-and-text-kmeans.pptx:
   num_slides: 6
   summary: relating mf to k-means, and how to use it for images
 
-recitation-3.pptx:
-  num_slides: 0
-  summary: recitation slides, probably an error
-  links:
-  - https://docs.google.com/presentation/d/1vh5VvrEiPhgjTbBkch8pDVfEQQLXnflWe4WOhdJ9s44/edit: Slides
-  - https://drive.google.com/file/d/1xxJQgFe1EcsD-2OvDIRp647URBeCRn4p/view?usp=sharing: PDF Handout
-
 michiel-guest-lecture.pptx:
   num_slides: 30
   summary: FiD, FiDO, etc
@@ -1168,28 +1161,6 @@ polars-overview.pptx:
   summary: Polars walkthrough
   links:
   - https://docs.pola.rs/user-guide/getting-started: Polars Getting Started Tutorial
-
-polars-recitation-resources:
-  num_slides: 0
-  summary: Polars recitation resources
-  links:
-  - https://drive.google.com/file/d/14nkg3EnnYxNbca15NpZcxDpftajr-Rnk/view?usp=sharing: Polars Essentials (part 2)
-  - https://colab.research.google.com/drive/1zZi9C-Pyr_0Ib5SbWLyhKysSkkvkgvyQ?usp=sharing: Colab Notebook
-  - https://colab.research.google.com/drive/1YPBin0bqKKr9ZTX4rFDFOufKdSKGPq60?usp=sharing: Colab Notebook Solutions
-  - https://docs.google.com/presentation/d/1bsa8uggmpDp4w6h2pbhiZj8_NQv2cq4W/edit?usp=sharing&ouid=112869297892034233698&rtpof=true&sd=true: Slides
-
-linear-algebra-recitation-resources:
-  num_slides: 0
-  summary: Linear algebra recitation resources
-  links:
-  - https://drive.google.com/file/d/1pm3WcWC0BQjA9xBRboYhl6ACZWl66bOq/view?usp=sharing: Slides
-  - https://drive.google.com/file/d/1kSzc7ErlP_oy35s4nolSR4_VWS4g0tg7/view?usp=sharing: Notebook
-
-hw1-writing-session-resources:
-  num_slides: 0
-  summary: HW1 writing session resources
-  links:
-  - https://drive.google.com/file/d/1tG6njfD0vf59esz7x4y03efFUzpS0XTl/view?usp=sharing: Notebook
 
 chincilla-scaling.pptx:
   num_slides: 7
