@@ -320,9 +320,12 @@
 
 - title: Guest Lecture - Leo Boytsov - Robustness, Generalization, and Practical Limits of Deep Learning, A Practitioner’s Perspective
   content:
+   - leonid_boytsov.dummy
+   - allreduce.pptx
+   - fido-etc.pptx
+   - fid-genllm.pptx
    - '* HW5 Slot A due'
    - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
-  
 
 - title: HW5 Writing Session
   type: recitation

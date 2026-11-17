@@ -110,9 +110,11 @@ task-vectors.pptx:
     - https://www.researchgate.net/profile/Leshem-Choshen-2/publication/371291070_Resolving_Interference_When_Merging_Models/links/6481cc4a79a722376518d1d6/Resolving-Interference-When-Merging-Models.pdf: TIES-merging paper, 2023
     - https://arxiv.org/pdf/2307.13269: LoRA hub paper, 2024
     - https://arxiv.org/pdf/2402.05859: PHATGOOSE paper, 2024
+
 rag-fid-recap.pptx:
   num_slides: 25
   summary: recap DPR, Contreiver, RAG, FiD, FiDO, LUMEN, and present GLIMMER
+
 fid-genllm.pptx:
   num_slides: 10
   summary: PCW, up thru dynamic block-sparse attention
@@ -502,9 +504,23 @@ tree-allreduce.pptx:
   links:
   - https://www.jmlr.org/papers/volume15/agarwal14a/agarwal14a.pdf:
       Agarwal et al, A Reliable Effective Terascale Linear Learning System
+
 allreduce.pptx:
-  num_slides: 14
-  summary: All-reduce
+  num_slides: 4
+  summary: Tree vs Ring all-reduce
+  links:
+   - https://www.jmlr.org/papers/volume15/agarwal14a/agarwal14a.pdf: Agarwal et al, A Reliable Effective Terascale Linear Learning System
+   - https://10605.github.io/viz/allreduce-tree.html: Tree AllReduce visualization
+   - https://10605.github.io/viz/allreduce-ring.html: Ring AllReduce visualization
+   - https://tpu-visualizer.uc.r.appspot.com/?platform=viperfish&topo=4x4x4: Viperfish TPU topology visualization
+
+leonid_boytsov.dummy:
+  summary: guest lecture
+  links:
+   - https://arxiv.org/abs/1312.6199: Intriguing properties of neural networks, Szegedy et al, 2014
+   - https://arxiv.org/abs/2307.02483: 'Jailbroken: How Does LLM Safety Training Fail?, Wei et al, 2023'
+   - https://arxiv.org/abs/2207.01262: 'Positional Bias in Long-Document Ranking: Impact, Assessment, and Mitigation, Boytsov et al, 2022'
+
 autodiff-details.pptx:
   num_slides: 4
   summary: '!deep !autodiff | Inputs, parameters, updates'
