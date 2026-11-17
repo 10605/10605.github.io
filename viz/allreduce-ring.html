@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring All-Reduce</title>
+<link rel="stylesheet" href="allreduce.css">
+<script src="allreduce.js"></script>
+<style>
+  /* one color per worker, used for its frame and for its share of every chunk */
+  :root { --w0: #2f6fd0; --w1: #c03f86; --w2: #3a8a35; --w3: #e8710a; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --w0: #6fa3f0; --w1: #ee7fbd; --w2: #7cc96f; --w3: #ff9f43; } }
+  :root[data-theme="dark"] { --w0: #6fa3f0; --w1: #ee7fbd; --w2: #7cc96f; --w3: #ff9f43; }
+  .src { stroke: var(--line); stroke-width: .6; fill: var(--surface); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Ring all-reduce</h1>
+  <p>Each of <i>n</i> workers holds a vector, and <b>all-reduce</b> must leave every worker with the
+    elementwise sum. The workers form a ring in which each one sends only to its successor. Each vector is cut into
+    <i>n</i> <b>chunks</b>, and every worker sends one chunk at every step, so every link in the ring is
+    busy all the time.</p>
+  <p><b>Scatter-reduce</b> (<i>n</i>−1 steps): each worker passes a chunk to its successor, which adds it to its
+    own copy of that chunk. The chunks travel around the ring picking up one more term per step, and afterwards
+    each worker holds one chunk that is fully summed. <b>All-gather</b> (<i>n</i>−1 more steps): the finished
+    chunks travel around the ring the same way, but now each receiver simply overwrites its copy.</p>
+  <p>Compare <a href="allreduce-tree.html">tree all-reduce</a>.</p>
+</header>
+
+<div class="card">
+  <div class="setup">
+    <label>Workers <i>n</i> <select id="n"><option>3</option><option selected>4</option></select></label>
+    <button id="rand">Random values</button>
+    <button id="orig">Values from the slides</button>
+    <span>The colored bar under each value shows which workers' data it already includes. Before each step,
+      a pair of arrows in the sender's color shows each chunk about to leave one worker and enter the next.</span>
+  </div>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Back one step (←)">◀ Back</button>
+  <button id="step" class="primary" title="Forward one step (→)">Step ▶</button>
+  <button id="play">Play</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Step">
+  <span class="k" id="kv"></span>
+  <label class="speed">Speed <select id="speed"><option value="1">normal</option><option value="2.5">slow</option><option value="5">very slow</option></select></label>
+</div>
+<p class="status" id="status"></p>
+
+<div class="card diagram">
+  <svg id="svg" role="img" aria-label="Workers on a ring, each holding a vector split into chunks"></svg>
+</div>
+
+<div class="lower">
+  <div class="card">
+    <h2>Who sends which chunk</h2>
+    <div class="scroll"><table id="tbl"></table></div>
+  </div>
+  <div class="card">
+    <h2>Cost</h2>
+    <p id="cost"></p>
+  </div>
+</div>
+
+<footer>
+  <p>At scatter-reduce step <i>s</i> = 1, …, <i>n</i>−1, worker <i>i</i> (A = 0, B = 1, …) sends chunk (<i>s</i> − 1 − <i>i</i>) mod <i>n</i>;
+    at all-gather step <i>s</i> it sends chunk (<i>s</i> − 2 − <i>i</i>) mod <i>n</i>, starting with the chunk it
+    finished. So each worker's chunk moves one place to the right per step. (The lecture slides use the mirror-image
+    schedule, (<i>i</i> − <i>s</i> + 1) mod <i>n</i>, which moves left; either works, as long as the chunk a worker
+    sends next is the one it just received.) A shaded cell is fully summed. The default values for four workers, and the layout, follow the
+    lecture slides, which are based on
+    <a href="https://towardsdatascience.com/visual-intuition-on-ring-allreduce-for-distributed-deep-learning-d1f34b4911da">Visual
+    intuition on ring-allreduce for distributed deep learning</a>.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const {$, packet} = AR;
+const SLIDES = [[17, 11, 1, 9], [5, 13, 23, 14], [3, 6, 10, 8], [12, 7, 2, 12]];
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+const name = i => String.fromCharCode(65 + i), letter = i => String.fromCharCode(97 + i);
+const mod = (a, n) => ((a % n) + n) % n;
+let n = 4, states = [];
+
+// ===== the algorithm ========================================================
+// which chunk worker i sends at a given phase and step s (1-based)
+// each worker moves one chunk to the right per step (the slides' version moves left: i - s + 1)
+const chunkSent = (phase, i, s) => mod(phase === 'scatter' ? s - 1 - i : s - 2 - i, n);
+
+function simulate(vals){
+  const full = (1 << n) - 1;
+  let cur = {w: vals.map((row, i) => row.map(v => ({v, mask: 1 << i}))), msgs: [], phase: 'start'};
+  const out = [cur];
+  for (const phase of ['scatter', 'gather']) for (let s = 1; s < n; s++){
+    const nx = {w: cur.w.map(row => row.map(c => ({...c}))), msgs: [], phase, s};
+    for (let i = 0; i < n; i++){
+      const j = (i + 1) % n, c = chunkSent(phase, i, s), x = cur.w[i][c];
+      nx.msgs.push({from: i, to: j, c, ...x});
+      nx.w[j][c] = phase === 'scatter' ? {v: x.v + cur.w[j][c].v, mask: x.mask | cur.w[j][c].mask} : {...x};
+    }
+    out.push(cur = nx);
+  }
+  out.full = full;
+  return out;
+}
+
+// ===== drawing ==============================================================
+const CW = 46, CH = 42, PAD = 8, TITLE = 24;
+const bw = () => n * CW + 2 * PAD, BH = TITLE + CH + PAD + 4;
+const RX = () => 170 + 20 * n, RY = () => 160 + 10 * n, MX = () => RX() + bw() / 2 + 110, MY = () => RY() + BH / 2 + 40;
+const ang = i => 2 * Math.PI * i / n;
+const pt = (t, s = 1) => ({x: MX() + s * RX() * Math.sin(t), y: MY() - s * RY() * Math.cos(t)});
+// workers on the lower half of the ring put their title under the cells, out of the arrows' way
+const below = i => Math.cos(ang(i)) < -0.1;
+const cellXY = (i, c) => { const p = pt(ang(i)); return {x: p.x - bw() / 2 + PAD + c * CW, y: p.y - BH / 2 + (below(i) ? PAD + 2 : TITLE)}; };
+const wc = i => `var(--w${i})`;
+// a row of n small boxes, box j filled in worker j's color once j's data is included
+const bar = (x, y, mask, cls) => `<g class="${cls}">${[...Array(n).keys()].map(j => { const w = (CW - 12) / n;
+  return `<rect class="src" x="${x + 6 + j * w}" y="${y}" width="${w}" height="7"${mask >> j & 1 ? ` style="fill:${wc(j)}"` : ''}/>`; }).join('')}</g>`;
+const term = (mask, c, full) => mask === full ? `r${SUB[c]}` : [...Array(n).keys()].filter(i => mask >> i & 1).map(i => `<tspan style="fill:${wc(i)}">${letter(i) + SUB[c]}</tspan>`).join('+');
+
+// unit tangent to the ring at angle t, pointing in the direction data travels
+const tangent = t => { const dx = RX() * Math.cos(t), dy = RY() * Math.sin(t), L = Math.hypot(dx, dy); return {ux: dx / L, uy: dy / L}; };
+// triangular arrowhead with its tip at (x, y), pointing along (ux, uy)
+const head = (x, y, ux, uy, l = 11, w = 5) => `M${x},${y} L${x - l * ux - w * uy},${y - l * uy + w * ux} L${x - l * ux + w * uy},${y - l * uy - w * ux} Z`;
+// An arrow for one message, drawn at cell c of worker i in the color `col`. Outgoing (out = true) leaves the
+// cell heading toward the next worker; incoming ends at the cell, arriving from the direction of the previous one.
+function cellArrow(i, c, out, col, cls){
+  const {x, y} = cellXY(i, c), cx = x + CW / 2, cy = y + CH / 2, LEN = 52;
+  const o = pt(ang(out ? i + 1 : i - 1)), d = out ? 1 : -1;
+  // aim at the neighbor, but steeply, so the arrow uses the cell's top or bottom edge, away from the title
+  const side = below(i) ? -1 : Math.cos(ang(i)) > 0.1 ? 1 : 0;
+  let ux = d * (o.x - cx), uy = d * (o.y - cy), L = Math.hypot(ux, uy);
+  ux /= L; uy /= L;
+  uy = (side ? (out ? side : -side) : Math.sign(uy) || 1) * Math.max(Math.abs(uy), .75);
+  L = Math.hypot(ux, uy); ux /= L; uy /= L;
+  // touch the middle of the cell's top or bottom edge: the one the arrow leaves through, or arrives at
+  const ey = cy + (uy > 0 === out ? 1 : -1) * (CH / 2 + 1);
+  const x0 = out ? cx : cx - LEN * ux, y0 = out ? ey : ey - LEN * uy;
+  const x1 = x0 + LEN * ux, y1 = y0 + LEN * uy;
+  return `<g class="${cls}"><line x1="${x0}" y1="${y0}" x2="${x1 - 6 * ux}" y2="${y1 - 6 * uy}" style="stroke:${col};stroke-width:2.5"/>
+    <path d="${head(x1, y1, ux, uy, 10, 5)}" style="fill:${col}"/></g>`;
+}
+
+function arc(i){                 // path along the ellipse from worker i to worker i+1
+  const a = pt(ang(i)), b = pt(ang(i + 1));
+  return `M${a.x},${a.y} A${RX()},${RY()} 0 0 1 ${b.x},${b.y}`;
+}
+
+function draw(k, animate){
+  const st = states[k], full = states.full, W = 2 * MX(), H = 2 * MY();
+  const got = new Set(st.msgs.map(m => `${m.to},${m.c}`)), sent = new Set(st.msgs.map(m => `${m.from},${m.c}`));
+  let h = '';
+  // ring links, with an arrowhead at each midpoint
+  for (let i = 0; i < n; i++){
+    const on = st.msgs.length > 0, tm = ang(i + .5), p = pt(tm), {ux, uy} = tangent(tm);
+    h += `<path class="edge${on ? ' on' : ''}" d="${arc(i)}"/>
+          <path d="${head(p.x + 6 * ux, p.y + 6 * uy, ux, uy)}" style="fill:${on ? 'var(--hit)' : 'var(--line)'}"/>`;
+  }
+  // what each link carried this step, outside the ring
+  for (const m of st.msgs){
+    const p = pt(ang(m.from + .5), 1.1), right = p.x > MX() + 5, left = p.x < MX() - 5;
+    h += `<text class="msg" x="${p.x}" y="${p.y + 4}" text-anchor="${right ? 'start' : left ? 'end' : 'middle'}">${term(m.mask, m.c, full)} = ${m.v}</text>`;
+  }
+  for (let i = 0; i < n; i++){
+    const p = pt(ang(i));
+    h += `<rect class="box" x="${p.x - bw() / 2}" y="${p.y - BH / 2}" width="${bw()}" height="${BH}" rx="6"
+            style="stroke:${wc(i)};stroke-width:2;fill:color-mix(in srgb, ${wc(i)} 8%, var(--surface))"/>
+          <text x="${p.x}" y="${below(i) ? p.y + BH / 2 - 9 : p.y - BH / 2 + 17}" text-anchor="middle" style="font-weight:600;fill:${wc(i)}">Worker ${name(i)}</text>`;
+    st.w[i].forEach((cell, c) => {
+      const {x, y} = cellXY(i, c), key = `${i},${c}`, fresh = animate && got.has(key) ? ' arrive' : '';
+      const cls = ['box', cell.mask === full ? 'full' : '', got.has(key) ? 'got' : '', sent.has(key) ? 'sent' : ''].join(' ');
+      h += `<rect class="${cls}" x="${x + 2}" y="${y}" width="${CW - 4}" height="${CH}" rx="3"/>
+            <text class="val${fresh}" x="${x + CW / 2}" y="${y + 21}" style="font-size:15px">${cell.v}</text>
+            ${bar(x, y + 29, cell.mask, fresh)}`;
+    });
+  }
+  // the next step's donor (outgoing) and recipient (incoming) cells
+  if (k + 1 < states.length) for (const m of states[k + 1].msgs)
+    h += cellArrow(m.from, m.c, true, wc(m.from), animate ? 'arrive' : '') + cellArrow(m.to, m.c, false, wc(m.from), animate ? 'arrive' : '');
+  if (animate) for (const m of st.msgs){
+    const a = cellXY(m.from, m.c), b = cellXY(m.to, m.c), d = 0.32 * 4 / n;
+    const s = pt(ang(m.from) + d), e = pt(ang(m.from + 1) - d);
+    h += packet(`M${a.x + CW / 2},${a.y + CH / 2} L${s.x},${s.y} A${RX()},${RY()} 0 0 1 ${e.x},${e.y} L${b.x + CW / 2},${b.y + CH / 2}`, m.v);
+  }
+  $('svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  $('svg').innerHTML = h;
+
+  const tag = (p, label) => `<span class="phase${st.phase === p ? ' on' : ''}">${label}</span>`;
+  let msg;
+  if (st.phase === 'start')
+    msg = `Each worker's vector is split into ${n} chunks, numbered 0 to ${n - 1}. The goal: every worker ends with
+      r<sub><i>c</i></sub> = ${[...Array(n).keys()].map(i => `<span style="color:${wc(i)}">${letter(i)}<sub><i>c</i></sub></span>`).join(' + ')} in every chunk <i>c</i>.`;
+  else if (st.phase === 'scatter')
+    msg = `<b>Scatter-reduce, step ${st.s} of ${n - 1}:</b> every worker sends one chunk to its successor, which adds it
+      to its own copy of that chunk. ${st.s === n - 1 ? 'Each worker now holds one fully summed chunk (shaded).' : `Each sent chunk now includes ${st.s + 1} workers' data.`}`;
+  else
+    msg = `<b>All-gather, step ${st.s} of ${n - 1}:</b> every worker passes a finished chunk to its successor, which
+      overwrites its copy. ${k === states.length - 1 ? 'Every worker now holds every summed chunk: all-reduce is done.' : ''}`;
+  $('status').innerHTML = `${tag('scatter', 'scatter-reduce')}${tag('gather', 'all-gather')} ${msg}`;
+
+  $('tbl').innerHTML = `<tr><th>step</th>${[...Array(n).keys()].map(i => `<th>${name(i)}→${name((i + 1) % n)}</th>`).join('')}</tr>` +
+    states.slice(1).map((s, j) => `<tr${j + 1 === k ? ' class="cur"' : ''}><td>${s.phase === 'scatter' ? 'scatter' : 'gather'} ${s.s}</td>${
+      s.msgs.map(m => `<td>chunk ${m.c}</td>`).join('')}</tr>`).join('');
+}
+
+function costText(){
+  $('cost').innerHTML = `With a vector of <i>N</i> numbers, each chunk has <i>N</i>/${n}. There are 2(<i>n</i>−1) = ${2 * (n - 1)}
+    steps, and in each one every worker sends and receives one chunk, so each worker sends
+    2(<i>n</i>−1)·<i>N</i>/<i>n</i> = ${(2 * (n - 1) / n).toFixed(2)}·<i>N</i> numbers in all. That is less than 2<i>N</i>
+    however many workers there are, and the load is spread evenly over every link. In
+    <a href="allreduce-tree.html">tree all-reduce</a> each message is the whole vector, so an interior node sends
+    3<i>N</i>, but it needs only about 2·log<sub>2</sub> <i>n</i> steps. Ring all-reduce trades more, smaller
+    steps (latency) for less traffic per worker (bandwidth), which wins for large vectors such as the gradients of a
+    deep network.`;
+}
+
+// ===== wiring ===============================================================
+const P = AR.player(() => states.length, draw);
+const randVals = () => Array.from({length: n}, () => Array.from({length: n}, () => 1 + Math.floor(Math.random() * 25)));
+function rebuild(vals){ P.stop(); states = simulate(vals); costText(); P.go(0); }
+const defaults = () => n === 4 ? SLIDES : randVals();
+$('n').addEventListener('change', e => { n = +e.target.value; rebuild(defaults()); });
+$('orig').addEventListener('click', () => { n = 4; $('n').value = 4; rebuild(SLIDES); });
+$('rand').addEventListener('click', () => rebuild(randVals()));
+rebuild(SLIDES);
+</script>
+</body>
+</html>

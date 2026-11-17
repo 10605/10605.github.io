@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tree All-Reduce</title>
+<link rel="stylesheet" href="allreduce.css">
+<script src="allreduce.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Tree all-reduce</h1>
+  <p>Every worker holds a local value (in practice, a whole vector of parameter updates). <b>All-reduce</b>
+    leaves <i>every</i> worker holding the sum of all of them, so all workers can continue from the same
+    shared parameters. With the workers arranged in a spanning tree, all-reduce is a <b>reduce</b>
+    (partial sums flow up, one level per step, until the root has the total) followed by a
+    <b>broadcast</b> (the total flows back down). This is the scheme used by Vowpal Wabbit's
+    Hadoop-compatible AllReduce.</p>
+  <p>Compare <a href="allreduce-ring.html">ring all-reduce</a>, which splits the vector into chunks so
+    every link is busy at every step.</p>
+</header>
+
+<div class="card">
+  <div class="setup">
+    <label>Workers <select id="levels"><option value="3">7 (3 levels)</option><option value="4">15 (4 levels)</option></select></label>
+    <button id="rand">Random values</button>
+    <button id="orig">Values from the slides</button>
+  </div>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Back one step (←)">◀ Back</button>
+  <button id="step" class="primary" title="Forward one step (→)">Step ▶</button>
+  <button id="play">Play</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Step">
+  <span class="k" id="kv"></span>
+  <label class="speed">Speed <select id="speed"><option value="1">normal</option><option value="2.5">slow</option><option value="5">very slow</option></select></label>
+</div>
+<p class="status" id="status"></p>
+
+<div class="card diagram">
+  <svg id="svg" role="img" aria-label="Workers arranged in a binary tree, with the values they hold"></svg>
+</div>
+
+<div class="lower">
+  <div class="card">
+    <h2>Cost</h2>
+    <p id="cost"></p>
+  </div>
+  <div class="card">
+    <h2>Steps</h2>
+    <div class="scroll"><table id="tbl"></table></div>
+  </div>
+</div>
+
+<footer>
+  <p>Nodes are numbered bottom-up as on the lecture slides, so with 7 workers they start with 1…7 and
+    finish with 1 + 2 + … + 7 = 28. The root is a worker too: it adds its own value to its children's
+    partial sums. A shaded box holds the total.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const {$, packet} = AR;
+let L = 3, values = null, states = [];
+
+// ===== the algorithm ========================================================
+const kids = i => [2 * i + 1, 2 * i + 2];
+const level = i => Math.floor(Math.log2(i + 1));
+const atLevel = (d, n) => [...Array(n).keys()].filter(i => level(i) === d);
+
+// bottom-up numbering: the deepest level gets 1, 2, ..., then the level above, and so on
+function slideValues(L){
+  const n = 2 ** L - 1, v = Array(n);
+  let c = 1;
+  for (let d = L - 1; d >= 0; d--) for (const i of atLevel(d, n)) v[i] = c++;
+  return v;
+}
+
+function simulate(v){
+  const n = v.length, total = v.reduce((a, b) => a + b, 0);
+  let cur = {v: [...v], cov: v.map(() => 1), full: v.map(() => false), msgs: [], phase: 'start'};
+  const out = [cur];
+  for (let d = L - 2; d >= 0; d--){            // reduce: level d adds in its children's partial sums
+    const nx = {v: [...cur.v], cov: [...cur.cov], full: [...cur.full], msgs: [], phase: 'reduce', d};
+    for (const i of atLevel(d, n)) for (const c of kids(i)){
+      nx.msgs.push({from: c, to: i, v: cur.v[c]});
+      nx.v[i] += cur.v[c]; nx.cov[i] += cur.cov[c];
+    }
+    nx.full[0] = d === 0;
+    out.push(cur = nx);
+  }
+  for (let d = 1; d < L; d++){                 // broadcast: level d receives the total from its parent
+    const nx = {v: [...cur.v], cov: [...cur.cov], full: [...cur.full], msgs: [], phase: 'broadcast', d};
+    for (const i of atLevel(d, n)){
+      const p = (i - 1) >> 1;
+      nx.msgs.push({from: p, to: i, v: total});
+      nx.v[i] = total; nx.cov[i] = n; nx.full[i] = true;
+    }
+    out.push(cur = nx);
+  }
+  return out;
+}
+
+// ===== drawing ==============================================================
+const BW = 70, BH = 50, LEAFGAP = 86, LEVH = 104, TOP = 16;
+function layout(){
+  const n = 2 ** L - 1, leaves = 2 ** (L - 1), pos = Array(n);
+  atLevel(L - 1, n).forEach((i, j) => pos[i] = {x: 50 + j * LEAFGAP, y: TOP + (L - 1) * LEVH});
+  for (let d = L - 2; d >= 0; d--) for (const i of atLevel(d, n)){
+    const [a, b] = kids(i);
+    pos[i] = {x: (pos[a].x + pos[b].x) / 2, y: TOP + d * LEVH};
+  }
+  return {pos, W: 100 + (leaves - 1) * LEAFGAP, H: TOP + (L - 1) * LEVH + BH + 16};
+}
+
+function draw(k, animate){
+  const st = states[k], {pos, W, H} = layout(), n = st.v.length;
+  const got = new Set(st.msgs.map(m => m.to)), sent = new Set(st.msgs.map(m => m.from));
+  const on = new Set(st.msgs.map(m => Math.max(m.from, m.to)));          // edge named by its child
+  const fresh = animate ? ' arrive' : '';
+  let h = '';
+  for (let i = 1; i < n; i++){
+    const p = pos[(i - 1) >> 1], c = pos[i];
+    h += `<line class="edge${on.has(i) ? ' on' : ''}" x1="${p.x}" y1="${p.y + BH}" x2="${c.x}" y2="${c.y}"/>`;
+  }
+  // message labels beside each active edge
+  for (const m of st.msgs){
+    const c = pos[Math.max(m.from, m.to)], p = pos[Math.min(m.from, m.to)];
+    const mx = (p.x + c.x) / 2, my = (p.y + BH + c.y) / 2, right = c.x > p.x;
+    h += `<text class="msg" x="${mx + (right ? 10 : -10)}" y="${my}" text-anchor="${right ? 'start' : 'end'}">${st.phase === 'reduce' ? '↑' : '↓'} ${m.v}</text>`;
+  }
+  for (let i = 0; i < n; i++){
+    const {x, y} = pos[i], cls = ['box', st.full[i] ? 'full' : '', got.has(i) ? 'got' : '', sent.has(i) ? 'sent' : ''].join(' ');
+    const who = st.full[i] ? 'total' : st.cov[i] > 1 ? `sum of ${st.cov[i]}` : '';
+    h += `<rect class="${cls}" x="${x - BW / 2}" y="${y}" width="${BW}" height="${BH}" rx="4"/>
+          <text class="val${got.has(i) ? fresh : ''}" x="${x}" y="${y + 25}">${st.v[i]}</text>
+          <text class="who${got.has(i) ? fresh : ''}" x="${x}" y="${y + 41}">${who}</text>`;
+  }
+  if (animate) for (const m of st.msgs){
+    const a = pos[m.from], b = pos[m.to], up = st.phase === 'reduce';
+    h += packet(`M${a.x},${a.y + (up ? 0 : BH)} L${b.x},${b.y + (up ? BH : 0)}`, m.v);
+  }
+  $('svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  $('svg').style.maxWidth = `${1.5 * W}px`; $('svg').style.margin = '0 auto';
+  $('svg').innerHTML = h;
+
+  const total = states[0].v.reduce((a, b) => a + b, 0), last = states.length - 1;
+  const tag = p => `<span class="phase${st.phase === p ? ' on' : ''}">${p}</span>`;
+  let msg;
+  if (st.phase === 'start')
+    msg = `Each of the ${n} workers holds its own value. Their sum is ${total}.`;
+  else if (st.phase === 'reduce')
+    msg = `<b>Reduce, level ${st.d}:</b> each child sends its partial sum up, and each node at level ${st.d}
+      adds them to its own value. ${st.d === 0 ? `The root now holds the total, ${total}.` : ''}`;
+  else
+    msg = `<b>Broadcast, level ${st.d}:</b> each node at level ${st.d} receives the total, ${total}, from its
+      parent. ${k === last ? 'Every worker now holds the total: all-reduce is done.' : ''}`;
+  $('status').innerHTML = `${tag('reduce')}${tag('broadcast')} ${msg}`;
+
+  $('tbl').innerHTML = `<tr><th>step</th><th>phase</th><th>messages</th></tr>` + states.map((s, j) =>
+    `<tr${j === k ? ' class="cur"' : ''}><td>${j}</td><td>${s.phase}${s.d != null ? ` · level ${s.d}` : ''}</td><td>${s.msgs.length}</td></tr>`).join('');
+}
+
+function costText(){
+  const n = 2 ** L - 1;
+  $('cost').innerHTML = `${2 * (L - 1)} steps for ${n} workers: 2·log<sub>2</sub>(<i>n</i>+1) − 2, so the
+    number of steps grows only logarithmically. But every message is the <i>whole</i> vector, and each
+    step uses only one level of the tree's links while the rest sit idle. An interior node
+    receives two vectors and sends one on the way up, and receives one and sends two on the way down.
+    For long vectors, bandwidth dominates, which is what <a href="allreduce-ring.html">ring all-reduce</a>
+    improves.`;
+}
+
+// ===== wiring ===============================================================
+const P = AR.player(() => states.length, draw);
+function rebuild(v){ P.stop(); values = v; states = simulate(values); costText(); P.go(0); }
+$('levels').addEventListener('change', e => { L = +e.target.value; rebuild(slideValues(L)); });
+$('orig').addEventListener('click', () => rebuild(slideValues(L)));
+$('rand').addEventListener('click', () => rebuild(slideValues(L).map(() => 1 + Math.floor(Math.random() * 20))));
+rebuild(slideValues(L));
+</script>
+</body>
+</html>
