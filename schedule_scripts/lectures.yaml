@@ -280,7 +280,7 @@
    - '* HW4 Slot B due Tue Nov 10 (tentative)'
 
 - title: Contrastive learning and retrieval
-  summary: Overvier of contrastive learning, neural retrieval, and RAG
+  summary: Overview of contrastive learning, neural retrieval, and RAG
   pptx_link: https://docs.google.com/presentation/d/1R1YaKHf-3C1wQY2oen4tuUDCpQD5jtWs/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   slide_link: https://drive.google.com/file/d/1GQdtxTDTb34HN4B0ycmMhZHbXf2nnCm0/view?usp=drive_link
   content:
@@ -303,6 +303,9 @@
 ########## RAG, Parallel Training, PPI
 
 - title: RAG / Optimizing Transformer Architectures
+  summary: Overview of end-to-end learning approaches for RAG
+  pptx_link: https://docs.google.com/presentation/d/1RRtlr8E2VeEjH7IkUn7qRRgLf1YWoY45/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1lKpQ2mgB-1u3XCWjjsNQjCRs99i5eyfv/view?usp=drive_link
   content:
     - rag-fid.pptx
     - rag-recap.pptx
