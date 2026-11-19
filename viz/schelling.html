@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schelling Segregation Model</title>
+<style>
+  /* ---- tokens: light is the base; both dark states re-declare the same names ---- */
+  :root {
+    --ground:      #eef1f3;
+    --surface:     #fbfcfd;
+    --surface-sunk:#e3e8ec;
+    --line:        #c6d0d8;
+    --ink:         #16222b;
+    --ink-soft:    #4a5b67;
+    --ink-faint:   #7b8b96;
+    --mem:         #0b6a7d;
+    --mem-soft:    #d3e7ec;
+    --grp-a:       #2b5fb8;   /* group A */
+    --hit:         #a4530c;
+    --hit-soft:    #f0dfc9;
+    --grp-b:       #c23b2e;   /* group B */
+    --focus:       #a4530c;
+    --shadow:    0 1px 2px rgba(19,38,48,.10), 0 8px 24px -16px rgba(19,38,48,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0d1519;
+      --surface:     #141f25;
+      --surface-sunk:#0a1216;
+      --line:        #2a3a43;
+      --ink:         #e6eef1;
+      --ink-soft:    #a3b4bd;
+      --ink-faint:   #6d818c;
+      --mem:         #4fc0d6;
+      --mem-soft:    #10333c;
+      --grp-a:       #5f97ec;
+      --hit:         #e09a4d;
+      --hit-soft:    #3a2a15;
+      --grp-b:       #e5675a;
+      --focus:       #e09a4d;
+      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0d1519;
+    --surface:     #141f25;
+    --surface-sunk:#0a1216;
+    --line:        #2a3a43;
+    --ink:         #e6eef1;
+    --ink-soft:    #a3b4bd;
+    --ink-faint:   #6d818c;
+    --mem:         #4fc0d6;
+    --mem-soft:    #10333c;
+    --grp-a:       #5f97ec;
+    --hit:         #e09a4d;
+    --hit-soft:    #3a2a15;
+    --grp-b:       #e5675a;
+    --focus:       #e09a4d;
+    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 56px; }
+  code { font-family: var(--mono); font-size: .9em; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 18px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 38px);
+       line-height: 1.1; margin: 0 0 8px; }
+  header p { margin: 0 0 8px; color: var(--ink-soft); max-width: 110ch; }
+  h2 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; font-weight: 600;
+       text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+          box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+  .card p { margin: 0 0 6px; font-size: 13.5px; color: var(--ink-soft); }
+  button { font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+           border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--mem); background: var(--mem-soft); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { border-color: var(--mem); }
+
+  /* ---- controls ---- */
+  .controls { display: grid; gap: 10px 22px; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); }
+  .ctl.wide { grid-column: 1 / -1; grid-template-columns: 10em minmax(0, 32em); }
+  .ctl.wide select { grid-column: 2; }
+  .ctl { display: grid; grid-template-columns: minmax(6em, 10em) minmax(0, 1fr) 3.6em; align-items: center; gap: 8px; }
+  .ctl label { font-size: 13.5px; color: var(--ink-soft); }
+  .ctl .val { font-family: var(--mono); font-size: 13px; text-align: right; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--mem); }
+  .ctl select { grid-column: 2 / 4; font: 13px var(--sans); color: var(--ink); background: var(--surface-sunk);
+                border: 1px solid var(--line); border-radius: 3px; padding: 3px 6px; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink-soft); }
+  .btnrow label { display: inline-flex; gap: 6px; align-items: center; }
+
+  /* ---- player ---- */
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 14px 0 6px; }
+  .player input[type=range] { flex: 1 1 160px; accent-color: var(--mem); }
+  .player .k { font-family: var(--mono); font-size: 13px; min-width: 9ch; }
+  .status { font-size: 14px; color: var(--ink-soft); min-height: 3em; margin: 0 0 12px; }
+  .status b { color: var(--ink); }
+
+  .main { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+  .side { display: grid; gap: 14px; min-width: 0; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { font-family: var(--sans); fill: var(--ink-soft); font-size: 11px; }
+  #board { cursor: crosshair; touch-action: none; }
+  #board .e { fill: var(--surface-sunk); }
+  #board .a { fill: var(--grp-a); }
+  #board .b { fill: var(--grp-b); }
+  #board .mv { fill: var(--ink); }
+  #board .nb { fill: none; stroke: var(--ink); stroke-width: .12; }
+  #board .me { fill: none; stroke: var(--ink); stroke-width: .2; }
+  .probe { font-size: 13.5px; color: var(--ink-soft); min-height: 2.8em; margin: 8px 0 0;
+           border-top: 1px solid var(--line); padding-top: 8px; }
+  .probe b { color: var(--ink); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; }
+  .legend > span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+  .ln { display: inline-block; width: 18px; border-top: 2px solid; }
+  .ln.dash { border-top-style: dashed; }
+
+  .axis { stroke: var(--line); }
+  .gridl { stroke: var(--line); stroke-dasharray: 2 3; }
+  .note { font-size: 12.5px !important; color: var(--ink-faint) !important; margin-top: 6px !important; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 12.5px; }
+  td { font-family: var(--mono); font-size: 13px; }
+  td:first-child { font-family: var(--sans); }
+  .tw { overflow-x: auto; }
+
+  .algo { font-family: var(--serif); font-size: 15px; line-height: 1.6; border: 1px solid var(--line);
+          padding: 10px 14px; border-radius: 3px; background: var(--surface-sunk); }
+  .algo .sc { font-variant: small-caps; }
+  .algo div { padding-left: 1.2em; }
+  .algo div.top { padding-left: 0; }
+
+  footer { margin-top: 18px; color: var(--ink-soft); font-size: 13.5px; max-width: 100ch; }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Schelling's model of segregation</h1>
+  <p>Agents of two groups, <b style="color:var(--grp-a)">A</b> and <b style="color:var(--grp-b)">B</b>, live on a grid
+    with some empty cells. Each agent looks at its (up to) eight neighbors and is <b>happy</b> if at least a fraction
+    <i>τ</i> of its occupied neighbors belong to its own group. In every round, each unhappy agent moves to an empty cell.
+    Nobody wants to be in the majority, only not to be in too small a minority, yet even a mild preference like
+    <i>τ</i> = 30% usually ends in a map where the typical agent's neighbors are 70–80% like itself:
+    the collective outcome is much more extreme than any individual's preference.</p>
+  <p>Hover over a cell to see its neighborhood. The bottom-right panel repeats the simulation for every <i>τ</i>,
+    showing where segregation sets in, and how at high <i>τ</i> the outcome depends on the move rule.</p>
+</header>
+
+<div class="card">
+  <h2>Setup</h2>
+  <div class="controls">
+    <div class="ctl"><label for="tau">Tolerance <i>τ</i> (alike ≥)</label>
+      <input id="tau" type="range" min="0" max="100" step="1" value="30"><span class="val" id="tauv"></span></div>
+    <div class="ctl"><label for="vac">Empty cells</label>
+      <input id="vac" type="range" min="2" max="50" step="1" value="10"><span class="val" id="vacv"></span></div>
+    <div class="ctl"><label for="share">Share of group B</label>
+      <input id="share" type="range" min="10" max="90" step="5" value="50"><span class="val" id="sharev"></span></div>
+    <div class="ctl"><label for="n">Grid size</label>
+      <select id="n"><option>20</option><option>30</option><option selected>40</option><option>50</option><option>60</option></select></div>
+    <div class="ctl wide"><label for="rule">An unhappy agent moves to</label>
+      <select id="rule">
+        <option value="random">a random empty cell</option>
+        <option value="randhappy" selected>a random empty cell where it would be happy</option>
+        <option value="nearest">the nearest empty cell where it would be happy</option>
+      </select></div>
+  </div>
+  <div class="btnrow">
+    <button id="newseed">New random start</button>
+    <label><input type="checkbox" id="wrap"> Edges wrap around (torus)</label>
+    <label><input type="checkbox" id="marks" checked> Mark agents that just moved</label>
+  </div>
+</div>
+
+<div class="player">
+  <button id="reset" title="Back to the start (Home)">⏮ Reset</button>
+  <button id="back" title="Back one round (←)">◀ Back</button>
+  <button id="step" class="primary" title="Forward one round (→)">Step ▶</button>
+  <button id="play">Play</button>
+  <button id="end">Last ⏭</button>
+  <input id="k" type="range" min="0" value="0" aria-label="Round">
+  <span class="k" id="kv"></span>
+</div>
+<p class="status" id="status"></p>
+
+<div class="main">
+  <div class="card">
+    <h2>The neighborhood map</h2>
+    <svg id="board" role="img" aria-label="Grid of agents of two groups and empty cells"></svg>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--grp-a)"></span>group A</span>
+      <span><span class="sw" style="background:var(--grp-b)"></span>group B</span>
+      <span><span class="sw" style="background:var(--surface-sunk);border:1px solid var(--line)"></span>empty</span>
+      <span><span class="sw" style="background:var(--ink);width:5px;height:5px;border-radius:50%"></span>moved last round</span>
+    </div>
+    <p class="probe" id="probe">Hover over a cell (or tap it) to see its neighbors.</p>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>Over time</h2>
+      <svg id="trend" role="img" aria-label="Average similarity and share unhappy by round"></svg>
+      <div class="legend">
+        <span><span class="ln" style="border-color:var(--mem)"></span>average fraction of neighbors alike</span>
+        <span><span class="ln" style="border-color:var(--hit)"></span>fraction of agents unhappy</span>
+        <span><span class="ln dash" style="border-color:var(--ink-faint)"></span><i>τ</i></span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>This round, by group</h2>
+      <div class="tw"><table id="tab"></table></div>
+      <p class="note" id="tabnote"></p>
+    </div>
+    <div class="card">
+      <h2>Segregation versus tolerance</h2>
+      <svg id="sweep" role="img" aria-label="Final average similarity for each tolerance threshold"></svg>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--mem);border-radius:50%"></span>final fraction alike</span>
+        <span><span class="sw" style="background:var(--hit);border-radius:50%"></span>still unhappy</span>
+        <span><span class="ln dash" style="border-color:var(--ink-faint)"></span>alike = <i>τ</i></span>
+      </div>
+      <p class="note" id="sweepnote"></p>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>One round</h2>
+  <div class="algo">
+    <div class="top"><span class="sc">round</span>(grid):</div>
+    <div><i>U</i> ← the agents that are unhappy now, in random order</div>
+    <div><span class="sc">for</span> each agent <i>a</i> in <i>U</i>:</div>
+    <div style="padding-left:2.4em"><span class="sc">if</span> <i>a</i> is still unhappy (its neighbors may have moved):</div>
+    <div style="padding-left:3.6em">pick an empty cell by the move rule (if there is none, <i>a</i> stays)</div>
+    <div style="padding-left:3.6em">move <i>a</i> there; its old cell becomes empty</div>
+    <div class="top">repeat rounds until nobody is unhappy, or nobody can move (or 200 rounds pass)</div>
+  </div>
+</div>
+
+<footer>
+  <p>“Fraction alike” for an agent is (neighbors in its group) / (occupied neighbors), over the 8 surrounding cells
+    (fewer at the edges unless they wrap). An agent with no neighbors counts as happy and is left out of the average.
+    With the cells shuffled at random, the expected fraction alike is about the size of the agent's own group, 50% when
+    the groups are equal; that is the starting point of every run.</p>
+  <p>The sweep uses the current grid size (up to 40), empty share, group share, move rule and edges, and the same
+    random start as the map (so it changes with “New random start”), with one run of at most 200 rounds per step.
+    Whether an agent is happy depends only on which fractions <i>a</i>/<i>b</i> (<i>b</i> ≤ 8 occupied neighbors) are at
+    least <i>τ</i>, so with a fixed random start the outcome is constant between consecutive such fractions (ticks on the
+    axis; the taller ones are multiples of 1/8). The panel runs once per step, so the curve is exact, and for grids up to 40
+    the step containing the current <i>τ</i> is exactly where the map ends up.</p>
+  <p>T. C. Schelling, <i>Dynamic models of segregation</i>, Journal of Mathematical Sociology 1 (1971);
+    <i>Micromotives and Macrobehavior</i> (1978).</p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const SVGNS = 'http://www.w3.org/2000/svg';
+const MAX_ROUNDS = 200;
+let seed = 1, hist = [], k = 0, probeCell = -1;
+
+// small seeded PRNG (mulberry32)
+function rng(s){
+  return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function shuffle(a, r){
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const pct = v => `${Math.round(100 * v)}%`;
+
+function params(){
+  return { N: +$('n').value, tau: +$('tau').value / 100, vac: +$('vac').value / 100,
+           share: +$('share').value / 100, rule: $('rule').value, wrap: $('wrap').checked };
+}
+
+// ---- the model: cells hold 0 (empty), 1 (group A) or 2 (group B) ----
+function neighborLists(N, wrap){
+  const nb = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+    const l = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++){
+      if (!dr && !dc) continue;
+      let rr = r + dr, cc = c + dc;
+      if (wrap){ rr = (rr + N) % N; cc = (cc + N) % N; }
+      else if (rr < 0 || cc < 0 || rr >= N || cc >= N) continue;
+      l.push(rr * N + cc);
+    }
+    nb.push(l);
+  }
+  return nb;
+}
+function initialGrid(P, r){
+  const n = P.N * P.N, nEmpty = Math.round(P.vac * n), nB = Math.round(P.share * (n - nEmpty));
+  const g = new Int8Array(n);
+  for (let i = 0; i < n; i++) g[i] = i < nEmpty ? 0 : i < nEmpty + nB ? 2 : 1;
+  return Int8Array.from(shuffle(Array.from(g), r));
+}
+// alike and occupied neighbor counts for an agent of group grp at cell i, ignoring cell skip
+function counts(g, nb, i, grp, skip){
+  let same = 0, occ = 0;
+  for (const j of nb[i]){ if (j === skip || !g[j]) continue; occ++; if (g[j] === grp) same++; }
+  return [same, occ];
+}
+function isHappy(g, nb, i, grp, tau, skip = -1){
+  const [s, o] = counts(g, nb, i, grp, skip);
+  return o === 0 || s >= tau * o - 1e-9;
+}
+function stats(g, nb, tau){
+  const s = {simSum: [0, 0, 0], simN: [0, 0, 0], unhappy: [0, 0, 0], count: [0, 0, 0]};
+  for (let i = 0; i < g.length; i++){
+    const grp = g[i]; if (!grp) continue;
+    const [same, occ] = counts(g, nb, i, grp, -1);
+    s.count[grp]++; s.count[0]++;
+    if (occ){ s.simSum[grp] += same / occ; s.simN[grp]++; s.simSum[0] += same / occ; s.simN[0]++; }
+    if (occ && same < tau * occ - 1e-9){ s.unhappy[grp]++; s.unhappy[0]++; }
+  }
+  s.sim = s.simSum.map((v, j) => s.simN[j] ? v / s.simN[j] : 0);
+  return s;
+}
+function chooseCell(g, nb, empties, i, grp, P, r){
+  if (P.rule === 'random') return Math.floor(r() * empties.length);
+  if (P.rule === 'randhappy'){
+    // visit empty cells in random order, stop at the first good one (a partial Fisher–Yates)
+    const idx = empties.map((_, j) => j);
+    for (let m = 0; m < idx.length; m++){
+      const j = m + Math.floor(r() * (idx.length - m)); [idx[m], idx[j]] = [idx[j], idx[m]];
+      if (isHappy(g, nb, empties[idx[m]], grp, P.tau, i)) return idx[m];
+    }
+    return -1;
+  }
+  // nearest: Euclidean distance on the grid (wrapped if the edges wrap), random tie-breaks
+  const N = P.N, r0 = Math.floor(i / N), c0 = i % N;
+  const d = empties.map((e, j) => {
+    let dr = Math.abs(Math.floor(e / N) - r0), dc = Math.abs(e % N - c0);
+    if (P.wrap){ dr = Math.min(dr, N - dr); dc = Math.min(dc, N - dc); }
+    return [dr * dr + dc * dc + r() * .5, j];
+  }).sort((a, b) => a[0] - b[0]);
+  for (const [, j] of d) if (isHappy(g, nb, empties[j], grp, P.tau, i)) return j;
+  return -1;
+}
+function round(g0, nb, P, r){
+  const g = g0.slice(), empties = [], movers = [];
+  for (let i = 0; i < g.length; i++){
+    if (!g[i]) empties.push(i);
+    else if (!isHappy(g, nb, i, g[i], P.tau)) movers.push(i);
+  }
+  shuffle(movers, r);
+  const moved = new Uint8Array(g.length); let nMoves = 0;
+  for (const i of movers){
+    const grp = g[i];
+    if (isHappy(g, nb, i, grp, P.tau) || !empties.length) continue;
+    const j = chooseCell(g, nb, empties, i, grp, P, r);
+    if (j < 0) continue;
+    const dest = empties[j];
+    g[dest] = grp; g[i] = 0; empties[j] = i; moved[dest] = 1; nMoves++;
+  }
+  return {g, moved, nMoves};
+}
+function simulate(P, s, keep){
+  const r = rng(s * 7919 + 17), nb = neighborLists(P.N, P.wrap);
+  let g = initialGrid(P, r), st = stats(g, nb, P.tau);
+  const out = [{g, st, moved: null, nMoves: 0}];
+  for (let t = 0; t < MAX_ROUNDS && st.unhappy[0] > 0; t++){
+    const res = round(g, nb, P, r);
+    g = res.g; st = stats(g, nb, P.tau);
+    const h = {g, st, moved: res.moved, nMoves: res.nMoves};
+    if (keep) out.push(h); else out[0] = h;
+    if (!res.nMoves) break;
+  }
+  return out;
+}
+
+// ---- rendering ----
+let NB = null;
+function build(){
+  const P = params();
+  NB = neighborLists(P.N, P.wrap);
+  hist = simulate(P, seed, true);
+  k = 0; probeCell = -1;
+  render();
+}
+
+function render(){
+  const P = params(), h = hist[k], st = h.st, last = hist[hist.length - 1], N = P.N;
+  $('k').max = hist.length - 1; $('k').value = k;
+  $('kv').textContent = `round ${k} / ${hist.length - 1}`;
+  $('back').disabled = $('reset').disabled = k === 0;
+  $('step').disabled = $('end').disabled = k === hist.length - 1;
+  $('tauv').textContent = pct(P.tau); $('vacv').textContent = pct(P.vac); $('sharev').textContent = pct(P.share);
+
+  const end = k === hist.length - 1;
+  const ending = !end ? '' : last.st.unhappy[0] === 0 ? ' <b>Settled</b>: every agent is happy, so nobody moves again.'
+    : last.nMoves === 0 ? ' <b>Stuck</b>: the unhappy agents have no empty cell where they would be happy.'
+    : ` <b>Not settled</b> after ${MAX_ROUNDS} rounds: agents keep moving.`;
+  $('status').innerHTML = (k === 0
+      ? `Random start: groups mixed at random, average fraction alike <b>${pct(st.sim[0])}</b>. ` +
+        `<b>${st.unhappy[0]}</b> agents (${pct(st.unhappy[0] / st.count[0])}) have fewer than ${pct(P.tau)} alike neighbors.`
+      : `Round ${k}: <b>${h.nMoves}</b> agents moved. Average fraction alike is now <b>${pct(st.sim[0])}</b>; ` +
+        `<b>${st.unhappy[0]}</b> agents (${pct(st.unhappy[0] / st.count[0])}) are unhappy.`) + ending;
+
+  // board
+  const marks = $('marks').checked;
+  let s = '';
+  for (let i = 0; i < h.g.length; i++){
+    const x = i % N, y = Math.floor(i / N), v = h.g[i];
+    const cls = v === 0 ? 'e' : (v === 1 ? 'a' : 'b');
+    s += `<rect class="${cls}" x="${x + .04}" y="${y + .04}" width=".92" height=".92"/>`;
+    if (marks && h.moved && h.moved[i]) s += `<circle class="mv" cx="${x + .5}" cy="${y + .5}" r=".16"/>`;
+  }
+  if (probeCell >= 0){
+    const x = probeCell % N, y = Math.floor(probeCell / N);
+    s += NB[probeCell].map(j => `<rect class="nb" x="${j % N + .06}" y="${Math.floor(j / N) + .06}" width=".88" height=".88"/>`).join('');
+    s += `<rect class="me" x="${x + .1}" y="${y + .1}" width=".8" height=".8"/>`;
+  }
+  const b = $('board'); b.setAttribute('viewBox', `0 0 ${N} ${N}`); b.innerHTML = s;
+  renderProbe(P);
+  renderTrend(P);
+  renderTable(P);
+  drawSweep();
+}
+
+function renderProbe(P){
+  if (probeCell < 0) return;
+  const g = hist[k].g, i = probeCell, N = P.N, grp = g[i], where = `(row ${Math.floor(i / N) + 1}, column ${i % N + 1})`;
+  if (!grp){
+    const a = counts(g, NB, i, 1, -1), bb = counts(g, NB, i, 2, -1);
+    const ok = q => isHappy(g, NB, i, q, P.tau) ? 'would be happy' : 'would not be happy';
+    $('probe').innerHTML = `Empty cell ${where}: ${a[1]} occupied neighbors, ${a[0]} A and ${bb[0]} B. ` +
+      `An A agent ${ok(1)} here; a B agent ${ok(2)}.`;
+    return;
+  }
+  const [same, occ] = counts(g, NB, i, grp, -1), name = grp === 1 ? 'A' : 'B';
+  const happy = isHappy(g, NB, i, grp, P.tau);
+  $('probe').innerHTML = `Agent of group <b style="color:var(${grp === 1 ? '--grp-a' : '--grp-b'})">${name}</b> ${where}: ` +
+    (occ ? `<b>${same}</b> of ${occ} occupied neighbors alike (${pct(same / occ)}), ` : 'no neighbors, ') +
+    `${occ ? (happy ? '≥' : '<') + ' ' + pct(P.tau) + ', so ' : 'so '}<b>${happy ? 'happy' : 'unhappy'}</b>.`;
+}
+function probeAt(e){
+  const N = params().N, rect = $('board').getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) / rect.width * N), y = Math.floor((e.clientY - rect.top) / rect.height * N);
+  const i = x >= 0 && y >= 0 && x < N && y < N ? y * N + x : -1;
+  if (i !== probeCell){ probeCell = i; render(); }
+}
+
+// minimal line chart on [0, xmax] × [0, 1]
+function frame(svg, w, h, m, xmax, xlabel){
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const X = v => m.l + v / xmax * (w - m.l - m.r), Y = v => h - m.b - v * (h - m.t - m.b);
+  let s = '';
+  for (const v of [0, .25, .5, .75, 1])
+    s += `<line class="${v ? 'gridl' : 'axis'}" x1="${m.l}" x2="${w - m.r}" y1="${Y(v)}" y2="${Y(v)}"/>` +
+         `<text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${pct(v)}</text>`;
+  s += `<text x="${(m.l + w - m.r) / 2}" y="${h - 4}" text-anchor="middle">${xlabel}</text>`;
+  return {X, Y, s};
+}
+const path = (pts, X, Y) => pts.map((p, j) => `${j ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('');
+
+function renderTrend(P){
+  const w = 460, h = 200, m = {l: 40, r: 12, t: 10, b: 34}, n = hist.length - 1, xmax = Math.max(4, n);
+  const f = frame($('trend'), w, h, m, xmax, 'round');
+  let s = f.s;
+  const step = Math.max(1, Math.ceil(xmax / 8));
+  for (let t = 0; t <= xmax; t += step) s += `<text x="${f.X(t)}" y="${h - m.b + 14}" text-anchor="middle">${t}</text>`;
+  s += `<line x1="${m.l}" x2="${w - m.r}" y1="${f.Y(P.tau)}" y2="${f.Y(P.tau)}" style="stroke:var(--ink-faint);stroke-dasharray:5 4;stroke-width:1.2"/>`;
+  const sim = hist.map((q, t) => [t, q.st.sim[0]]), unh = hist.map((q, t) => [t, q.st.unhappy[0] / q.st.count[0]]);
+  for (const [pts, col] of [[sim, '--mem'], [unh, '--hit']]){
+    s += `<path d="${path(pts, f.X, f.Y)}" style="fill:none;stroke:var(--line);stroke-width:2"/>`;
+    s += `<path d="${path(pts.slice(0, k + 1), f.X, f.Y)}" style="fill:none;stroke:var(${col});stroke-width:2.2"/>`;
+    s += `<circle cx="${f.X(k)}" cy="${f.Y(pts[k][1])}" r="4.5" style="fill:var(${col});stroke:var(--surface);stroke-width:2"/>`;
+  }
+  $('trend').innerHTML = s;
+}
+
+function renderTable(P){
+  const st = hist[k].st, st0 = hist[0].st;
+  const row = (label, j) => `<tr><td>${label}</td><td>${st.count[j]}</td><td>${pct(st0.sim[j])}</td><td>${pct(st.sim[j])}</td>` +
+    `<td>${st.unhappy[j]} (${pct(st.count[j] ? st.unhappy[j] / st.count[j] : 0)})</td></tr>`;
+  $('tab').innerHTML = '<tr><th>group</th><th>agents</th><th>alike at start</th><th>alike now</th><th>unhappy</th></tr>' +
+    row('<b style="color:var(--grp-a)">A</b>', 1) + row('<b style="color:var(--grp-b)">B</b>', 2) + row('all agents', 0);
+  $('tabnote').innerHTML = P.share !== .5
+    ? 'With unequal groups the minority starts out with few alike neighbors, so it is the first to move; the majority is often happy from the start.'
+    : 'Every agent only asks for ' + pct(P.tau) + ' alike neighbors, but compare the last two columns.';
+}
+
+// ---- sweep over τ, computed a few points at a time so the page stays responsive ----
+// An agent's fraction alike is a/b with b ≤ 8 occupied neighbors, so whether it is happy only changes when τ
+// crosses such a fraction. With a fixed seed every run (random draws included) is the same for all τ in
+// (TAUS[j-1], TAUS[j]], so one run at the right end of each interval gives the whole step function exactly.
+const TAUS = (() => {
+  const fr = new Map();
+  for (let b = 1; b <= 8; b++) for (let a = 0; a <= b; a++){
+    const g = (x, y) => y ? g(y, x % y) : x, d = g(a, b) || b;
+    fr.set((a / b).toFixed(9), {v: a / b, label: a === 0 ? '0' : a === b ? '1' : `${a / d}/${b / d}`});
+  }
+  return [...fr.values()].sort((p, q) => p.v - q.v);
+})();
+let sweep = [], sweepGen = 0, sweepKey = '';
+function startSweep(){
+  const P = params(), key = JSON.stringify([Math.min(P.N, 40), P.vac, P.share, P.rule, P.wrap, seed]);
+  if (key === sweepKey) return drawSweep();
+  sweepKey = key; sweep = []; const gen = ++sweepGen;
+  let j = 0;
+  const next = () => {
+    if (gen !== sweepGen || j >= TAUS.length) return drawSweep();
+    const Q = {...P, N: Math.min(P.N, 40), tau: TAUS[j].v};
+    // same random start as the map, so on the step containing the current τ (and N ≤ 40) this is the map's final state
+    const h = simulate(Q, seed, false)[0];
+    sweep[j] = {lo: j ? TAUS[j - 1] : TAUS[0], hi: TAUS[j], sim: h.st.sim[0], unh: h.st.unhappy[0] / h.st.count[0]};
+    j++;
+    drawSweep();
+    setTimeout(next, 0);
+  };
+  drawSweep(); setTimeout(next, 30);
+}
+function drawSweep(){
+  const P = params(), w = 460, h = 210, m = {l: 40, r: 12, t: 10, b: 34};
+  const f = frame($('sweep'), w, h, m, 1, 'tolerance τ: fraction of alike neighbors wanted');
+  let s = f.s;
+  for (const v of [0, .2, .4, .6, .8, 1]) s += `<text x="${f.X(v)}" y="${h - m.b + 14}" text-anchor="middle">${pct(v)}</text>`;
+  s += `<line x1="${f.X(0)}" y1="${f.Y(0)}" x2="${f.X(1)}" y2="${f.Y(1)}" style="stroke:var(--ink-faint);stroke-dasharray:5 4;stroke-width:1.2"/>`;
+  s += `<line x1="${f.X(P.tau)}" x2="${f.X(P.tau)}" y1="${m.t}" y2="${h - m.b}" style="stroke:var(--ink);stroke-width:1;opacity:.5"/>`;
+  s += `<text x="${f.X(P.tau) + (P.tau > .8 ? -4 : 4)}" y="${m.t + 10}" text-anchor="${P.tau > .8 ? 'end' : 'start'}">current τ</text>`;
+  // breakpoints: a tick at every a/b with b ≤ 8, taller at multiples of 1/8
+  s += TAUS.map(t => { const tall = Math.abs(t.v * 8 - Math.round(t.v * 8)) < 1e-9;
+    return `<line x1="${f.X(t.v)}" x2="${f.X(t.v)}" y1="${h - m.b}" y2="${h - m.b - (tall ? 6 : 3)}" style="stroke:var(--ink-faint)"/>`; }).join('');
+  const done = sweep.filter(Boolean);
+  for (const [key, col] of [['sim', '--mem'], ['unh', '--hit']]){
+    // flat on (lo, hi], closed dot at hi; faint risers between steps
+    let d = '';
+    done.forEach((q, j) => { d += `${j ? 'L' : 'M'}${f.X(q.lo.v).toFixed(1)},${f.Y(q[key]).toFixed(1)}L${f.X(q.hi.v).toFixed(1)},${f.Y(q[key]).toFixed(1)}`; });
+    if (done.length) s += `<path d="${d}" style="fill:none;stroke:var(${col});stroke-width:1;opacity:.35"/>`;
+    s += done.map(q => (q.hi.v > q.lo.v ? `<line x1="${f.X(q.lo.v)}" x2="${f.X(q.hi.v)}" y1="${f.Y(q[key])}" y2="${f.Y(q[key])}" style="stroke:var(${col});stroke-width:2.4"/>` : '') +
+      `<circle cx="${f.X(q.hi.v)}" cy="${f.Y(q[key])}" r="2.8" style="fill:var(${col})">` +
+      `<title>τ ${q.hi.v > q.lo.v ? `in (${q.lo.label}, ${q.hi.label}]` : '= 0'}: ${key === 'sim' ? 'fraction alike' : 'unhappy'} ${pct(q[key])}</title></circle>`).join('');
+  }
+  $('sweep').innerHTML = s;
+  $('sweepnote').innerHTML = done.length < TAUS.length ? `Simulating… ${done.length} / ${TAUS.length}`
+    : 'Above the dashed diagonal, agents end up with more alike neighbors than they asked for. ' +
+      (P.rule === 'random'
+        ? 'With random moves, agents keep moving until the map is almost completely segregated; at very high τ nothing satisfies them and they never settle.'
+        : 'At high τ a mixed map has almost no empty cell good enough, so the unhappy agents get stuck where they are and the map stays mixed. Try random moves.');
+}
+
+// ---- wiring ----
+let timer = null;
+function stop(){ clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+const go = n => { k = Math.max(0, Math.min(hist.length - 1, n)); render(); };
+$('step').onclick = () => { stop(); go(k + 1); };
+$('back').onclick = () => { stop(); go(k - 1); };
+$('reset').onclick = () => { stop(); go(0); };
+$('end').onclick = () => { stop(); go(hist.length - 1); };
+$('k').oninput = e => { stop(); go(+e.target.value); };
+$('play').onclick = () => {
+  if (timer) return stop();
+  if (k === hist.length - 1) go(0);
+  $('play').textContent = 'Pause';
+  timer = setInterval(() => { if (k >= hist.length - 1) stop(); else go(k + 1); }, 450);
+};
+const rebuild = () => { stop(); build(); startSweep(); };
+for (const id of ['tau', 'vac', 'share']){
+  $(id).oninput = () => { $(id + 'v').textContent = pct(+$(id).value / 100); };
+  $(id).onchange = rebuild;
+}
+$('n').onchange = $('rule').onchange = $('wrap').onchange = rebuild;
+$('marks').onchange = render;
+$('newseed').onclick = () => { seed++; rebuild(); };
+$('board').addEventListener('pointermove', probeAt);
+$('board').addEventListener('pointerdown', probeAt);
+$('board').addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && probeCell >= 0){ probeCell = -1; render(); } });
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, select')) return;
+  if (e.key === 'ArrowRight'){ stop(); go(k + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ stop(); go(k - 1); e.preventDefault(); }
+  else if (e.key === 'Home'){ stop(); go(0); }
+});
+build(); startSweep();
+</script>
+</body>
+</html>
