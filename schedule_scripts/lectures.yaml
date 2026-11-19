@@ -319,23 +319,22 @@
     - fido-etc.pptx
 
 - title: Guest Lecture - Leo Boytsov - Robustness, Generalization, and Practical Limits of Deep Learning, A Practitioner’s Perspective
-  slide_link: https://drive.google.com/file/d/1qgJXq_kQ_474-unl4G6bh2Xv6nUTEFrS/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1Vhl_Fn3JbuNrYfX6A74llGEdujc8iCF-/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link:
   content:
    - leonid_boytsov.dummy
-   - allreduce.pptx
-   - fido-etc.pptx
-   - fid-genllm.pptx
    - '* HW5 Slot A due'
    - '* Miniproject: project check in due (written report OR oral check-in - see miniproject handouts).'
 
 - title: HW5 Writing Session
   type: recitation
 
-- title: Network Effects and Scalable Evaluation
-  slide_link: https://drive.google.com/file/d/1oz0ZGlq6z6Bvmte7PrXfXScglJCjVBTB/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1UQU3YIeMvlVa37mZnZtYfX9k-s0GwZEU/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+- title: RAG Catchup / Network Effects and Scalable Evaluation
+  slide_link: https://drive.google.com/file/d/1qgJXq_kQ_474-unl4G6bh2Xv6nUTEFrS/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1Vhl_Fn3JbuNrYfX6A74llGEdujc8iCF-/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
+    - allreduce.pptx
+    - fido-etc.pptx
+    - fid-genllm.pptx
     - ppi.pptx
     - '* HW5 Slot B due Tue Nov 24 (tentative)'
 
