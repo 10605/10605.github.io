@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayesian PPI: Interval Widths</title>
+<link rel="stylesheet" href="ppi.css">
+<script src="ppi.js"></script>
+<style>
+  .tw { overflow-x: auto; }
+  #tab td:first-child { font-family: var(--mono); }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="series"></nav>
+
+<header>
+  <h1>Classical vs PPI vs PPI++: interval width as <i>n</i> grows</h1>
+  <p>As in Figure 3 of the paper: for each number of human labels <i>n</i>, draw many simulated datasets (<i>n</i> human-labeled
+    examples plus <i>N</i> autorater-labeled ones), compute a 95% interval for <i>P</i>(<i>H</i> = 1) three ways, and average the widths.</p>
+  <p><b style="color:var(--mem)">Classical</b> uses only the human labels (Clopper–Pearson).
+    <b style="color:var(--third)">PPI</b> is the Bayesian difference estimate of Eq 1, <i>g</i> = <i>μ</i><sub>1</sub> + <i>μ</i><sub>2</sub>,
+    with its interval from Monte Carlo integration. <b style="color:var(--pos)">PPI++</b> is the power-tuned version of Eq 5:</p>
+  <div class="eq"><i>g</i> = <sup>1</sup>⁄<sub><i>N</i></sub> Σ<sub><i>j</i></sub> <i>λ f</i>(<i>x̃<sub>j</sub></i>) + <sup>1</sup>⁄<sub><i>n</i></sub> Σ<sub><i>i</i></sub> (<i>y<sub>i</sub></i> − <i>λ f</i>(<i>x<sub>i</sub></i>)),
+    &nbsp;&nbsp; <i>λ̂</i> = Cov(<i>y</i>, <i>f</i>) / ((1 + <i>n</i>/<i>N</i>) Var(<i>f</i>)) clipped to [0, 1]</div>
+  <p>Any <i>λ</i> gives the same expectation, E[<i>y</i>]. <i>λ</i> = 1 is PPI and <i>λ</i> = 0 ignores the autorater entirely, so
+    PPI++ estimates the variance-minimizing <i>λ</i> from the labeled data and falls back toward the classical estimate when the
+    autorater is weak. Try the presets: with a good autorater PPI and PPI++ both win, but with a coin-flip autorater PPI is
+    <i>worse</i> than using the human labels alone.</p>
+</header>
+
+<div class="card">
+  <h2>Simulation</h2>
+  <div class="ctls">
+    <div class="ctl"><label for="p">True <i>P</i>(<i>H</i> = 1)</label><input id="p" type="range" min="0.05" max="0.95" step="0.01" value="0.73"><span class="val" id="pv"></span></div>
+    <div class="ctl"><label for="fp">Autorater false positives <i>P</i>(<i>A</i>=1 | <i>H</i>=0)</label><input id="fp" type="range" min="0" max="1" step="0.01" value="0.10"><span class="val" id="fpv"></span></div>
+    <div class="ctl"><label for="fn">Autorater false negatives <i>P</i>(<i>A</i>=0 | <i>H</i>=1)</label><input id="fn" type="range" min="0" max="1" step="0.01" value="0.08"><span class="val" id="fnv"></span></div>
+    <div class="ctl"><label for="N">Autorater-labeled examples <i>N</i></label><input id="N" type="range" min="500" max="20000" step="500" value="5000"><span class="val" id="Nv"></span></div>
+    <div class="ctl"><label for="trials">Datasets per <i>n</i></label>
+      <select id="trials"><option>50</option><option selected>100</option><option>200</option><option>500</option></select></div>
+    <div class="ctl"><label for="T">Monte Carlo draws <i>T</i></label>
+      <select id="T"><option>1000</option><option selected>2000</option><option>5000</option><option>10000</option></select></div>
+  </div>
+  <div class="btnrow">
+    <span class="presets">autorater:
+      <button data-fp="0.02" data-fn="0.02">accurate (2% / 2%)</button>
+      <button data-fp="0.10" data-fn="0.08">the page-1 autorater (10% / 8%)</button>
+      <button data-fp="0.30" data-fn="0.05">lenient (30% / 5%)</button>
+      <button data-fp="0.25" data-fn="0.25">noisy (25% / 25%)</button>
+      <button data-fp="0.50" data-fn="0.50">coin flip (50% / 50%)</button></span>
+    <button id="rerun">New simulation</button>
+  </div>
+  <p class="status" id="status" style="margin:10px 0 0"></p>
+</div>
+
+<div class="g2" style="margin-top:14px">
+  <div class="card">
+    <h2>Average 95% interval width</h2>
+    <svg class="chart" id="width"></svg>
+    <div class="legend">
+      <span><span class="ln" style="border-color:var(--mem)"></span>classical</span>
+      <span><span class="ln" style="border-color:var(--third)"></span>PPI</span>
+      <span><span class="ln" style="border-color:var(--pos)"></span>PPI++</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Width relative to classical</h2>
+    <svg class="chart" id="ratio"></svg>
+    <div class="legend">
+      <span><span class="ln" style="border-color:var(--third)"></span>PPI</span>
+      <span><span class="ln" style="border-color:var(--pos)"></span>PPI++</span>
+      <span><span class="ln dash" style="border-color:var(--mem)"></span>classical (= 1)</span>
+    </div>
+    <p class="note" id="rationote"></p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Results</h2>
+  <div class="tw"><table class="t" id="tab"></table></div>
+  <p class="note">Width ratio: PPI or PPI++ width over classical width. “Worth”: the number of human labels the classical method would
+    need for the same width as PPI++, <i>n</i> × (classical width / PPI++ width)². Coverage: the fraction of datasets whose interval
+    contains the true <i>P</i>(<i>H</i> = 1); it should be at least 95%, up to simulation noise. Values under <span id="lowcov"></span>,
+    more than three standard errors below 95% for this many datasets, are in red.</p>
+</div>
+
+<footer>
+  <p>Data are generated as on <a href="ppi-intro.html">page 1</a>: <i>H</i> ~ Bernoulli(<i>P</i>(<i>H</i>=1)), and the autorater label
+    <i>A</i> flips <i>H</i> with the given false-positive and false-negative rates. In each dataset, <i>μ</i><sub>1</sub> has posterior
+    <i>λ</i> · Beta(<i>m</i> + ½, <i>N</i> − <i>m</i> + ½) and the rectifier mean has a Gaussian posterior with its standard error as the
+    width (Student-<i>t</i> for <i>n</i> &lt; 30); the interval comes from <i>T</i> Monte Carlo draws. Cov(<i>y</i>, <i>f</i>) is estimated
+    from the labeled data and Var(<i>f</i>) from all the autorater labels, as in PPI++.</p>
+  <p>With a very accurate autorater and few human labels, PPI's coverage drops below 95% (try the “accurate” preset with 500
+    datasets per <i>n</i> and look at the coverage column). The reason is that many datasets then have no human–autorater disagreements at all: every rectifier
+    value is 0, its sample standard deviation is 0, and the Gaussian posterior for <i>μ</i><sub>2</sub> collapses to a point, leaving only
+    the (biased) autorater mean's uncertainty. With a 2% / 2% autorater, about a third of datasets at <i>n</i> = 50 look like this.
+    The paper's curves likewise start at <i>n</i> = 50; a posterior for the rectifier that does not rely on its sample variance
+    (e.g. a Dirichlet over its three values −1, 0, 1) would avoid the problem.</p>
+  <p>R. A. Hofer et al., <i>Bayesian Prediction-Powered Inference</i>, arXiv:2405.06034 (2024).
+    A. N. Angelopoulos, J. C. Duchi, T. Zrnic, <i>PPI++: Efficient prediction-powered inference</i>, arXiv:2311.01453 (2023).</p>
+  <p class="nextpage" id="nextpage"></p>
+</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const NS = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], ALPHA = 0.05;
+const METHODS = [['classical', '--mem'], ['ppi', '--third'], ['ppipp', '--pos']];
+let seed = 1, res = [], gen = 0;
+
+const params = () => ({p: +$('p').value, fp: +$('fp').value, fn: +$('fn').value, N: +$('N').value,
+                       trials: +$('trials').value, T: +$('T').value});
+
+// one simulated dataset at size n: interval widths and coverage for the three methods
+function trial(P, n, r){
+  const counts = [[0, 0], [0, 0]];
+  for (let i = 0; i < n; i++){ const [h, a] = PPI.label(r(), r(), P); counts[h][a]++; }
+  const pa = PPI.pA(P);
+  let m = 0;
+  for (let j = 0; j < P.N; j++) if (r() < pa) m++;
+  const S = PPI.summarize(counts, P.N, m), lam = PPI.powerTune(S);
+  const cp = PPI.clopperPearson(S.k, n, ALPHA);
+  const mc = lambda => PPI.mcInterval(PPI.monteCarlo(PPI.posteriors(S, lambda), P.T, r).g, ALPHA);
+  return {classical: cp, ppi: mc(1), ppipp: mc(lam), lam};
+}
+
+function run(){
+  const P = params(), g = ++gen, r = PPI.rng(seed);
+  res = [];
+  let j = 0;
+  const next = () => {
+    if (g !== gen) return;
+    if (j >= NS.length){ $('status').innerHTML = `Done: ${P.trials} datasets at each of ${NS.length} values of <i>n</i>.`; return; }
+    const n = NS[j], acc = {n, lam: 0};
+    for (const [k] of METHODS) acc[k] = {w: 0, cov: 0};
+    for (let t = 0; t < P.trials; t++){
+      const o = trial(P, n, r);
+      for (const [k] of METHODS){ acc[k].w += (o[k][1] - o[k][0]) / P.trials; acc[k].cov += (o[k][0] <= P.p && P.p <= o[k][1]) / P.trials; }
+      acc.lam += o.lam / P.trials;
+    }
+    res[j++] = acc;
+    $('status').innerHTML = `Simulating… done through <i>n</i> = ${n}.`;
+    draw();
+    setTimeout(next, 0);
+  };
+  $('status').innerHTML = 'Simulating…';
+  draw();
+  setTimeout(next, 20);
+}
+
+function draw(){
+  const P = params();
+  $('pv').textContent = PPI.fmt(P.p, 2); $('fpv').textContent = PPI.pct(P.fp); $('fnv').textContent = PPI.pct(P.fn);
+  $('Nv').textContent = P.N;
+  document.querySelectorAll('[data-fp]').forEach(b => b.classList.toggle('on', +b.dataset.fp === P.fp && +b.dataset.fn === P.fn));
+  const done = res.filter(Boolean), xr = [0, NS[NS.length - 1] + 10];
+
+  const wmax = done.length ? Math.max(...done.flatMap(d => METHODS.map(([k]) => d[k].w))) * 1.08 : 0.5;
+  const c = PPI.chart({w: 560, h: 300, m: {l: 48, r: 14, t: 12, b: 36}, x: xr, y: [0, wmax], xlabel: 'human-labeled examples n', ylabel: 'interval width'});
+  let s = c.axes();
+  for (const [k, col] of METHODS)
+    s += c.line(done.map(d => [d.n, d[k].w]), `stroke:var(${col});stroke-width:2.2`) + c.dots(done.map(d => [d.n, d[k].w]), `fill:var(${col})`, 3.2);
+  PPI.svgOut($('width'), c, s);
+
+  const ratios = done.flatMap(d => [d.ppi.w / d.classical.w, d.ppipp.w / d.classical.w]);
+  const rmax = Math.max(1.2, ...ratios) * 1.05, rmin = Math.min(.5, ...ratios) * .95;
+  const q = PPI.chart({w: 560, h: 300, m: {l: 48, r: 14, t: 12, b: 36}, x: xr, y: [Math.max(0, rmin), rmax], xlabel: 'human-labeled examples n', ylabel: 'width / classical width'});
+  s = q.axes() + q.hline(1, 'stroke:var(--mem);stroke-width:1.6;stroke-dasharray:6 4');
+  for (const [k, col] of METHODS.slice(1))
+    s += q.line(done.map(d => [d.n, d[k].w / d.classical.w]), `stroke:var(${col});stroke-width:2.2`) +
+         q.dots(done.map(d => [d.n, d[k].w / d.classical.w]), `fill:var(${col})`, 3.2);
+  PPI.svgOut($('ratio'), q, s);
+
+  const last = done[done.length - 1];
+  $('rationote').innerHTML = !last ? '' :
+    `At <i>n</i> = ${last.n}, PPI's interval is ${PPI.pct(last.ppi.w / last.classical.w)} as wide as the classical one and PPI++'s is ${PPI.pct(last.ppipp.w / last.classical.w)}
+     (average <i>λ̂</i> = ${PPI.fmt(last.lam, 2)}).` +
+    (last.ppi.w > last.classical.w * 1.02 ? ' Here the autorater is bad enough that PPI <b>hurts</b>: its rectifier is noisier than the human labels themselves.' : '');
+
+  // flag coverage more than three standard errors below 95%, so simulation noise alone is rarely flagged
+  const low = .95 - 3 * Math.sqrt(.95 * .05 / P.trials);
+  $('lowcov').textContent = PPI.pct(low);
+  $('tab').innerHTML = '<tr><th><i>n</i></th><th>classical</th><th>PPI</th><th>PPI++</th><th>ratio PPI</th><th>ratio PPI++</th>' +
+    '<th>mean <i>λ̂</i></th><th>PPI++ worth</th><th>coverage C / PPI / PPI++</th></tr>' +
+    done.map(d => `<tr><td>${d.n}</td><td>${PPI.fmt(d.classical.w)}</td><td>${PPI.fmt(d.ppi.w)}</td><td>${PPI.fmt(d.ppipp.w)}</td>` +
+      `<td>${PPI.fmt(d.ppi.w / d.classical.w, 2)}</td><td>${PPI.fmt(d.ppipp.w / d.classical.w, 2)}</td><td>${PPI.fmt(d.lam, 2)}</td>` +
+      `<td>≈ ${Math.round(d.n * (d.classical.w / d.ppipp.w) ** 2)}</td>` +
+      `<td>${METHODS.map(([k]) => d[k].cov < low ? `<span class="no">${PPI.pct(d[k].cov)}</span>` : PPI.pct(d[k].cov)).join(' / ')}</td></tr>`).join('');
+}
+
+// ---- wiring: rerun (debounced) whenever a setting changes ----
+let deb = null;
+const schedule = () => { draw(); clearTimeout(deb); deb = setTimeout(run, 250); };
+for (const id of ['p', 'fp', 'fn', 'N']){ $(id).oninput = () => { gen++; res = []; schedule(); }; }
+$('trials').onchange = $('T').onchange = () => { gen++; res = []; schedule(); };
+document.querySelectorAll('[data-fp]').forEach(b => b.onclick = () => {
+  $('fp').value = b.dataset.fp; $('fn').value = b.dataset.fn; gen++; res = []; schedule();
+});
+$('rerun').onclick = () => { seed++; run(); };
+run();
+</script>
+</body>
+</html>
