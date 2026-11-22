@@ -329,8 +329,8 @@
   type: recitation
 
 - title: RAG Catchup / Network Effects and Scalable Evaluation
-  slide_link: https://drive.google.com/file/d/1qgJXq_kQ_474-unl4G6bh2Xv6nUTEFrS/view?usp=drive_link
-  pptx_link: https://docs.google.com/presentation/d/1Vhl_Fn3JbuNrYfX6A74llGEdujc8iCF-/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
+  slide_link: https://drive.google.com/file/d/1fOgaVPYQEivCaZaqBNjmklQi8fyPT8T7/view?usp=drive_link
+  pptx_link: https://docs.google.com/presentation/d/1wlI9an5r-NYls5a1v-MvEdnvIwRh1Vgb/edit?usp=drive_link&ouid=108006266785637771510&rtpof=true&sd=true
   content:
     - allreduce.pptx
     - fido-etc.pptx
