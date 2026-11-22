@@ -13,6 +13,7 @@
   --hit:         #a4530c;   /* autorater labels */
   --hit-soft:    #f0dfc9;
   --third:       #6b4fa0;   /* PPI (difference estimate) */
+  --grn:         #2e7d32;   /* human-label posteriors on the intro page */
   --neg:         #c8302c;   /* upper tail of the Monte Carlo sample */
   --pos:         #2a5fc4;   /* lower tail; PPI++ */
   --focus:       #a4530c;
@@ -32,6 +33,8 @@
     --hit:         #e09a4d;
     --hit-soft:    #3a2a15;
     --third:       #b49be6;
+  --grn:         #6cc070;
+    --grn:         #6cc070;
     --neg:         #f07470;
     --pos:         #7ea6f2;
     --focus:       #e09a4d;

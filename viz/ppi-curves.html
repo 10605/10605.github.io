@@ -10,6 +10,8 @@
   .tw { overflow-x: auto; }
   #tab td:first-child { font-family: var(--mono); }
   .presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  #width .pick { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+  svg.chart text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
 </style>
 </head>
 <body>
@@ -21,7 +23,7 @@
   <p>As in Figure 3 of the paper: for each number of human labels <i>n</i>, draw many simulated datasets (<i>n</i> human-labeled
     examples plus <i>N</i> autorater-labeled ones), compute a 95% interval for <i>P</i>(<i>H</i> = 1) three ways, and average the widths.</p>
   <p><b style="color:var(--mem)">Classical</b> uses only the human labels (Clopper–Pearson).
-    <b style="color:var(--third)">PPI</b> is the Bayesian difference estimate of Eq 1, <i>g</i> = <i>μ</i><sub>1</sub> + <i>μ</i><sub>2</sub>,
+    <b style="color:var(--neg)">PPI</b> is the Bayesian difference estimate of Eq 1, <i>g</i> = <i>μ</i><sub>1</sub> + <i>μ</i><sub>2</sub>,
     with its interval from Monte Carlo integration. <b style="color:var(--pos)">PPI++</b> is the power-tuned version of Eq 5:</p>
   <div class="eq"><i>g</i> = <sup>1</sup>⁄<sub><i>N</i></sub> Σ<sub><i>j</i></sub> <i>λ f</i>(<i>x̃<sub>j</sub></i>) + <sup>1</sup>⁄<sub><i>n</i></sub> Σ<sub><i>i</i></sub> (<i>y<sub>i</sub></i> − <i>λ f</i>(<i>x<sub>i</sub></i>)),
     &nbsp;&nbsp; <i>λ̂</i> = Cov(<i>y</i>, <i>f</i>) / ((1 + <i>n</i>/<i>N</i>) Var(<i>f</i>)) clipped to [0, 1]</div>
@@ -61,15 +63,16 @@
     <svg class="chart" id="width"></svg>
     <div class="legend">
       <span><span class="ln" style="border-color:var(--mem)"></span>classical</span>
-      <span><span class="ln" style="border-color:var(--third)"></span>PPI</span>
+      <span><span class="ln" style="border-color:var(--neg)"></span>PPI</span>
       <span><span class="ln" style="border-color:var(--pos)"></span>PPI++</span>
     </div>
+    <p class="note" id="matchnote">Click the PPI or PPI++ curve to see how many human labels the other methods need for an interval that narrow.</p>
   </div>
   <div class="card">
     <h2>Width relative to classical</h2>
     <svg class="chart" id="ratio"></svg>
     <div class="legend">
-      <span><span class="ln" style="border-color:var(--third)"></span>PPI</span>
+      <span><span class="ln" style="border-color:var(--neg)"></span>PPI</span>
       <span><span class="ln" style="border-color:var(--pos)"></span>PPI++</span>
       <span><span class="ln dash" style="border-color:var(--mem)"></span>classical (= 1)</span>
     </div>
@@ -108,8 +111,26 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const NS = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], ALPHA = 0.05;
-const METHODS = [['classical', '--mem'], ['ppi', '--third'], ['ppipp', '--pos']];
+const METHODS = [['classical', '--mem'], ['ppi', '--neg'], ['ppipp', '--pos']];
 let seed = 1, res = [], gen = 0;
+let sel = null;   // clicked point on the width chart: {k: 'ppi' | 'ppipp', n}
+
+// piecewise-linear value of a curve [[x, y], …] at x
+const interp = (pts, x) => {
+  for (let i = 1; i < pts.length; i++)
+    if (x <= pts[i][0]) { const [a, fa] = pts[i - 1], [b, fb] = pts[i]; return fa + (fb - fa) * (x - a) / (b - a); }
+  return pts[pts.length - 1][1];
+};
+// first x ≥ x0 where the curve crosses height y0, or null if it doesn't within the simulated range
+const crossing = (pts, x0, y0) => {
+  const seg = [[x0, interp(pts, x0)], ...pts.filter(([x]) => x > x0)];
+  for (let i = 1; i < seg.length; i++){
+    const [a, fa] = seg[i - 1], [b, fb] = seg[i];
+    if ((fa - y0) * (fb - y0) <= 0 && fa !== fb) return a + (b - a) * (y0 - fa) / (fb - fa);
+  }
+  return null;
+};
+const NAMES = {classical: 'classical', ppi: 'PPI', ppipp: 'PPI++'};
 
 const params = () => ({p: +$('p').value, fp: +$('fp').value, fn: +$('fn').value, N: +$('N').value,
                        trials: +$('trials').value, T: +$('T').value});
@@ -161,8 +182,14 @@ function draw(){
   const wmax = done.length ? Math.max(...done.flatMap(d => METHODS.map(([k]) => d[k].w))) * 1.08 : 0.5;
   const c = PPI.chart({w: 560, h: 300, m: {l: 48, r: 14, t: 12, b: 36}, x: xr, y: [0, wmax], xlabel: 'human-labeled examples n', ylabel: 'interval width'});
   let s = c.axes();
+  const curve = k => done.map(d => [d.n, d[k].w]);
   for (const [k, col] of METHODS)
-    s += c.line(done.map(d => [d.n, d[k].w]), `stroke:var(${col});stroke-width:2.2`) + c.dots(done.map(d => [d.n, d[k].w]), `fill:var(${col})`, 3.2);
+    s += c.line(curve(k), `stroke:var(${col});stroke-width:2.2`) + c.dots(curve(k), `fill:var(${col})`, 3.2);
+  s += matchLines(c, curve);
+  // wide invisible strokes over the PPI and PPI++ curves catch clicks
+  for (const [k] of METHODS.slice(1))
+    if (done.length > 1) s += c.line(curve(k), '').replace('<path ', `<path class="pick" data-k="${k}" `);
+  widthChart = c;
   PPI.svgOut($('width'), c, s);
 
   const ratios = done.flatMap(d => [d.ppi.w / d.classical.w, d.ppipp.w / d.classical.w]);
@@ -190,6 +217,44 @@ function draw(){
       `<td>≈ ${Math.round(d.n * (d.classical.w / d.ppipp.w) ** 2)}</td>` +
       `<td>${METHODS.map(([k]) => d[k].cov < low ? `<span class="no">${PPI.pct(d[k].cov)}</span>` : PPI.pct(d[k].cov)).join(' / ')}</td></tr>`).join('');
 }
+
+// light horizontal line from the clicked point to the right; a vertical drop wherever it meets another curve
+let widthChart = null;
+function matchLines(c, curve){
+  const pts = sel && curve(sel.k);
+  if (!pts || pts.length < 2) return '';
+  const col = METHODS.find(([k]) => k === sel.k)[1], n0 = Math.min(Math.max(sel.n, pts[0][0]), pts[pts.length - 1][0]), y0 = interp(pts, n0);
+  const light = `stroke:var(${col});stroke-width:1.5;opacity:.45`;
+  let s = `<line style="${light}" x1="${c.X(n0)}" x2="${c.w - c.m.r}" y1="${c.Y(y0)}" y2="${c.Y(y0)}"/>`;
+  const found = [];
+  for (const [k] of METHODS){
+    if (k === sel.k) continue;
+    if (interp(curve(k), n0) < y0) { found.push(`${NAMES[k]} is already narrower at this <i>n</i>`); continue; }
+    const x = crossing(curve(k), n0, y0);
+    if (x === null) continue;
+    found.push(`${NAMES[k]} needs <i>n</i> ≈ ${Math.round(x)}`);
+    s += `<line style="${light};stroke-dasharray:4 3" x1="${c.X(x)}" x2="${c.X(x)}" y1="${c.Y(y0)}" y2="${c.h - c.m.b}"/>` +
+         `<text class="lab halo" x="${c.X(x) + 4}" y="${c.h - c.m.b - 5}" style="fill:var(${col})">n ≈ ${Math.round(x)}</text>`;
+  }
+  s += `<circle cx="${c.X(n0)}" cy="${c.Y(y0)}" r="5" style="fill:none;stroke:var(${col});stroke-width:2"/>`;
+  // past the simulated range, extrapolate classical with width ∝ 1/√n
+  const cl = curve('classical'), [nl, wl] = cl[cl.length - 1];
+  if (crossing(cl, n0, y0) === null && wl > y0 && interp(cl, n0) >= y0) found.push(`classical would need roughly <i>n</i> ≈ ${Math.round(nl * (wl / y0) ** 2)} (beyond the chart, assuming width ∝ 1/√<i>n</i>)`);
+  $('matchnote').innerHTML = `${NAMES[sel.k]} at <i>n</i> = ${Math.round(n0)} has width ${PPI.fmt(y0)}. To get an interval that narrow, ` +
+    (found.length ? found.join('; ') : 'no other method gets there within the simulated range') + '. Click elsewhere to clear.';
+  return s;
+}
+$('width').addEventListener('click', e => {
+  const k = e.target.dataset && e.target.dataset.k;
+  if (!k || !widthChart) {
+    sel = null;
+    $('matchnote').innerHTML = 'Click the PPI or PPI++ curve to see how many human labels the other methods need for an interval that narrow.';
+  } else {
+    const svg = $('width'), pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse()), c = widthChart;
+    sel = {k, n: c.x[0] + (pt.x - c.m.l) / (c.w - c.m.l - c.m.r) * (c.x[1] - c.x[0])};
+  }
+  draw();
+});
 
 // ---- wiring: rerun (debounced) whenever a setting changes ----
 let deb = null;
