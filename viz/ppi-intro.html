@@ -13,6 +13,7 @@
   .g21 { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
   @media (max-width: 760px) { .g21 { grid-template-columns: minmax(0, 1fr); } }
   svg.chart text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+  .eqs { font-size: 14px; line-height: 1.55; margin: 0 0 8px; padding: 6px 12px; }
   #ints td:first-child, #conf2 td:first-child { font-family: var(--sans); }
 </style>
 </head>
@@ -124,6 +125,9 @@
   </div>
   <div class="card">
     <h2>3 · Sort the <i>g</i>'s and cut off the tails</h2>
+    <div class="eq eqs"><i>g</i> = <i>μ</i><sub>1</sub> + <i>μ</i><sub>2</sub><br>
+      <i>μ</i><sub>1</sub> = <sup>1</sup>⁄<sub><i>N</i></sub> Σ<sub><i>j</i></sub> <i>f</i>(<i>x̃<sub>j</sub></i>)<br>
+      <i>μ</i><sub>2</sub> = <sup>1</sup>⁄<sub><i>n</i></sub> Σ<sub><i>i</i></sub> (<i>y<sub>i</sub></i> − <i>f</i>(<i>x<sub>i</sub></i>))</div>
     <svg class="chart" id="ghist"></svg>
     <div class="legend">
       <span><span class="sw" style="background:var(--pos)"></span>lowest α/2</span>
